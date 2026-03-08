@@ -1,0 +1,280 @@
+NOTE: DÙNG TẤT CẢ LÀ UUID CHO TIỆN
+
+-- =============================================
+-- ATS ENTERPRISE MINI - POSTGRESQL SCHEMA
+-- =============================================
+
+-- =========================
+-- EXTENSIONS
+-- =========================
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+
+-- =========================
+-- ENUM TYPES
+-- =========================
+
+CREATE TYPE user_status_enum AS ENUM ('ACTIVE', 'INACTIVE');
+
+CREATE TYPE job_status_enum AS ENUM (
+    'DRAFT',
+    'PENDING_APPROVAL',
+    'APPROVED',
+    'REJECTED',
+    'CLOSED'
+);
+
+CREATE TYPE application_stage_enum AS ENUM (
+    'APPLIED',
+    'SCREENING',
+    'INTERVIEW',
+    'OFFER',
+    'HIRED',
+    'REJECTED'
+);
+
+CREATE TYPE application_status_enum AS ENUM (
+    'ACTIVE',
+    'WITHDRAWN',
+    'REJECTED'
+);
+
+CREATE TYPE interview_status_enum AS ENUM (
+    'SCHEDULED',
+    'COMPLETED',
+    'CANCELLED'
+);
+
+CREATE TYPE interview_type_enum AS ENUM (
+    'ONLINE',
+    'OFFLINE'
+);
+
+CREATE TYPE offer_status_enum AS ENUM (
+    'DRAFT',
+    'PENDING_APPROVAL',
+    'APPROVED',
+    'REJECTED',
+    'SENT'
+);
+
+CREATE TYPE approval_status_enum AS ENUM (
+    'APPROVED',
+    'REJECTED'
+);
+
+-- =========================
+-- CORE / AUTH MODULE
+-- =========================
+
+CREATE TABLE roles (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(100) UNIQUE NOT NULL
+);
+
+INSERT INTO roles (name) VALUES
+('SYSTEM_ADMIN'),
+('HR'),
+('HR_MANAGER'),
+('INTERVIEWER');
+
+CREATE TABLE departments (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) UNIQUE NOT NULL,
+    description TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE users (
+    id BIGSERIAL PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    full_name VARCHAR(255),
+    status user_status_enum DEFAULT 'ACTIVE',
+    department_id BIGINT REFERENCES departments(id) ON DELETE SET NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE user_roles (
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    role_id BIGINT REFERENCES roles(id) ON DELETE CASCADE,
+    PRIMARY KEY (user_id, role_id)
+);
+
+-- =========================
+-- JOB MODULE
+-- =========================
+
+CREATE TABLE jobs (
+    id BIGSERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    description TEXT,
+    department_id BIGINT REFERENCES departments(id),
+    hiring_manager_id BIGINT REFERENCES users(id),
+    created_by BIGINT REFERENCES users(id),
+    status job_status_enum DEFAULT 'DRAFT',
+    headcount INT DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE job_approvals (
+    id BIGSERIAL PRIMARY KEY,
+    job_id BIGINT REFERENCES jobs(id) ON DELETE CASCADE,
+    approved_by BIGINT REFERENCES users(id),
+    status approval_status_enum,
+    comment TEXT,
+    approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- CANDIDATE MODULE
+-- =========================
+
+CREATE TABLE candidates (
+    id BIGSERIAL PRIMARY KEY,
+    full_name VARCHAR(255) NOT NULL,
+    email VARCHAR(255),
+    phone VARCHAR(50),
+    current_company VARCHAR(255),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE applications (
+    id BIGSERIAL PRIMARY KEY,
+    candidate_id BIGINT REFERENCES candidates(id) ON DELETE CASCADE,
+    job_id BIGINT REFERENCES jobs(id) ON DELETE CASCADE,
+    stage application_stage_enum DEFAULT 'APPLIED',
+    status application_status_enum DEFAULT 'ACTIVE',
+    applied_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE(candidate_id, job_id)
+);
+
+CREATE TABLE candidate_stage_history (
+    id BIGSERIAL PRIMARY KEY,
+    application_id BIGINT REFERENCES applications(id) ON DELETE CASCADE,
+    from_stage application_stage_enum,
+    to_stage application_stage_enum,
+    changed_by BIGINT REFERENCES users(id),
+    changed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE candidate_notes (
+    id BIGSERIAL PRIMARY KEY,
+    application_id BIGINT REFERENCES applications(id) ON DELETE CASCADE,
+    created_by BIGINT REFERENCES users(id),
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- INTERVIEW MODULE
+-- =========================
+
+CREATE TABLE interviews (
+    id BIGSERIAL PRIMARY KEY,
+    application_id BIGINT REFERENCES applications(id) ON DELETE CASCADE,
+    scheduled_at TIMESTAMP NOT NULL,
+    location VARCHAR(255),
+    type interview_type_enum,
+    created_by BIGINT REFERENCES users(id),
+    status interview_status_enum DEFAULT 'SCHEDULED'
+);
+
+CREATE TABLE interview_participants (
+    interview_id BIGINT REFERENCES interviews(id) ON DELETE CASCADE,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    role VARCHAR(50), -- INTERVIEWER, OBSERVER
+    PRIMARY KEY (interview_id, user_id)
+);
+
+-- =========================
+-- SCORING MODULE
+-- =========================
+
+CREATE TABLE scorecard_templates (
+    id BIGSERIAL PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    department_id BIGINT REFERENCES departments(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE scorecard_criteria (
+    id BIGSERIAL PRIMARY KEY,
+    template_id BIGINT REFERENCES scorecard_templates(id) ON DELETE CASCADE,
+    name VARCHAR(255) NOT NULL,
+    weight NUMERIC(5,2) DEFAULT 1.0
+);
+
+CREATE TABLE interview_scores (
+    id BIGSERIAL PRIMARY KEY,
+    interview_id BIGINT REFERENCES interviews(id) ON DELETE CASCADE,
+    interviewer_id BIGINT REFERENCES users(id),
+    criterion_id BIGINT REFERENCES scorecard_criteria(id),
+    score INT CHECK (score BETWEEN 1 AND 5),
+    comment TEXT
+);
+
+-- =========================
+-- OFFER MODULE
+-- =========================
+
+CREATE TABLE offers (
+    id BIGSERIAL PRIMARY KEY,
+    application_id BIGINT REFERENCES applications(id) ON DELETE CASCADE,
+    salary NUMERIC(15,2),
+    position_title VARCHAR(255),
+    status offer_status_enum DEFAULT 'DRAFT',
+    created_by BIGINT REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE offer_approvals (
+    id BIGSERIAL PRIMARY KEY,
+    offer_id BIGINT REFERENCES offers(id) ON DELETE CASCADE,
+    approved_by BIGINT REFERENCES users(id),
+    status approval_status_enum,
+    comment TEXT,
+    approved_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- SYSTEM MODULE
+-- =========================
+
+CREATE TABLE notifications (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id) ON DELETE CASCADE,
+    title VARCHAR(255),
+    content TEXT,
+    is_read BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE audit_logs (
+    id BIGSERIAL PRIMARY KEY,
+    user_id BIGINT REFERENCES users(id),
+    action VARCHAR(100),
+    entity_type VARCHAR(100),
+    entity_id BIGINT,
+    old_value JSONB,
+    new_value JSONB,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- =========================
+-- INDEXES (IMPORTANT FOR ATS)
+-- =========================
+
+CREATE INDEX idx_users_department ON users(department_id);
+CREATE INDEX idx_jobs_department ON jobs(department_id);
+CREATE INDEX idx_applications_job ON applications(job_id);
+CREATE INDEX idx_applications_stage ON applications(stage);
+CREATE INDEX idx_interviews_application ON interviews(application_id);
+CREATE INDEX idx_notifications_user ON notifications(user_id);
+CREATE INDEX idx_audit_entity ON audit_logs(entity_type, entity_id);
+
+-- =============================================
+-- END OF FILE
+-- =============================================
