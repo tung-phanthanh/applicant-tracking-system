@@ -24,7 +24,7 @@ const VALID_CREDENTIALS = {
 };
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
+    const [user, setUser] = useState<User | null>(MOCK_USER);
     const [isLoading, setIsLoading] = useState(false);
 
     const login = async (credentials: LoginCredentials): Promise<void> => {
