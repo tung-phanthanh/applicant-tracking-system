@@ -6,6 +6,8 @@ import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
+import CandidatesPage from "@/pages/recruiter/CandidatesPage";
+import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 
 function App() {
   return (
@@ -26,10 +28,8 @@ function App() {
 
               {/* Placeholder routes for future pages */}
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
-              <Route
-                path="/candidates"
-                element={<ComingSoon title="Candidates" />}
-              />
+              <Route path="/candidates" element={<CandidatesPage />} />
+              <Route path="/candidates/:id" element={<CandidateProfilePage />} />
               <Route
                 path="/interviews"
                 element={<ComingSoon title="Interviews" />}
