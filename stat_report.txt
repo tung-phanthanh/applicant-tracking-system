@@ -1,4 +1,0 @@
- .../java/fptu/sba301/ats/exception/ApiError.java   |  16 --
- .../sba301/ats/exception/BusinessException.java    |  16 +-
- .../ats/exception/GlobalExceptionHandler.java      | 163 ---------------------
- 3 files changed, 1 insertion(+), 194 deletions(-)

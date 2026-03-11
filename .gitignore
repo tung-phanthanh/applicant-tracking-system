@@ -5,3 +5,11 @@ frontend/.agent/
 backend/.agents/
 backend/.agent/
 .gemini/
+
+# Ignore specific file extensions globally
+*.md
+*.log
+*.txt
+
+# Ignore specific root folders
+docs/
