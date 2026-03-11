@@ -5,8 +5,10 @@ import {
     LayoutDashboard,
     User,
     Users,
+    ShieldCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useAuth } from "@/hooks/useAuth";
 
 const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -16,7 +18,14 @@ const navItems = [
     { to: "/profile", icon: User, label: "My Profile" },
 ];
 
+const adminNavItems = [
+    { to: "/admin/users", icon: ShieldCheck, label: "Manage Users" },
+];
+
 export default function Sidebar() {
+    const { user } = useAuth();
+    const isAdmin = user?.role === "SYSTEM_ADMIN";
+
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
             {/* Logo */}
@@ -50,6 +59,35 @@ export default function Sidebar() {
                             </NavLink>
                         </li>
                     ))}
+
+                    {/* Admin section */}
+                    {isAdmin && (
+                        <>
+                            <li className="pt-3">
+                                <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Administration
+                                </p>
+                            </li>
+                            {adminNavItems.map(({ to, icon: Icon, label }) => (
+                                <li key={to}>
+                                    <NavLink
+                                        to={to}
+                                        className={({ isActive }) =>
+                                            cn(
+                                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                                isActive
+                                                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                            )
+                                        }
+                                    >
+                                        <Icon className="h-4 w-4 shrink-0" />
+                                        {label}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </>
+                    )}
                 </ul>
             </nav>
 

@@ -25,11 +25,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmailAndDeletedFalse(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
-        if (!user.isActive())
+        if (!user.isActive()) {
             throw new DisabledException("Account not activated");
-
-        if (user.isAccountLocked())
+        }
+        if (user.isAccountLocked()) {
             throw new LockedException("Account locked");
+        }
 
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
