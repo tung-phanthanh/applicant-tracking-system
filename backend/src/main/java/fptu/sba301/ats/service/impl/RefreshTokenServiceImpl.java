@@ -11,9 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,7 +32,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)
-                .expiryDate(Instant.now().plusMillis(refreshTokenDurationMs))
+                .expiryDate(LocalDateTime.now().plusNanos(refreshTokenDurationMs * 1_000_000))
                 .revoked(false)
                 .build();
 
@@ -51,7 +49,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new RuntimeException("Refresh token revoked");
         }
 
-        if (refreshToken.getExpiryDate().isBefore(ChronoLocalDateTime.from(Instant.now()))) {
+        if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Refresh token expired");
         }
 

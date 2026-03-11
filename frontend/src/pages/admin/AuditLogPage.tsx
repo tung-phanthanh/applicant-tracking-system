@@ -38,19 +38,42 @@ export default function AuditLogPage() {
 
     useEffect(() => {
         const actionParam = selectedAction === "ALL" ? undefined : selectedAction;
-        auditLogService.getLogs(actionParam).then((data: { id: string, timestamp: string, actorUsername?: string, actorEmail?: string, action: string, resource?: string, resourceId?: string, detail?: string, ipAddress?: string }[]) => {
+        auditLogService.getLogs(actionParam).then((data: any[]) => {
             setLogs(
-                data.map(d => ({
-                    id: d.id,
-                    timestamp: d.timestamp,
-                    actor: d.actorUsername || 'System',
-                    actorEmail: d.actorEmail || 'system@ats.local',
-                    action: d.action,
-                    resource: d.resource || 'Unknown',
-                    resourceId: d.resourceId || 'N/A',
-                    detail: d.detail || '',
-                    ipAddress: d.ipAddress || '127.0.0.1'
-                } as AuditLog))
+                data.map(d => {
+                    // Parse newValue JSON to extract description
+                    let description = '';
+                    let detailData = null;
+                    if (d.newValue) {
+                        try {
+                            const parsed = typeof d.newValue === 'string'
+                                ? JSON.parse(d.newValue)
+                                : d.newValue;
+                            description = parsed.description || '';
+                            detailData = parsed.data || null;
+                        } catch {
+                            description = String(d.newValue);
+                        }
+                    }
+
+                    // Fallback detail from oldValue/newValue raw text
+                    if (!description && (d.oldValue || d.newValue)) {
+                        description = `${d.action} on ${d.entityType || 'Unknown'}`;
+                    }
+
+                    return {
+                        id: d.id,
+                        timestamp: d.createdAt,
+                        actor: d.userFullName || 'System',
+                        actorEmail: d.userEmail || 'system@ats.local',
+                        action: d.action,
+                        resource: d.entityType || 'Unknown',
+                        resourceId: d.entityId || 'N/A',
+                        detail: description,
+                        detailData: detailData,
+                        ipAddress: d.ipAddress || '127.0.0.1'
+                    } as AuditLog & { detailData: any };
+                })
             );
         }).catch(console.error);
     }, [selectedAction]);
@@ -142,11 +165,11 @@ export default function AuditLogPage() {
             {/* Log Table */}
             <div className="rounded-lg border border-border bg-card shadow-sm overflow-hidden">
                 {/* Table Header */}
-                <div className="hidden grid-cols-[140px_1fr_100px_1fr_120px] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid">
+                <div className="hidden grid-cols-[140px_160px_180px_1fr_110px] gap-4 border-b border-border bg-muted/50 px-5 py-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground md:grid">
                     <span>Timestamp</span>
                     <span>Actor</span>
                     <span>Action</span>
-                    <span>Resource</span>
+                    <span>Description</span>
                     <span>IP Address</span>
                 </div>
 
@@ -156,34 +179,65 @@ export default function AuditLogPage() {
                     </div>
                 )}
 
-                {filtered.map((log) => (
+                {filtered.map((log: any) => (
                     <div key={log.id} className="border-b border-border last:border-0">
                         {/* Row */}
                         <div
-                            className="grid cursor-pointer grid-cols-1 gap-2 px-5 py-3 transition-colors hover:bg-accent/50 md:grid-cols-[140px_1fr_100px_1fr_120px] md:gap-4 md:items-center"
+                            className="grid cursor-pointer grid-cols-1 gap-2 px-5 py-3 transition-colors hover:bg-accent/50 md:grid-cols-[140px_160px_180px_1fr_110px] md:gap-4 md:items-center"
                             onClick={() => setExpanded(expanded === log.id ? null : log.id)}
                         >
                             <span className="text-xs text-muted-foreground font-mono whitespace-nowrap">
                                 {formatTimestamp(log.timestamp)}
                             </span>
-                            <div>
-                                <p className="text-sm font-medium text-foreground">{log.actor}</p>
-                                <p className="text-xs text-muted-foreground">{log.actorEmail}</p>
+                            <div className="min-w-0">
+                                <p className="text-sm font-medium text-foreground truncate">{log.actor}</p>
+                                <p className="text-xs text-muted-foreground truncate">{log.actorEmail}</p>
                             </div>
-                            <Badge variant="outline" className={cn("text-xs w-fit", ACTION_STYLES[log.action])}>
-                                {log.action}
-                            </Badge>
-                            <div>
-                                <p className="text-sm text-foreground">{log.resource}</p>
-                                <p className="text-xs text-muted-foreground font-mono">{log.resourceId}</p>
+                            <div className="flex flex-col gap-1">
+                                <Badge variant="outline" className={cn("text-xs w-fit", ACTION_STYLES[log.action as AuditAction])}>
+                                    {log.action}
+                                </Badge>
+                                <span className="text-xs text-muted-foreground">{log.resource}</span>
                             </div>
+                            <p className="text-sm text-foreground truncate" title={log.detail}>
+                                {log.detail || <span className="text-muted-foreground italic">No description</span>}
+                            </p>
                             <span className="font-mono text-xs text-muted-foreground">{log.ipAddress}</span>
                         </div>
 
                         {/* Expanded Detail */}
                         {expanded === log.id && (
-                            <div className="border-t border-border bg-muted/30 px-5 py-3">
-                                <p className="text-sm text-foreground">{log.detail}</p>
+                            <div className="border-t border-border bg-muted/30 px-5 py-4 space-y-3">
+                                {log.detail && (
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Description</p>
+                                        <p className="text-sm text-foreground font-medium">{log.detail}</p>
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-2 gap-4 text-xs">
+                                    <div>
+                                        <p className="font-semibold uppercase text-muted-foreground mb-1">Resource Type</p>
+                                        <p className="text-foreground">{log.resource}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold uppercase text-muted-foreground mb-1">Resource ID</p>
+                                        <p className="font-mono text-foreground">{log.resourceId}</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold uppercase text-muted-foreground mb-1">Performed By</p>
+                                        <p className="text-foreground">{log.actor} ({log.actorEmail})</p>
+                                    </div>
+                                    <div>
+                                        <p className="font-semibold uppercase text-muted-foreground mb-1">IP Address</p>
+                                        <p className="font-mono text-foreground">{log.ipAddress}</p>
+                                    </div>
+                                </div>
+                                {log.detailData && (
+                                    <div>
+                                        <p className="text-xs font-semibold uppercase text-muted-foreground mb-1">Data Snapshot</p>
+                                        <pre className="rounded bg-muted p-3 text-xs overflow-auto max-h-48 text-foreground">{JSON.stringify(log.detailData, null, 2)}</pre>
+                                    </div>
+                                )}
                             </div>
                         )}
                     </div>
