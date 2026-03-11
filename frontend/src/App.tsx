@@ -7,6 +7,14 @@ import LoginPage from "@/pages/auth/LoginPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
 
+// Admin Pages
+import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
+import RolesPage from "@/pages/admin/RolesPage";
+import DepartmentsPage from "@/pages/admin/DepartmentsPage";
+import SystemConfigPage from "@/pages/admin/SystemConfigPage";
+import AuditLogPage from "@/pages/admin/AuditLogPage";
+import NotificationsPage from "@/pages/admin/NotificationsPage";
+
 function App() {
   return (
     <BrowserRouter>
@@ -35,10 +43,17 @@ function App() {
                 element={<ComingSoon title="Interviews" />}
               />
 
-              {/* Future: Admin routes */}
-              {/* <Route path="/admin" element={<AdminGuard />}> */}
-              {/*   <Route path="users" element={<AdminUsersPage />} /> */}
-              {/* </Route> */}
+              {/* Admin routes */}
+              <Route path="/admin">
+                <Route path="dashboard" element={<AdminDashboardPage />} />
+                <Route path="roles" element={<RolesPage />} />
+                <Route path="departments" element={<DepartmentsPage />} />
+                <Route path="system-config" element={<SystemConfigPage />} />
+                <Route path="audit-logs" element={<AuditLogPage />} />
+              </Route>
+
+              {/* Shared or standalone routes */}
+              <Route path="/notifications" element={<NotificationsPage />} />
             </Route>
           </Route>
 

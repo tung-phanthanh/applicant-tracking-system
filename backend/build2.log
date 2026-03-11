@@ -1,0 +1,44 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] --------------------------< fptu.sba301:ats >---------------------------
+[INFO] Building ats 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- clean:3.4.1:clean (default-clean) @ ats ---
+[INFO] Deleting C:\Users\LEGION 5 PRO\OneDrive\Desktop\1_SBA301\Gr project\applicant-tracking-system\backend\target
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ ats ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.1:compile (default-compile) @ ats ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 64 source files with javac [debug parameters release 21] to target\classes
+[WARNING] /C:/Users/LEGION 5 PRO/OneDrive/Desktop/1_SBA301/Gr project/applicant-tracking-system/backend/src/main/java/fptu/sba301/ats/entity/User.java:[45,21] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] /C:/Users/LEGION 5 PRO/OneDrive/Desktop/1_SBA301/Gr project/applicant-tracking-system/backend/src/main/java/fptu/sba301/ats/entity/User.java:[48,21] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] /C:/Users/LEGION 5 PRO/OneDrive/Desktop/1_SBA301/Gr project/applicant-tracking-system/backend/src/main/java/fptu/sba301/ats/entity/User.java:[51,21] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[WARNING] /C:/Users/LEGION 5 PRO/OneDrive/Desktop/1_SBA301/Gr project/applicant-tracking-system/backend/src/main/java/fptu/sba301/ats/entity/RefreshToken.java:[43,21] @Builder will ignore the initializing expression entirely. If you want the initializing expression to serve as default, add @Builder.Default. If it is not supposed to be settable during building, make the field final.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ ats ---
+[INFO] skip non existing resourceDirectory C:\Users\LEGION 5 PRO\OneDrive\Desktop\1_SBA301\Gr project\applicant-tracking-system\backend\src\test\resources
+[INFO] 
+[INFO] --- compiler:3.14.1:testCompile (default-testCompile) @ ats ---
+[INFO] Recompiling the module because of changed dependency.
+[INFO] Compiling 3 source files with javac [debug parameters release 21] to target\test-classes
+[INFO] 
+[INFO] --- surefire:3.5.4:test (default-test) @ ats ---
+[INFO] Tests are skipped.
+[INFO] 
+[INFO] --- jar:3.4.2:jar (default-jar) @ ats ---
+[INFO] Building jar: C:\Users\LEGION 5 PRO\OneDrive\Desktop\1_SBA301\Gr project\applicant-tracking-system\backend\target\ats-0.0.1-SNAPSHOT.jar
+[INFO] 
+[INFO] --- spring-boot:3.5.11:repackage (repackage) @ ats ---
+[INFO] Replacing main artifact C:\Users\LEGION 5 PRO\OneDrive\Desktop\1_SBA301\Gr project\applicant-tracking-system\backend\target\ats-0.0.1-SNAPSHOT.jar with repackaged archive, adding nested dependencies in BOOT-INF/.
+[INFO] The original artifact has been renamed to C:\Users\LEGION 5 PRO\OneDrive\Desktop\1_SBA301\Gr project\applicant-tracking-system\backend\target\ats-0.0.1-SNAPSHOT.jar.original
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  6.800 s
+[INFO] Finished at: 2026-03-01T14:59:32+07:00
+[INFO] ------------------------------------------------------------------------

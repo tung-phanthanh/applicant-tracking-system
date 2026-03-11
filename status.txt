@@ -1,0 +1,99 @@
+ M backend/pom.xml
+ M backend/src/main/java/fptu/sba301/ats/entity/BaseEntity.java
+ M backend/src/main/java/fptu/sba301/ats/entity/Department.java
+ M backend/src/main/java/fptu/sba301/ats/entity/RefreshToken.java
+ M backend/src/main/java/fptu/sba301/ats/entity/User.java
+ M backend/src/main/java/fptu/sba301/ats/repository/RefreshTokenRepository.java
+ M backend/src/main/java/fptu/sba301/ats/repository/UserRepository.java
+ M backend/src/main/java/fptu/sba301/ats/security/CustomUserDetailsService.java
+ M backend/src/main/resources/application.properties
+ M frontend/package-lock.json
+ M frontend/package.json
+ M frontend/src/App.tsx
+ M frontend/src/components/shared/Header.tsx
+ M frontend/src/components/shared/Sidebar.tsx
+ M frontend/src/pages/recruiter/DashboardPage.tsx
+?? .agent/
+?? .editorconfig
+?? .gitattributes
+?? .vscode/
+?? ERRORS.md
+?? GEMINI.md
+?? README.md
+?? backend/app.log
+?? backend/backend.log
+?? backend/backend_cmd.log
+?? backend/backend_cmd2.log
+?? backend/backend_cmd3.log
+?? backend/backend_cmd4.log
+?? backend/backend_cmd_root.log
+?? backend/backend_test.log
+?? backend/build.log
+?? backend/build2.log
+?? backend/cmd_build.log
+?? backend/compile.log
+?? backend/diff_report.txt
+?? backend/final_run.log
+?? backend/final_run_update.log
+?? backend/refactor_uuid.js
+?? backend/run_boot.log
+?? backend/run_cmd.log
+?? backend/run_cmd_2.log
+?? backend/run_cmd_atsdb.log
+?? backend/spring_run.log
+?? backend/src/main/java/fptu/sba301/ats/annotation/
+?? backend/src/main/java/fptu/sba301/ats/aspect/
+?? backend/src/main/java/fptu/sba301/ats/controller/AuditLogController.java
+?? backend/src/main/java/fptu/sba301/ats/controller/DashboardController.java
+?? backend/src/main/java/fptu/sba301/ats/controller/DepartmentController.java
+?? backend/src/main/java/fptu/sba301/ats/controller/NotificationController.java
+?? backend/src/main/java/fptu/sba301/ats/controller/RoleController.java
+?? backend/src/main/java/fptu/sba301/ats/controller/SystemConfigController.java
+?? backend/src/main/java/fptu/sba301/ats/dto/request/DepartmentRequestDTO.java
+?? backend/src/main/java/fptu/sba301/ats/dto/request/RoleRequestDTO.java
+?? backend/src/main/java/fptu/sba301/ats/dto/response/AuditLogResponseDTO.java
+?? backend/src/main/java/fptu/sba301/ats/dto/response/DashboardStatsDTO.java
+?? backend/src/main/java/fptu/sba301/ats/dto/response/DepartmentResponseDTO.java
+?? backend/src/main/java/fptu/sba301/ats/dto/response/NotificationResponseDTO.java
+?? backend/src/main/java/fptu/sba301/ats/dto/response/RoleResponseDTO.java
+?? backend/src/main/java/fptu/sba301/ats/entity/AuditLog.java
+?? backend/src/main/java/fptu/sba301/ats/entity/Notification.java
+?? backend/src/main/java/fptu/sba301/ats/entity/Permission.java
+?? backend/src/main/java/fptu/sba301/ats/entity/Role.java
+?? backend/src/main/java/fptu/sba301/ats/entity/SystemConfig.java
+?? backend/src/main/java/fptu/sba301/ats/enums/UserStatus.java
+?? backend/src/main/java/fptu/sba301/ats/event/
+?? backend/src/main/java/fptu/sba301/ats/repository/AuditLogRepository.java
+?? backend/src/main/java/fptu/sba301/ats/repository/DepartmentRepository.java
+?? backend/src/main/java/fptu/sba301/ats/repository/NotificationRepository.java
+?? backend/src/main/java/fptu/sba301/ats/repository/PermissionRepository.java
+?? backend/src/main/java/fptu/sba301/ats/repository/RoleRepository.java
+?? backend/src/main/java/fptu/sba301/ats/repository/SystemConfigRepository.java
+?? backend/src/main/java/fptu/sba301/ats/service/AuditLogService.java
+?? backend/src/main/java/fptu/sba301/ats/service/DashboardService.java
+?? backend/src/main/java/fptu/sba301/ats/service/DepartmentService.java
+?? backend/src/main/java/fptu/sba301/ats/service/NotificationService.java
+?? backend/src/main/java/fptu/sba301/ats/service/RoleService.java
+?? backend/src/main/java/fptu/sba301/ats/service/SystemConfigService.java
+?? backend/src/main/java/fptu/sba301/ats/service/impl/AuditLogServiceImpl.java
+?? backend/src/main/java/fptu/sba301/ats/service/impl/DashboardServiceImpl.java
+?? backend/src/main/java/fptu/sba301/ats/service/impl/DepartmentServiceImpl.java
+?? backend/src/main/java/fptu/sba301/ats/service/impl/NotificationServiceImpl.java
+?? backend/src/main/java/fptu/sba301/ats/service/impl/RoleServiceImpl.java
+?? backend/src/main/java/fptu/sba301/ats/service/impl/SystemConfigServiceImpl.java
+?? backend/src/test/java/fptu/sba301/ats/service/
+?? backend/test.log
+?? backend/test_nopwd.log
+?? backend/test_sa.log
+?? database_schema.sql
+?? docs/
+?? frontend/src/data/
+?? frontend/src/lib/axios.ts
+?? frontend/src/pages/NotificationsPage.tsx
+?? frontend/src/pages/admin/
+?? frontend/src/services/
+?? frontend/src/types/index.ts
+?? namestatus.txt
+?? package.json
+?? stat_report.txt
+?? status.txt

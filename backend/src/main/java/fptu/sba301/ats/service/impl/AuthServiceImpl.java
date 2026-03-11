@@ -12,41 +12,43 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
-
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
-    private final AuthenticationManager authenticationManager;
-    private final UserRepository userRepository;
-    private final JwtService jwtService;
-    private final RefreshTokenService refreshTokenService;
+        private final AuthenticationManager authenticationManager;
+        private final UserRepository userRepository;
+        private final JwtService jwtService;
+        private final RefreshTokenService refreshTokenService;
 
-    @Override
-    public AuthResponse login(LoginRequest request) {
+        @Override
+        public AuthResponse login(LoginRequest request) {
 
-        // Authenticate
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
-        );
+                // Authenticate
+                authenticationManager.authenticate(
+                                new UsernamePasswordAuthenticationToken(
+                                                request.getEmail(),
+                                                request.getPassword()));
 
-        // Load user
-        User user = userRepository
-                .findByEmailAndDeletedFalse(request.getEmail())
-                .orElseThrow();
+                // Load user
+                User user = userRepository
+                                .findByEmail(request.getEmail())
+                                .orElseThrow();
 
-        // Generate tokens
-        String accessToken =
-                jwtService.generateToken(user);
+                // Generate tokens
+                String accessToken = jwtService.generateToken(user);
 
-        var refreshToken =
-                refreshTokenService.createRefreshToken(user);
+                var refreshToken = refreshTokenService.createRefreshToken(user);
 
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken.getToken())
-                .build();
-    }
+                return AuthResponse.builder()
+                                .accessToken(accessToken)
+                                .refreshToken(refreshToken.getToken())
+                                .user(AuthResponse.UserInfo.builder()
+                                                .id(user.getId())
+                                                .email(user.getEmail())
+                                                .fullName(user.getFullName())
+                                                .role(user.getRole().name())
+                                                .avatarURL(user.getAvatarURL())
+                                                .build())
+                                .build();
+        }
 }

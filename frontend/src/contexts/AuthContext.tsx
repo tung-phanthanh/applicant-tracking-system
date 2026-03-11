@@ -1,4 +1,5 @@
-import { createContext, useState, type ReactNode } from "react";
+import { createContext, useState, useEffect, type ReactNode } from "react";
+import api from "@/lib/axios";
 import type {
     AuthContextType,
     LoginCredentials,
@@ -7,43 +8,60 @@ import type {
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-const MOCK_USER: User = {
-    id: "1",
-    name: "John Doe",
-    email: "john.doe@company.com",
-    role: "recruiter",
-    department: "HR Department",
-    phone: "+1 (555) 123-4567",
-    initials: "JD",
-};
-
-// Simulated valid credentials for demo
-const VALID_CREDENTIALS = {
-    email: "john.doe@company.com",
-    password: "password123",
-};
-
 export function AuthProvider({ children }: { children: ReactNode }) {
     const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const storedUser = localStorage.getItem("user");
+        const token = localStorage.getItem("token");
+        if (storedUser && token) {
+            setUser(JSON.parse(storedUser));
+        }
+        setIsLoading(false);
+    }, []);
 
     const login = async (credentials: LoginCredentials): Promise<void> => {
         setIsLoading(true);
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1000));
-        setIsLoading(false);
+        try {
+            const response: any = await api.post("/auth/login", credentials);
+            
+            // Assuming backend returns { accessToken, refreshToken, userDetails }
+            // or just tokens and we need to fetch user info.
+            // Based on my previous Invoke-RestMethod, it returned accessToken.
+            
+            const accessToken = response.accessToken;
+            const refreshToken = response.refreshToken;
+            
+            // For now, let's create a partial user object if userDetails is missing
+            // Ideally the backend should return user info as well.
+            const userData: User = {
+                id: response.id || "1",
+                name: response.fullName || credentials.email.split('@')[0],
+                email: credentials.email,
+                role: response.role || "admin",
+                department: response.department || "HR",
+                phone: response.phone || "000-000-0000",
+                initials: (response.fullName || credentials.email).substring(0, 2).toUpperCase()
+            };
 
-        if (
-            credentials.email === VALID_CREDENTIALS.email &&
-            credentials.password === VALID_CREDENTIALS.password
-        ) {
-            setUser(MOCK_USER);
-        } else {
+            localStorage.setItem("token", accessToken);
+            localStorage.setItem("refreshToken", refreshToken);
+            localStorage.setItem("user", JSON.stringify(userData));
+            
+            setUser(userData);
+        } catch (error) {
+            console.error("Login failed:", error);
             throw new Error("Invalid credentials");
+        } finally {
+            setIsLoading(false);
         }
     };
 
     const logout = () => {
+        localStorage.removeItem("token");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("user");
         setUser(null);
     };
 
