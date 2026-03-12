@@ -24,7 +24,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public AuthResponse login(LoginRequest request) {
 
-        // Authenticate
+        // Authenticate — throws BadCredentialsException / DisabledException / LockedException on failure
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -38,15 +38,17 @@ public class AuthServiceImpl implements AuthService {
                 .orElseThrow();
 
         // Generate tokens
-        String accessToken =
-                jwtService.generateToken(user);
-
-        var refreshToken =
-                refreshTokenService.createRefreshToken(user);
+        String accessToken = jwtService.generateToken(user);
+        var refreshToken = refreshTokenService.createRefreshToken(user);
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken.getToken())
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
     }
 }
+

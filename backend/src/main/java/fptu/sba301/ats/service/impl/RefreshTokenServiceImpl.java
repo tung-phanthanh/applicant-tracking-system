@@ -11,9 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
-import java.time.chrono.ChronoLocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -34,7 +32,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)
-                .expiryDate(LocalDateTime.from(Instant.now().plusMillis(refreshTokenDurationMs)))
+                // Fix: LocalDateTime.from(Instant) throws; use LocalDateTime.now().plusSeconds()
+                .expiryDate(LocalDateTime.now().plusSeconds(refreshTokenDurationMs / 1000))
                 .revoked(false)
                 .build();
 
@@ -51,7 +50,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
             throw new RuntimeException("Refresh token revoked");
         }
 
-        if (refreshToken.getExpiryDate().isBefore(ChronoLocalDateTime.from(Instant.now()))) {
+        if (refreshToken.getExpiryDate().isBefore(LocalDateTime.now())) {
             throw new RuntimeException("Refresh token expired");
         }
 
@@ -74,7 +73,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         List<RefreshToken> tokens =
                 refreshTokenRepository.findAllByUserAndRevokedFalse(user);
 
-        tokens.forEach(token -> token.setRevoked(true));
+        tokens.forEach(t -> t.setRevoked(true));
 
         refreshTokenRepository.saveAll(tokens);
     }
@@ -99,12 +98,15 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         RefreshToken newToken = createRefreshToken(user);
 
-        String newAccessToken =
-                jwtService.generateToken(user);
+        String newAccessToken = jwtService.generateToken(user);
 
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newToken.getToken())
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
     }
 
@@ -118,3 +120,4 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenRepository.save(token);
     }
 }
+
