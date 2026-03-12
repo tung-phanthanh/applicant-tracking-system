@@ -1,4 +1,7 @@
+import { mockHandler } from "@/mocks/mockHandler";
+
 const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8386/api/v1";
+const USE_MOCK = import.meta.env.VITE_MOCK === "true";
 
 type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
 
@@ -45,6 +48,20 @@ function getToken(): string | null {
 
 async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
     const { method = "GET", body, params } = options;
+
+    // ── MOCK INTERCEPTOR ─────────────────────────────────────
+    if (USE_MOCK) {
+        // Strip query-string for cleaner matching
+        const cleanPath = path.split("?")[0];
+        const mockResult = await mockHandler(method, cleanPath, body);
+        // Non-GET mutations always return from mock (including undefined → 204)
+        // GET routes: if mockResult is not undefined, return it; else fall through
+        if (method !== "GET" || mockResult !== undefined) {
+            return mockResult as T;
+        }
+    }
+    // ─────────────────────────────────────────────────────────
+
     const token = getToken();
 
     const headers: HeadersInit = {

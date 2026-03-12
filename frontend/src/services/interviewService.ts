@@ -43,4 +43,11 @@ export const interviewService = {
             { method: "POST", body },
         );
     },
+
+    reschedule(interviewId: number, body: { scheduledAt: string; location?: string; type?: string }) {
+        return apiFetch<InterviewResponse>(
+            `/interviews/${interviewId}/reschedule`,
+            { method: "PUT", body },
+        );
+    },
 };

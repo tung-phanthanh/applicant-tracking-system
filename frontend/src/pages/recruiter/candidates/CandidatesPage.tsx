@@ -97,7 +97,7 @@ export default function CandidatesPage() {
                                                     </DropdownMenuItem>
                                                     {app.stage === 'OFFER' && (
                                                         <DropdownMenuItem asChild>
-                                                            <Link to="/offers/new">Create Offer</Link>
+                                                            <Link to={`/offers/create/${app.id}`}>Create Offer</Link>
                                                         </DropdownMenuItem>
                                                     )}
                                                 </DropdownMenuContent>

@@ -26,7 +26,7 @@ export default function OfferPdfPreviewPage() {
         // Load offer info + PDF blob in parallel
         Promise.all([
             offerService.getById(Number(offerId)),
-            offerService.getPreviewBlob(Number(offerId)),
+            offerService.getPreviewBlob(Number(offerId)).catch(() => null),
         ])
             .then(([offerData, blobUrl]) => {
                 setOffer(offerData);

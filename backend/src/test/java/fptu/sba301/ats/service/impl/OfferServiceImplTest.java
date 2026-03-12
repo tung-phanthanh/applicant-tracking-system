@@ -200,4 +200,103 @@ class OfferServiceImplTest {
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         assertTrue(ex.getMessage().contains("APPROVED or SENT"));
     }
+
+    // ==========================================
+    // Offer Approval — Happy paths
+    // ==========================================
+
+    @Test
+    void approve_PendingApproval_SetsStatusToApproved() {
+        Offer offer = new Offer();
+        offer.setId(7L);
+        offer.setStatus(OfferStatus.PENDING_APPROVAL);
+
+        fptu.sba301.ats.entity.User approver = new fptu.sba301.ats.entity.User();
+        approver.setEmail("manager@test.com");
+
+        when(offerRepository.findById(7L)).thenReturn(Optional.of(offer));
+        when(userRepository.findByEmailAndDeletedFalse("manager@test.com")).thenReturn(Optional.of(approver));
+        when(approvalRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(offerRepository.save(offer)).thenReturn(offer);
+
+        ApprovalDecisionRequest req = new ApprovalDecisionRequest("Looks good");
+        assertDoesNotThrow(() -> service.approve(7L, req, "manager@test.com"));
+
+        assertEquals(OfferStatus.APPROVED, offer.getStatus());
+        verify(approvalRepository).save(any(fptu.sba301.ats.entity.OfferApproval.class));
+        verify(offerRepository).save(offer);
+    }
+
+    @Test
+    void reject_PendingApproval_SetsStatusToRejected() {
+        Offer offer = new Offer();
+        offer.setId(8L);
+        offer.setStatus(OfferStatus.PENDING_APPROVAL);
+
+        fptu.sba301.ats.entity.User approver = new fptu.sba301.ats.entity.User();
+        approver.setEmail("manager@test.com");
+
+        when(offerRepository.findById(8L)).thenReturn(Optional.of(offer));
+        when(userRepository.findByEmailAndDeletedFalse("manager@test.com")).thenReturn(Optional.of(approver));
+        when(approvalRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+        when(offerRepository.save(offer)).thenReturn(offer);
+
+        ApprovalDecisionRequest req = new ApprovalDecisionRequest("Salary too high");
+        assertDoesNotThrow(() -> service.reject(8L, req, "manager@test.com"));
+
+        assertEquals(OfferStatus.REJECTED, offer.getStatus());
+        verify(approvalRepository).save(any(fptu.sba301.ats.entity.OfferApproval.class));
+    }
+
+    // ==========================================
+    // Offer PDF Preview
+    // ==========================================
+
+    @Test
+    void generatePdf_OfferNotFound_ThrowsNotFound() {
+        when(offerRepository.findById(999L)).thenReturn(Optional.empty());
+
+        BusinessException ex = assertThrows(BusinessException.class,
+                () -> service.generatePdf(999L));
+        assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
+        assertTrue(ex.getMessage().contains("Offer not found"));
+    }
+
+    @Test
+    void generatePdf_ValidOffer_ReturnsPdfBytes() {
+        Offer offer = new Offer();
+        offer.setId(9L);
+        offer.setApplicationId(100L);
+        offer.setPositionTitle("Backend Dev");
+        offer.setSalary(new java.math.BigDecimal("5000.00"));
+        offer.setStatus(OfferStatus.APPROVED);
+
+        Application app = new Application();
+        app.setId(100L);
+        app.setCandidateId(50L);
+        app.setJobId(60L);
+
+        fptu.sba301.ats.entity.Candidate candidate = new fptu.sba301.ats.entity.Candidate();
+        candidate.setId(50L);
+        candidate.setFullName("Nguyen Van A");
+
+        fptu.sba301.ats.entity.Job job = new fptu.sba301.ats.entity.Job();
+        job.setId(60L);
+        job.setTitle("Backend Developer");
+
+        when(offerRepository.findById(9L)).thenReturn(Optional.of(offer));
+        when(applicationRepository.findById(100L)).thenReturn(Optional.of(app));
+        when(candidateRepository.findById(50L)).thenReturn(Optional.of(candidate));
+        when(jobRepository.findById(60L)).thenReturn(Optional.of(job));
+
+        byte[] pdf = service.generatePdf(9L);
+
+        assertNotNull(pdf, "PDF bytes should not be null");
+        assertTrue(pdf.length > 0, "PDF should have content");
+        // PDF files start with the %PDF header
+        assertEquals('%', (char) pdf[0]);
+        assertEquals('P', (char) pdf[1]);
+        assertEquals('D', (char) pdf[2]);
+        assertEquals('F', (char) pdf[3]);
+    }
 }

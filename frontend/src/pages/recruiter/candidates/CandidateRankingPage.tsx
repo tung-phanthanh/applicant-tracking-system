@@ -192,7 +192,7 @@ export default function CandidateRankingPage() {
                                                         <Eye className="h-3.5 w-3.5" /> View Evaluation
                                                     </DropdownMenuItem>
                                                     <DropdownMenuItem
-                                                        onClick={() => navigate(`/offers/new?applicationId=${c.applicationId}`)}
+                                                        onClick={() => navigate(`/offers/create/${c.applicationId}`)}
                                                         className="gap-2 text-indigo-600"
                                                     >
                                                         <FileText className="h-3.5 w-3.5" /> Create Offer

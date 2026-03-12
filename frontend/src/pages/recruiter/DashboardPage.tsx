@@ -20,6 +20,14 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "@/components/ui/dialog";
 import { jobService } from "@/services/jobService";
 import { candidateService } from "@/services/candidateService";
 import { applicationService } from "@/services/applicationService";
@@ -27,12 +35,18 @@ import { interviewService } from "@/services/interviewService";
 import type { Application, InterviewResponse } from "@/types/models";
 import { toast } from "sonner";
 
+const STAGES = ["APPLIED", "SCREENING", "INTERVIEW", "OFFER", "HIRED", "REJECTED"];
+
 export default function DashboardPage() {
     const [activeJobs, setActiveJobs] = useState(0);
     const [totalCandidates, setTotalCandidates] = useState(0);
     const [recentApps, setRecentApps] = useState<Application[]>([]);
     const [upcomingInterviews, setUpcomingInterviews] = useState<InterviewResponse[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+
+    const [advanceApp, setAdvanceApp] = useState<Application | null>(null);
+    const [newStage, setNewStage] = useState<string>("SCREENING");
+    const [isAdvancing, setIsAdvancing] = useState(false);
 
     useEffect(() => {
         loadDashboardData();
@@ -56,6 +70,35 @@ export default function DashboardPage() {
             toast.error("Failed to load some dashboard metrics");
         } finally {
             setIsLoading(false);
+        }
+    };
+
+    const handleAdvanceStage = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!advanceApp) return;
+
+        setIsAdvancing(true);
+        try {
+            await applicationService.advanceStage(advanceApp.id, newStage);
+            toast.success("Candidate stage updated successfully!");
+            setAdvanceApp(null);
+            loadDashboardData();
+        } catch (error) {
+            console.error("Failed to advance stage:", error);
+            toast.error("Failed to update candidate stage.");
+        } finally {
+            setIsAdvancing(false);
+        }
+    };
+
+    const openAdvanceModal = (app: Application) => {
+        setAdvanceApp(app);
+        // Try to default to the next logical stage if possible
+        const currentIndex = STAGES.indexOf(app.stage as string);
+        if (currentIndex !== -1 && currentIndex < STAGES.length - 1) {
+            setNewStage(STAGES[currentIndex + 1]);
+        } else {
+            setNewStage(app.stage as string);
         }
     };
 
@@ -229,7 +272,7 @@ export default function DashboardPage() {
                                                 <DropdownMenuItem asChild>
                                                     <Link to={`/candidates/${app.id}/evaluation`}>View Evaluation</Link>
                                                 </DropdownMenuItem>
-                                                <DropdownMenuItem>Advance Stage</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => openAdvanceModal(app)}>Advance Stage</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </div>
@@ -286,6 +329,58 @@ export default function DashboardPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Advance Stage Dialog */}
+            <Dialog open={!!advanceApp} onOpenChange={(open) => !open && setAdvanceApp(null)}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Advance Candidate Stage</DialogTitle>
+                        <DialogDescription>
+                            Move {advanceApp?.candidateName} to the next step in the hiring process.
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <form onSubmit={handleAdvanceStage} className="space-y-6 pt-4">
+                        <div className="space-y-4">
+                            <label className="text-sm font-medium">Select new stage</label>
+                            <div className="grid grid-cols-2 gap-3">
+                                {STAGES.map((stage) => (
+                                    <label
+                                        key={stage}
+                                        className={`flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-colors ${
+                                            newStage === stage
+                                                ? "border-indigo-600 bg-indigo-50 text-indigo-700 font-medium"
+                                                : "border-slate-200 bg-white hover:bg-slate-50 text-slate-700"
+                                        }`}
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <input
+                                                type="radio"
+                                                name="stage"
+                                                value={stage}
+                                                checked={newStage === stage}
+                                                onChange={(e) => setNewStage(e.target.value)}
+                                                className="sr-only" // hidden radio
+                                            />
+                                            <span className="text-sm capitalize">{stage.toLowerCase()}</span>
+                                        </div>
+                                        {newStage === stage && <CheckCircle2 className="h-4 w-4 text-indigo-600" />}
+                                    </label>
+                                ))}
+                            </div>
+                        </div>
+
+                        <DialogFooter>
+                            <Button type="button" variant="outline" onClick={() => setAdvanceApp(null)}>
+                                Cancel
+                            </Button>
+                            <Button type="submit" disabled={isAdvancing}>
+                                {isAdvancing ? "Updating..." : "Update Stage"}
+                            </Button>
+                        </DialogFooter>
+                    </form>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

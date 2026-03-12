@@ -12,5 +12,12 @@ export const applicationService = {
 
     getApplicationById(id: number) {
         return apiFetch<Application>(`/applications/${id}`);
+    },
+
+    advanceStage(id: number, stage: string) {
+        return apiFetch<Application>(`/applications/${id}/stage`, {
+            method: "PUT",
+            body: { stage }
+        });
     }
 };

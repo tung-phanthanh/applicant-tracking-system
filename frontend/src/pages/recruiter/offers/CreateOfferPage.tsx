@@ -57,7 +57,7 @@ export default function CreateOfferPage() {
         try {
             const offer = await offerService.create(buildPayload());
             toast.success("Offer draft saved");
-            navigate(`/offers/${offer.id}`);
+            navigate(`/offers/${offer.id}/preview`);
         } catch {
             toast.error("Failed to save offer");
         } finally {
@@ -75,7 +75,7 @@ export default function CreateOfferPage() {
             const offer = await offerService.create(buildPayload());
             await offerService.submit(offer.id);
             toast.success("Offer submitted for approval!");
-            navigate(`/offers/${offer.id}`);
+            navigate(`/offers/${offer.id}/preview`);
         } catch {
             toast.error("Failed to submit offer");
         } finally {

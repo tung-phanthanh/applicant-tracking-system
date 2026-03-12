@@ -90,7 +90,7 @@ export default function InterviewEvaluationFormPage() {
             }
 
             // Handle existing scores
-            if (scoresResult.status === "fulfilled") {
+            if (scoresResult.status === "fulfilled" && scoresResult.value) {
                 const res = scoresResult.value;
                 if (res.submitted) setIsSubmitted(true);
                 setRecommendation(res.recommendation ?? "");

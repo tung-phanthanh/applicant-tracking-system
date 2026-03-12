@@ -12,5 +12,12 @@ export const jobService = {
 
     getActiveJobsCount() {
         return apiFetch<number>("/jobs/active/count");
+    },
+
+    createJob(jobData: Partial<Job>) {
+        return apiFetch<Job>("/jobs", {
+            method: "POST",
+            body: jobData
+        });
     }
 };
