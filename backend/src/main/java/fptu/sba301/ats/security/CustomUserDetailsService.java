@@ -4,14 +4,12 @@ import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.DisabledException;
-import org.springframework.security.authentication.LockedException;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -22,8 +20,8 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email)
             throws UsernameNotFoundException {
 
-        User user = userRepository.findByEmailAndDeletedFalse(email)
-                .orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
         if (!user.isActive()) {
             throw new DisabledException("Account not activated");
@@ -32,10 +30,6 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new LockedException("Account locked");
         }
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                List.of(new SimpleGrantedAuthority(user.getRole().name()))
-        );
+        return UserPrincipal.create(user);
     }
 }

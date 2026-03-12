@@ -6,8 +6,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.Setter;
 
-@Getter
-@Setter
+@Data
 public class LoginRequest {
 
     @NotBlank(message = "Email is required")

@@ -70,8 +70,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public void revokeAllUserTokens(User user) {
 
-        List<RefreshToken> tokens =
-                refreshTokenRepository.findAllByUserAndRevokedFalse(user);
+        List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndRevokedFalse(user);
 
         tokens.forEach(t -> t.setRevoked(true));
 

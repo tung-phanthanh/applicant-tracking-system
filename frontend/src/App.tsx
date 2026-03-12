@@ -45,6 +45,14 @@ import OnboardingChecklistPage from "@/pages/recruiter/onboarding/OnboardingChec
 // Jobs
 import JobsPage from "@/pages/recruiter/jobs/JobsPage";
 
+// Admin Pages
+import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
+import RolesPage from "@/pages/admin/RolesPage";
+import DepartmentsPage from "@/pages/admin/DepartmentsPage";
+import SystemConfigPage from "@/pages/admin/SystemConfigPage";
+import AuditLogPage from "@/pages/admin/AuditLogPage";
+import NotificationsPage from "@/pages/admin/NotificationsPage";
+
 function App() {
   return (
     <BrowserRouter>
