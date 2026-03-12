@@ -7,16 +7,12 @@ import fptu.sba301.ats.entity.Job;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface JobService {
     List<Job> findAll();
-    Optional<Job> findById(Long id);
+    Optional<Job> findById(UUID id);
     Job save(Job job);
-    Job update(Long id, Job job);
-    void delete(Long id);
-      List<JobResponse> getAllJobs();
-
-    JobResponse getJobById(Long id);
-
-    long countActiveJobs();
+    Job update(UUID id, Job job);
+    void delete(UUID id);
 }

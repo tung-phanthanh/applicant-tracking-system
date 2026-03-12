@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class JobServiceImpl implements JobService {
@@ -25,7 +26,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Optional<Job> findById(Long id) {
+    public Optional<Job> findById(UUID id) {
         return jobRepository.findById(id);
     }
 
@@ -38,7 +39,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Job update(Long id, Job job) {
+    public Job update(UUID id, Job job) {
         return jobRepository.findById(id)
                 .map(existing -> {
                     existing.setTitle(job.getTitle());
@@ -46,14 +47,13 @@ public class JobServiceImpl implements JobService {
                     existing.setLocation(job.getLocation());
                     existing.setDescription(job.getDescription());
                     existing.setStatus(job.getStatus());
-                    // postedDate should not change on update
                     return jobRepository.save(existing);
                 })
                 .orElseThrow(() -> new RuntimeException("Job not found: " + id));
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(UUID id) {
         jobRepository.deleteById(id);
     }
 
