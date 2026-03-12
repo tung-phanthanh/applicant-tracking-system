@@ -35,6 +35,7 @@ function buildUserFromStorage(): User | null {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(MOCK_USER);
     const [user, setUser] = useState<User | null>(buildUserFromStorage);
     const [isLoading, setIsLoading] = useState(false);
 
