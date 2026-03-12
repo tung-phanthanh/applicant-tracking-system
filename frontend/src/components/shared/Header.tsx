@@ -28,8 +28,8 @@ export default function Header() {
 
     const pageTitle = PAGE_TITLES[location.pathname] ?? "Enterprise ATS";
 
-    const handleLogout = () => {
-        logout();
+    const handleLogout = async () => {
+        await logout();
         navigate("/login");
     };
 
@@ -45,10 +45,14 @@ export default function Header() {
                             className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-accent"
                         >
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
-                                {user.initials}
+                                {user.fullName
+                                    .split(" ")
+                                    .map((n) => n[0])
+                                    .slice(0, 2)
+                                    .join("")}
                             </div>
                             <span className="text-sm font-medium text-foreground">
-                                {user.name}
+                                {user.fullName}
                             </span>
                         </Button>
                     </DropdownMenuTrigger>

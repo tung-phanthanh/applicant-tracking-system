@@ -36,8 +36,7 @@ public class JwtService {
 
             return Jwts.builder()
                     .setIssuer("skill-checking")
-                    .setSubject(user.getId().toString())
-                    .claim(EMAIL_KEY, user.getEmail())
+                    .setSubject(user.getEmail())
                     .claim(ROLE_KEY, user.getRole())
                     .setIssuedAt(Date.from(now))
                     .setExpiration(Date.from(expiry))

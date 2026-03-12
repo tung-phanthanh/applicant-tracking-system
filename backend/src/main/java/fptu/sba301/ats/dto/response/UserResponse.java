@@ -5,16 +5,20 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.Instant;
 import java.util.UUID;
+
 
 @Getter
 @Builder
 @AllArgsConstructor
-public class AuthResponse {
-    private String accessToken;
-    private String refreshToken;
-    private UUID userId;
+public class UserResponse {
+    private UUID id;
     private String fullName;
     private String email;
     private Role role;
+    private boolean active;
+    private boolean accountLocked;
+    private String department;
+    private Instant createdAt;
 }
