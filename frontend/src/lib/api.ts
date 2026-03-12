@@ -1,101 +1,123 @@
-import { mockHandler } from "@/mocks/mockHandler";
+import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_URL || "http://localhost:8386/api/v1";
-const USE_MOCK = import.meta.env.VITE_MOCK === "true";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8386/api/v1";
 
-type HttpMethod = "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
-
-interface FetchOptions {
-    method?: HttpMethod;
-    body?: unknown;
-    params?: Record<string, string | number | boolean | undefined>;
-}
-
-class ApiError extends Error {
-    status: number;
-    data?: unknown;
-
-    constructor(
-        status: number,
-        message: string,
-        data?: unknown,
-    ) {
-        super(message);
-        this.status = status;
-        this.data = data;
-        this.name = "ApiError";
-    }
-}
-
-function buildUrl(
-    path: string,
-    params?: Record<string, string | number | boolean | undefined>,
-): string {
-    const url = new URL(BASE_URL + path);
-    if (params) {
-        Object.entries(params).forEach(([k, v]) => {
-            if (v !== undefined && v !== null) {
-                url.searchParams.append(k, String(v));
-            }
-        });
-    }
-    return url.toString();
-}
-
-function getToken(): string | null {
-    return localStorage.getItem("accessToken");
-}
-
-async function apiFetch<T>(path: string, options: FetchOptions = {}): Promise<T> {
-    const { method = "GET", body, params } = options;
-
-    // ── MOCK INTERCEPTOR ─────────────────────────────────────
-    if (USE_MOCK) {
-        // Strip query-string for cleaner matching
-        const cleanPath = path.split("?")[0];
-        const mockResult = await mockHandler(method, cleanPath, body);
-        // Non-GET mutations always return from mock (including undefined → 204)
-        // GET routes: if mockResult is not undefined, return it; else fall through
-        if (method !== "GET" || mockResult !== undefined) {
-            return mockResult as T;
-        }
-    }
-    // ─────────────────────────────────────────────────────────
-
-    const token = getToken();
-
-    const headers: HeadersInit = {
+const api = axios.create({
+    baseURL: BASE_URL,
+    headers: {
         "Content-Type": "application/json",
-    };
-    if (token) {
-        headers["Authorization"] = `Bearer ${token}`;
-    }
+    },
+});
 
-    const response = await fetch(buildUrl(path, params), {
-        method,
-        headers,
-        body: body !== undefined ? JSON.stringify(body) : undefined,
-    });
-
-    if (!response.ok) {
-        let data: unknown;
-        try {
-            data = await response.json();
-        } catch {
-            data = null;
-        }
-        const message =
-            (data as { message?: string })?.message ||
-            `HTTP ${response.status}: ${response.statusText}`;
-        throw new ApiError(response.status, message, data);
-    }
-
-    // 204 No Content
-    if (response.status === 204) {
-        return undefined as T;
-    }
-
-    return response.json() as Promise<T>;
+// ── Request interceptor: attach access token ──────────────────────────────
+// Support both localStorage (remember-me) and sessionStorage (session-only)
+function getToken(key: string): string | null {
+    return localStorage.getItem(key) || sessionStorage.getItem(key);
 }
 
-export { apiFetch, ApiError, BASE_URL };
+api.interceptors.request.use(
+    (config) => {
+        const token = getToken("accessToken");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    (error) => Promise.reject(error)
+);
+
+// ── Response interceptor: handle 401 → try refresh → retry ───────────────
+let isRefreshing = false;
+let failedQueue: Array<{
+    resolve: (value: string) => void;
+    reject: (reason?: unknown) => void;
+}> = [];
+
+function processQueue(error: unknown, token: string | null = null) {
+    failedQueue.forEach(({ resolve, reject }) => {
+        if (error) {
+            reject(error);
+        } else {
+            resolve(token as string);
+        }
+    });
+    failedQueue = [];
+}
+
+api.interceptors.response.use(
+    (response) => response,
+    async (error) => {
+        const originalRequest = error.config;
+
+        const isLoginEndpoint = originalRequest?.url?.includes("/auth/login");
+        const isRefreshEndpoint = originalRequest?.url?.includes("/auth/refresh");
+
+        if (
+            error.response?.status === 401 &&
+            !originalRequest._retry &&
+            !isLoginEndpoint &&
+            !isRefreshEndpoint
+        ) {
+            if (isRefreshing) {
+                return new Promise<string>((resolve, reject) => {
+                    failedQueue.push({ resolve, reject });
+                })
+                    .then((token) => {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                        return api(originalRequest);
+                    })
+                    .catch((err) => Promise.reject(err));
+            }
+
+            originalRequest._retry = true;
+            isRefreshing = true;
+
+            const refreshToken = getToken("refreshToken");
+
+            if (!refreshToken) {
+                isRefreshing = false;
+                clearSession();
+                window.location.href = "/login";
+                return Promise.reject(error);
+            }
+
+            try {
+                const { data } = await axios.post(`${BASE_URL}/auth/refresh`, {
+                    refreshToken,
+                });
+
+                const newAccessToken: string = data.accessToken;
+                const newRefreshToken: string = data.refreshToken;
+
+                localStorage.setItem("accessToken", newAccessToken);
+                localStorage.setItem("refreshToken", newRefreshToken);
+
+                api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+
+                processQueue(null, newAccessToken);
+                return api(originalRequest);
+            } catch (refreshError) {
+                processQueue(refreshError, null);
+                clearSession();
+                window.location.href = "/login";
+                return Promise.reject(refreshError);
+            } finally {
+                isRefreshing = false;
+            }
+        }
+
+        return Promise.reject(error);
+    }
+);
+
+function clearSession() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("user");
+}
+
+export default api;

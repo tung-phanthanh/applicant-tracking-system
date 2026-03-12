@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -59,4 +60,16 @@ public class User extends BaseEntity {
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
+
+    @Column(name = "reset_token", length = 100)
+    private String resetToken;
+
+    @Column(name = "reset_token_expires_at")
+    private Instant resetTokenExpiresAt;
+
+    @Column(name = "activation_token", length = 100)
+    private String activationToken;
+
+    @Column(name = "activation_token_expires_at")
+    private Instant activationTokenExpiresAt;
 }

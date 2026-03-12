@@ -7,42 +7,50 @@ import java.time.Instant;
 
 @Entity
 @Table(name = "jobs")
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.time.Instant;
+
+/**
+ * Represents a job posting within the ATS.
+ */
+@Entity
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Job {
-
+@Table(name = "jobs")
+public class Job extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", updatable = false, nullable = false)
     private Long id;
 
-    @Column(name = "title", nullable = false, length = 255)
+    @Column(name = "title", nullable = false)
     private String title;
+
+    @Column(name = "department")
+    private String department;
+
+    @Column(name = "location")
+    private String location;
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "department_id")
-    private Long departmentId;
-
-    @Column(name = "hiring_manager_id")
-    private Long hiringManagerId;
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "status", length = 50)
+    @Column(name = "status")
     private String status;
 
-    @Column(name = "headcount")
-    private Integer headcount;
-
-    @Column(name = "created_at", updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @Column(name = "posted_date")
+    private Instant postedDate;
 }

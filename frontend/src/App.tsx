@@ -1,11 +1,22 @@
 import { Navigate, BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/routes/ProtectedRoute";
+import AdminRoute from "@/routes/AdminRoute";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
+import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
+import SetPasswordPage from "@/pages/auth/SetPasswordPage";
+import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
+import JobsPage from "@/pages/recruiter/JobsPage";
+import CreateJobPage from "@/pages/recruiter/CreateJobPage";
+import EditJobPage from "@/pages/recruiter/EditJobPage";
+import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
+import AdminUsersPage from "@/pages/admin/AdminUsersPage";
+import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
+import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
 
 // Features
 // 1. Scorecard Templates
@@ -39,17 +50,22 @@ function App() {
     <BrowserRouter>
       <AuthProvider>
         <Routes>
-          {/* Public routes */}
+          {/* Public auth routes (centered card layout) */}
           <Route element={<AuthLayout />}>
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+            {/* Token-based pages (linked from emails) */}
+            <Route path="/activate" element={<SetPasswordPage />} />
+            <Route path="/reset-password" element={<ResetPasswordPage />} />
           </Route>
 
-          {/* Protected routes */}
+          {/* Protected routes — any authenticated user */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
               <Route path="/" element={<Navigate to="/dashboard" replace />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
+              <Route path="/change-password" element={<ChangePasswordPage />} />
 
               {/* 1. Scorecard Templates */}
               <Route path="/scorecards" element={<ScorecardTemplateListPage />} />
