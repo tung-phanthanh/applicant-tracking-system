@@ -4,15 +4,16 @@ import lombok.Builder;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Data
 @Builder
 public class JobResponse {
-    private Long id;
+    private UUID id;
     private String title;
     private String description;
-    private Long departmentId;
-    private Long hiringManagerId;
+    private UUID departmentId;
+    private UUID hiringManagerId;
     private String status;
     private Integer headcount;
     private Instant createdAt;

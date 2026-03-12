@@ -4,19 +4,11 @@ import fptu.sba301.ats.dto.response.JobResponse;
 import fptu.sba301.ats.entity.Job;
 import fptu.sba301.ats.repository.JobRepository;
 import fptu.sba301.ats.service.JobService;
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
-
-import fptu.sba301.ats.entity.Job;
-import fptu.sba301.ats.repository.JobRepository;
-import fptu.sba301.ats.service.JobService;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -64,9 +56,6 @@ public class JobServiceImpl implements JobService {
     public void delete(Long id) {
         jobRepository.deleteById(id);
     }
-  
-  
-    private final JobRepository jobRepository;
 
     @Override
     public List<JobResponse> getAllJobs() {
@@ -94,12 +83,9 @@ public class JobServiceImpl implements JobService {
                 .id(job.getId())
                 .title(job.getTitle())
                 .description(job.getDescription())
-                .departmentId(job.getDepartmentId())
-                .hiringManagerId(job.getHiringManagerId())
+                .departmentId(job.getDepartment())
                 .status(job.getStatus())
-                .headcount(job.getHeadcount())
                 .createdAt(job.getCreatedAt())
-                .updatedAt(job.getUpdatedAt())
                 .build();
   }
 }
