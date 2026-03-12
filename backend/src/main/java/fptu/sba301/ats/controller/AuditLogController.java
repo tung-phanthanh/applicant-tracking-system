@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.response.AuditLogResponseDTO;
 import fptu.sba301.ats.service.AuditLogService;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/v1/audit-logs")
+@RequestMapping(AppConstant.BASE_URL + "/audit-logs")
 @RequiredArgsConstructor
 public class AuditLogController {
 

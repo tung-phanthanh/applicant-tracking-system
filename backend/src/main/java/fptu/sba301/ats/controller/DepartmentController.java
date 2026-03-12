@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.request.DepartmentRequestDTO;
 import fptu.sba301.ats.dto.response.DepartmentResponseDTO;
 import fptu.sba301.ats.service.DepartmentService;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/departments")
+@RequestMapping(AppConstant.BASE_URL + "/departments")
 @RequiredArgsConstructor
 public class DepartmentController {
 
@@ -33,7 +34,8 @@ public class DepartmentController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<DepartmentResponseDTO> updateDepartment(@PathVariable UUID id, @RequestBody DepartmentRequestDTO request) {
+    public ResponseEntity<DepartmentResponseDTO> updateDepartment(@PathVariable UUID id,
+            @RequestBody DepartmentRequestDTO request) {
         return ResponseEntity.ok(departmentService.updateDepartment(id, request));
     }
 

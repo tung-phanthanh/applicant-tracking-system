@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.response.NotificationResponseDTO;
 import fptu.sba301.ats.security.UserPrincipal;
 import fptu.sba301.ats.service.NotificationService;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/notifications")
+@RequestMapping(AppConstant.BASE_URL + "/notifications")
 @RequiredArgsConstructor
 public class NotificationController {
 
@@ -21,8 +22,7 @@ public class NotificationController {
     @GetMapping
     public ResponseEntity<List<NotificationResponseDTO>> getUserNotifications(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam(required = false) Boolean unreadOnly
-    ) {
+            @RequestParam(required = false) Boolean unreadOnly) {
         return ResponseEntity.ok(notificationService.getUserNotifications(principal.getId(), unreadOnly));
     }
 

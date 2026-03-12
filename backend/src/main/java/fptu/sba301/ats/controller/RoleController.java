@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.request.RoleRequestDTO;
 import fptu.sba301.ats.dto.response.RoleResponseDTO;
 import fptu.sba301.ats.service.RoleService;
@@ -11,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/roles")
+@RequestMapping(AppConstant.BASE_URL + "/roles")
 @RequiredArgsConstructor
 public class RoleController {
 
