@@ -44,18 +44,23 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
             a.stage,
             a.status,
             ROUND(AVG(isc.score)::numeric, 1),
-            a.applied_at
+            a.applied_at,
+            c.source,
+            c.location,
+            c.experience_years,
+            c.summary
         FROM candidates c
         JOIN applications a ON c.id = a.candidate_id
         JOIN jobs j ON a.job_id = j.id
         LEFT JOIN interviews i ON a.id = i.application_id
         LEFT JOIN interview_scores isc ON i.id = isc.interview_id
-        WHERE c.id = :candidateId::uuid
+        WHERE c.id = CAST(:candidateId AS uuid)
           AND a.status = 'ACTIVE'
         GROUP BY c.id, c.full_name, c.email, c.phone, c.current_company,
-                 j.title, a.stage, a.status, a.applied_at
+                 j.title, a.stage, a.status, a.applied_at,
+                 c.source, c.location, c.experience_years, c.summary
         ORDER BY a.applied_at DESC
         LIMIT 1
         """, nativeQuery = true)
-    Optional<Object[]> findCandidateProfileById(@Param("candidateId") String candidateId);
+    List<Object[]> findCandidateProfileById(@Param("candidateId") String candidateId);
 }

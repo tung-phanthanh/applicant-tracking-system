@@ -9,6 +9,7 @@ import {
     Phone,
     Star,
     X,
+    MapPin,
 } from "lucide-react";
 import { getCandidateById } from "@/api/candidateApi";
 import type { CandidateProfileResponse } from "@/types/candidate";
@@ -246,11 +247,17 @@ export default function CandidateProfilePage() {
                         {/* Summary */}
                         <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                             <h3 className="mb-3 font-semibold text-foreground">Summary</h3>
-                            <p className="text-sm leading-relaxed text-muted-foreground">
-                                {candidate.currentCompany
-                                    ? `Currently working at ${candidate.currentCompany}. Applied for the ${candidate.appliedFor} position. `
-                                    : ""}
-                                No additional summary available. Please review the candidate's CV for more details.
+                            <p className="text-sm leading-relaxed text-muted-foreground whitespace-pre-wrap">
+                                {candidate.summary ? (
+                                    candidate.summary
+                                ) : (
+                                    <>
+                                        {candidate.currentCompany
+                                            ? `Currently working at ${candidate.currentCompany}. Applied for the ${candidate.appliedFor} position. `
+                                            : ""}
+                                        No additional summary available. Please review the candidate's CV for more details.
+                                    </>
+                                )}
                             </p>
                         </div>
                     </div>
@@ -295,6 +302,29 @@ export default function CandidateProfilePage() {
                                         </dd>
                                     </div>
                                 )}
+                                {candidate.experienceYears != null && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-muted-foreground">Experience</dt>
+                                        <dd className="font-medium text-foreground">
+                                            {candidate.experienceYears} {candidate.experienceYears === 1 ? 'Year' : 'Years'}
+                                        </dd>
+                                    </div>
+                                )}
+                                {candidate.source && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-muted-foreground">Source</dt>
+                                        <dd className="font-medium text-foreground">{candidate.source}</dd>
+                                    </div>
+                                )}
+                                {candidate.location && (
+                                    <div className="flex items-center justify-between">
+                                        <dt className="text-muted-foreground">Location</dt>
+                                        <dd className="flex items-center gap-1 font-medium text-foreground">
+                                            <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
+                                            {candidate.location}
+                                        </dd>
+                                    </div>
+                                )}
                                 {candidate.phone && (
                                     <div className="flex items-center justify-between">
                                         <dt className="text-muted-foreground">Phone</dt>
@@ -310,24 +340,31 @@ export default function CandidateProfilePage() {
                                 Documents
                             </h3>
                             <div className="space-y-3">
-                                {/* Resume placeholder */}
-                                <div className="flex items-center gap-3 rounded-md border border-border p-3">
-                                    <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-red-50 text-red-500">
-                                        <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
-                                            <path
-                                                fillRule="evenodd"
-                                                d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
-                                                clipRule="evenodd"
-                                            />
-                                        </svg>
-                                    </div>
-                                    <div>
-                                        <p className="text-xs font-medium text-foreground">
-                                            resume_{candidate.name.toLowerCase().replace(/\s/g, "_")}.pdf
-                                        </p>
-                                        <p className="text-xs text-muted-foreground">No file uploaded</p>
-                                    </div>
-                                </div>
+                                {candidate.documents && candidate.documents.length > 0 ? (
+                                    candidate.documents.map((doc) => (
+                                        <a key={doc.id} href={doc.fileUrl} target="_blank" rel="noreferrer" className="flex items-center gap-3 rounded-md border border-border p-3 hover:bg-muted/50 transition-colors">
+                                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-red-50 text-red-500">
+                                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </div>
+                                            <div>
+                                                <p className="text-xs font-medium text-foreground">
+                                                    {doc.fileName}
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    {doc.fileSizeBytes ? (doc.fileSizeBytes / 1024 / 1024).toFixed(1) + " MB" : ""}
+                                                </p>
+                                            </div>
+                                        </a>
+                                    ))
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">No documents uploaded</p>
+                                )}
                             </div>
                         </div>
                     </div>

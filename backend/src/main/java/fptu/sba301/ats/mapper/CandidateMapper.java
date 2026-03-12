@@ -4,12 +4,14 @@ import fptu.sba301.ats.dto.response.CandidateListResponse;
 import fptu.sba301.ats.dto.response.CandidateProfileResponse;
 import org.mapstruct.Mapper;
 
+import org.mapstruct.Mapping;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface CandidateMapper {
 
+    @Mapping(source = "id", target = "id")
     CandidateListResponse toCandidateListResponse(
             String id,
             String name,
@@ -29,5 +31,10 @@ public interface CandidateMapper {
             String stage,
             String status,
             Double rating,
-            LocalDateTime appliedDate);
+            LocalDateTime appliedDate,
+            String source,
+            String location,
+            Integer experienceYears,
+            String summary,
+            java.util.List<fptu.sba301.ats.dto.response.CandidateDocumentDto> documents);
 }

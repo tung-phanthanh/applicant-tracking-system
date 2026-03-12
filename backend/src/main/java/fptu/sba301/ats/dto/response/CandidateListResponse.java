@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @Builder
 public class CandidateListResponse {
+    private String id;
     private String name;
     private String email;
     private String appliedFor;

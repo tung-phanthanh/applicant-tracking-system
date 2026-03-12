@@ -23,4 +23,10 @@ public class CandidateProfileResponse {
     private String status;
     private Double rating;
     private LocalDateTime appliedDate;
+    
+    private String source;
+    private String location;
+    private Integer experienceYears;
+    private String summary;
+    private java.util.List<CandidateDocumentDto> documents;
 }

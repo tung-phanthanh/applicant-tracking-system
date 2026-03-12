@@ -8,6 +8,15 @@ export interface CandidateListResponse {
     appliedDate: string;
 }
 
+export interface CandidateDocument {
+    id: string;
+    fileName: string;
+    fileUrl: string;
+    fileType: string;
+    fileSizeBytes: number;
+    uploadedAt: string;
+}
+
 export interface CandidateProfileResponse {
     id: string; // UUID
     name: string;
@@ -19,5 +28,10 @@ export interface CandidateProfileResponse {
     status: string;
     rating: number | null;
     appliedDate: string;
+    source: string;
+    location: string;
+    experienceYears: number;
+    summary: string;
+    documents: CandidateDocument[];
 }
 
