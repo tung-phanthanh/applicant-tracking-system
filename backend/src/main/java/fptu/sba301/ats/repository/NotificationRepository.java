@@ -1,18 +1,19 @@
 package fptu.sba301.ats.repository;
 
 import fptu.sba301.ats.entity.Notification;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-import java.util.UUID;
-
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, UUID> {
-    List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> findByUserIdAndIsReadOrderByCreatedAtDesc(UUID userId, boolean isRead);
+    Page<Notification> findByUserId(Long userId, Pageable pageable);
 
-    long countByUserIdAndIsReadFalse(UUID userId);
+    Page<Notification> findByUserIdAndIsRead(Long userId, boolean isRead, Pageable pageable);
+
+    List<Notification> findByUserIdAndIsReadFalse(Long userId);
 }

@@ -1,23 +1,20 @@
 package fptu.sba301.ats.dto.response;
 
+import fptu.sba301.ats.enums.Role;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import java.util.UUID;
 
-@Data
+import java.util.UUID;
+
+@Getter
 @Builder
 public class AuthResponse {
     private String accessToken;
     private String refreshToken;
-    private UserInfo user;
-
-    @Data
-    @Builder
-    public static class UserInfo {
-        private UUID id;
-        private String email;
-        private String fullName;
-        private String role;
-        private String avatarURL;
-    }
+    private UUID userId;
+    private String fullName;
+    private String email;
+    private Role role;
 }

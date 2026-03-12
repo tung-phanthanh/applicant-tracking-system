@@ -1,17 +1,15 @@
 package fptu.sba301.ats.service;
 
-import fptu.sba301.ats.dto.response.NotificationResponseDTO;
-
-import java.util.List;
-
-import java.util.UUID;
+import fptu.sba301.ats.entity.Notification;
+import fptu.sba301.ats.enums.NotificationType;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface NotificationService {
-    List<NotificationResponseDTO> getUserNotifications(UUID userId, Boolean unreadOnly);
 
-    long getUnreadCount(UUID userId);
+    void createNotification(Long userId, NotificationType type, String title, String message, Long referenceId);
 
-    void markAsRead(UUID id);
+    Page<Notification> getMyNotifications(String email, Pageable pageable);
 
-    void markAllAsRead(UUID userId);
+    void markAsRead(Long notificationId, String email);
 }

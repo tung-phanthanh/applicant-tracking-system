@@ -1,47 +1,50 @@
 package fptu.sba301.ats.entity;
 
+import fptu.sba301.ats.enums.NotificationType;
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.UuidGenerator;
+
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
+@Table(name = "notifications")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "notifications")
 public class Notification {
+
     @Id
-    @UuidGenerator
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    private Long id;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @Column(name = "user_id", nullable = false)
+    private Long userId;
 
-    @Column(name = "title", length = 255)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "type", nullable = false, length = 50)
+    private NotificationType type;
+
+    @Column(name = "title", nullable = false, length = 255)
     private String title;
 
-    @Column(name = "content", columnDefinition = "TEXT")
-    private String content;
+    @Column(name = "message", columnDefinition = "TEXT", nullable = false)
+    private String message;
 
-    @Column(name = "type", length = 50)
-    private String type;
+    @Column(name = "is_read", nullable = false)
+    private boolean isRead;
 
-    @Column(name = "link", length = 255)
-    private String link;
-
-    @Column(name = "is_read")
-    private boolean isRead = false;
+    // e.g. offerId or applicationId
+    @Column(name = "reference_id")
+    private Long referenceId;
 
     @Column(name = "created_at", updatable = false)
     private Instant createdAt;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = Instant.now();
+        this.createdAt = Instant.now();
     }
 }

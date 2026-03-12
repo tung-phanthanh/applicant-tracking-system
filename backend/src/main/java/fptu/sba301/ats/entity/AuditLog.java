@@ -2,57 +2,40 @@ package fptu.sba301.ats.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.annotations.UuidGenerator;
-import org.hibernate.type.SqlTypes;
 
 import java.time.Instant;
-import java.util.UUID;
 
 @Entity
+@Table(name = "audit_logs")
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "audit_logs")
+@Builder
 public class AuditLog {
+
     @Id
-    @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-    @Column(name = "user_id")
-    private UUID userId;
+    @Column(name = "actor_email")
+    private String actorEmail;
 
-    @Column(name = "action", length = 100)
+    @Column(nullable = false)
     private String action;
 
-    @Column(name = "entity_type", length = 100)
+    @Column(name = "entity_type", nullable = false)
     private String entityType;
 
     @Column(name = "entity_id")
-    private UUID entityId;
+    private Long entityId;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "old_value", columnDefinition = "JSONB")
+    @Column(name = "old_value", columnDefinition = "jsonb")
     private String oldValue;
 
-    @JdbcTypeCode(SqlTypes.JSON)
-    @Column(name = "new_value", columnDefinition = "JSONB")
+    @Column(name = "new_value", columnDefinition = "jsonb")
     private String newValue;
 
-    @Column(name = "ip_address")
-    private String ipAddress;
-
-    @Column(name = "user_agent", columnDefinition = "TEXT")
-    private String userAgent;
-
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = Instant.now();
-    }
 }

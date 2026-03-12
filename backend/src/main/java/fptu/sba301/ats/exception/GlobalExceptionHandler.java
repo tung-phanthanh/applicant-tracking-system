@@ -7,6 +7,9 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -72,7 +75,55 @@ public class GlobalExceptionHandler {
     }
 
     // =============================
-    // 3. Business Exception
+    // 3. Spring Security Auth Exceptions
+    // =============================
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiError> handleBadCredentials(
+            BadCredentialsException ex,
+            HttpServletRequest request) {
+
+        ApiError error = buildError(
+                HttpStatus.UNAUTHORIZED,
+                "Invalid email or password",
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(DisabledException.class)
+    public ResponseEntity<ApiError> handleDisabledException(
+            DisabledException ex,
+            HttpServletRequest request) {
+
+        ApiError error = buildError(
+                HttpStatus.UNAUTHORIZED,
+                "Your account has not been activated. Please contact your administrator.",
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(error);
+    }
+
+    @ExceptionHandler(LockedException.class)
+    public ResponseEntity<ApiError> handleLockedException(
+            LockedException ex,
+            HttpServletRequest request) {
+
+        ApiError error = buildError(
+                HttpStatus.FORBIDDEN,
+                "Your account has been locked. Please contact your administrator.",
+                request.getRequestURI(),
+                null
+        );
+
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(error);
+    }
+
+    // =============================
+    // 4. Business Exception
     // =============================
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ApiError> handleBusinessException(

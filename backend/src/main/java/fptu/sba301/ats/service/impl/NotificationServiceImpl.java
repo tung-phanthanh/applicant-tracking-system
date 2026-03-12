@@ -1,69 +1,75 @@
 package fptu.sba301.ats.service.impl;
 
-import fptu.sba301.ats.dto.response.NotificationResponseDTO;
 import fptu.sba301.ats.entity.Notification;
+import fptu.sba301.ats.entity.User;
+import fptu.sba301.ats.enums.NotificationType;
+import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.NotificationRepository;
+import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.service.NotificationService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.log4j.Log4j2;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import java.util.UUID;
-
 @Service
 @RequiredArgsConstructor
+@Log4j2
 public class NotificationServiceImpl implements NotificationService {
 
     private final NotificationRepository notificationRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<NotificationResponseDTO> getUserNotifications(UUID userId, Boolean unreadOnly) {
-        List<Notification> notifications;
-        if (Boolean.TRUE.equals(unreadOnly)) {
-            notifications = notificationRepository.findByUserIdAndIsReadOrderByCreatedAtDesc(userId, false);
-        } else {
-            notifications = notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
+    @Transactional
+    public void createNotification(Long userId, NotificationType type, String title, String message, Long referenceId) {
+        Notification notification = Notification.builder()
+                .userId(userId)
+                .type(type)
+                .title(title)
+                .message(message)
+                .referenceId(referenceId)
+                .isRead(false)
+                .build();
+        notificationRepository.save(notification);
+        log.info("Created notification for user {}, type: {} - {}", userId, type, title);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public Page<Notification> getMyNotifications(String email, Pageable pageable) {
+        User user = findUserOrThrow(email);
+        Long userLongId = resolveUserLongId(user);
+        return notificationRepository.findByUserId(userLongId, pageable);
+    }
+
+    @Override
+    @Transactional
+    public void markAsRead(Long notificationId, String email) {
+        User user = findUserOrThrow(email);
+        Long userLongId = resolveUserLongId(user);
+
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new BusinessException("Notification not found", HttpStatus.NOT_FOUND));
+
+        if (!notification.getUserId().equals(userLongId)) {
+            throw new BusinessException("Not authorized to read this notification", HttpStatus.FORBIDDEN);
         }
 
-        return notifications.stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+        notification.setRead(true);
+        notificationRepository.save(notification);
     }
 
-    @Override
-    public long getUnreadCount(UUID userId) {
-        return notificationRepository.countByUserIdAndIsReadFalse(userId);
+    private User findUserOrThrow(String email) {
+        return userRepository.findByEmailAndDeletedFalse(email)
+                .orElseThrow(() -> new BusinessException("User not found with email: " + email, HttpStatus.NOT_FOUND));
     }
 
-    @Override
-    @Transactional
-    public void markAsRead(UUID id) {
-        notificationRepository.findById(id).ifPresent(notification -> {
-            notification.setRead(true);
-            notificationRepository.save(notification);
-        });
-    }
-
-    @Override
-    @Transactional
-    public void markAllAsRead(UUID userId) {
-        List<Notification> unread = notificationRepository.findByUserIdAndIsReadOrderByCreatedAtDesc(userId, false);
-        unread.forEach(n -> n.setRead(true));
-        notificationRepository.saveAll(unread);
-    }
-
-    private NotificationResponseDTO mapToDTO(Notification entity) {
-        return NotificationResponseDTO.builder()
-                .id(entity.getId())
-                .title(entity.getTitle())
-                .content(entity.getContent())
-                .type(entity.getType())
-                .link(entity.getLink())
-                .isRead(entity.isRead())
-                .createdAt(entity.getCreatedAt())
-                .build();
+    // See SecurityUtils for comments on the UUID/Long PK mismatch.
+    private Long resolveUserLongId(User user) {
+        return (long) user.getEmail().hashCode();
     }
 }

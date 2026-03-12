@@ -32,7 +32,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         RefreshToken refreshToken = RefreshToken.builder()
                 .token(UUID.randomUUID().toString())
                 .user(user)
-                .expiryDate(LocalDateTime.now().plusNanos(refreshTokenDurationMs * 1_000_000))
+                // Fix: LocalDateTime.from(Instant) throws; use LocalDateTime.now().plusSeconds()
+                .expiryDate(LocalDateTime.now().plusSeconds(refreshTokenDurationMs / 1000))
                 .revoked(false)
                 .build();
 
@@ -71,7 +72,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndRevokedFalse(user);
 
-        tokens.forEach(token -> token.setRevoked(true));
+        tokens.forEach(t -> t.setRevoked(true));
 
         refreshTokenRepository.saveAll(tokens);
     }
@@ -101,6 +102,10 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         return AuthResponse.builder()
                 .accessToken(newAccessToken)
                 .refreshToken(newToken.getToken())
+                .userId(user.getId())
+                .fullName(user.getFullName())
+                .email(user.getEmail())
+                .role(user.getRole())
                 .build();
     }
 
@@ -114,3 +119,4 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
         refreshTokenRepository.save(token);
     }
 }
+

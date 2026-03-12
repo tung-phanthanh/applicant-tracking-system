@@ -23,18 +23,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
 
-        if (!user.isActive())
-            throw new DisabledException("Account is not active");
-
-        return UserPrincipal.create(user);
-    }
-
-    public UserDetails loadUserById(String id) {
-        User user = userRepository.findById(UUID.fromString(id))
-                .orElseThrow(() -> new UsernameNotFoundException("User not found with id: " + id));
-
-        if (!user.isActive())
-            throw new DisabledException("Account is not active");
+        if (!user.isActive()) {
+            throw new DisabledException("Account not activated");
+        }
+        if (user.isAccountLocked()) {
+            throw new LockedException("Account locked");
+        }
 
         return UserPrincipal.create(user);
     }

@@ -1,69 +1,96 @@
-import { createContext, useState, useEffect, type ReactNode } from "react";
-import api from "@/lib/axios";
-import type {
-    AuthContextType,
-    LoginCredentials,
-    User,
-} from "@/types/auth";
+import {
+    createContext,
+    useState,
+    useEffect,
+    useCallback,
+    type ReactNode,
+} from "react";
+import type { AuthContextType, LoginCredentials, User } from "@/types/auth";
+import { authService } from "@/services/authService";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
 
-export function AuthProvider({ children }: { children: ReactNode }) {
-    const [user, setUser] = useState<User | null>(null);
-    const [isLoading, setIsLoading] = useState(true);
+// Tokens can be in either localStorage (remember me) or sessionStorage (session only)
+function getStoredItem(key: string): string | null {
+    return localStorage.getItem(key) || sessionStorage.getItem(key);
+}
 
+function clearSession() {
+    localStorage.removeItem("accessToken");
+    localStorage.removeItem("refreshToken");
+    localStorage.removeItem("user");
+    sessionStorage.removeItem("accessToken");
+    sessionStorage.removeItem("refreshToken");
+    sessionStorage.removeItem("user");
+}
+
+function buildUserFromStorage(): User | null {
+    try {
+        const raw = getStoredItem("user");
+        if (!raw) return null;
+        return JSON.parse(raw) as User;
+    } catch {
+        return null;
+    }
+}
+
+export function AuthProvider({ children }: { children: ReactNode }) {
+    const [user, setUser] = useState<User | null>(MOCK_USER);
+    const [user, setUser] = useState<User | null>(buildUserFromStorage);
+    const [isLoading, setIsLoading] = useState(false);
+
+    // Restore session on mount: if token exists but user missing, clear stale data
     useEffect(() => {
-        const storedUser = localStorage.getItem("user");
-        const token = localStorage.getItem("token");
-        if (storedUser && token) {
-            setUser(JSON.parse(storedUser));
+        const accessToken = getStoredItem("accessToken");
+        const storedUser = buildUserFromStorage();
+        if (!accessToken || !storedUser) {
+            clearSession();
+            setUser(null);
         }
-        setIsLoading(false);
     }, []);
 
-    const login = async (credentials: LoginCredentials): Promise<void> => {
-        setIsLoading(true);
+    const login = useCallback(
+        async (credentials: LoginCredentials, rememberMe = false): Promise<void> => {
+            setIsLoading(true);
+            try {
+                const response = await authService.login(
+                    credentials.email,
+                    credentials.password
+                );
+
+                const userData: User = {
+                    id: response.userId,
+                    fullName: response.fullName,
+                    email: response.email,
+                    role: response.role,
+                };
+
+                const storage = rememberMe ? localStorage : sessionStorage;
+                storage.setItem("accessToken", response.accessToken);
+                storage.setItem("refreshToken", response.refreshToken);
+                storage.setItem("user", JSON.stringify(userData));
+
+                setUser(userData);
+            } finally {
+                setIsLoading(false);
+            }
+        },
+        []
+    );
+
+    const logout = useCallback(async (): Promise<void> => {
+        const refreshToken = getStoredItem("refreshToken");
         try {
-            const response: any = await api.post("/auth/login", credentials);
-            
-            // Assuming backend returns { accessToken, refreshToken, userDetails }
-            // or just tokens and we need to fetch user info.
-            // Based on my previous Invoke-RestMethod, it returned accessToken.
-            
-            const accessToken = response.accessToken;
-            const refreshToken = response.refreshToken;
-            
-            // For now, let's create a partial user object if userDetails is missing
-            // Ideally the backend should return user info as well.
-            const userData: User = {
-                id: response.id || "1",
-                name: response.fullName || credentials.email.split('@')[0],
-                email: credentials.email,
-                role: response.role || "admin",
-                department: response.department || "HR",
-                phone: response.phone || "000-000-0000",
-                initials: (response.fullName || credentials.email).substring(0, 2).toUpperCase()
-            };
-
-            localStorage.setItem("token", accessToken);
-            localStorage.setItem("refreshToken", refreshToken);
-            localStorage.setItem("user", JSON.stringify(userData));
-            
-            setUser(userData);
-        } catch (error) {
-            console.error("Login failed:", error);
-            throw new Error("Invalid credentials");
+            if (refreshToken) {
+                await authService.logout(refreshToken);
+            }
+        } catch {
+            // Silently ignore logout API errors — we clean up locally regardless
         } finally {
-            setIsLoading(false);
+            clearSession();
+            setUser(null);
         }
-    };
-
-    const logout = () => {
-        localStorage.removeItem("token");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("user");
-        setUser(null);
-    };
+    }, []);
 
     return (
         <AuthContext.Provider value={{ user, isLoading, login, logout }}>
@@ -71,3 +98,4 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         </AuthContext.Provider>
     );
 }
+
