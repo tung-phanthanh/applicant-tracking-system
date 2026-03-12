@@ -10,6 +10,9 @@ import SetPasswordPage from "@/pages/auth/SetPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
+import JobsPage from "@/pages/recruiter/JobsPage";
+import CreateJobPage from "@/pages/recruiter/CreateJobPage";
+import EditJobPage from "@/pages/recruiter/EditJobPage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
@@ -37,6 +40,20 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
+              {/* Jobs module */}
+              <Route path="/jobs" element={<JobsPage />} />
+              <Route path="/jobs/new" element={<CreateJobPage />} />
+              <Route path="/jobs/:id/edit" element={<EditJobPage />} />
+
+              {/* Placeholder routes for other future modules */}
+              <Route
+                path="/candidates"
+                element={<ComingSoon title="Candidates" />}
+              />
+              <Route
+                path="/interviews"
+                element={<ComingSoon title="Interviews" />}
+              />
               {/* Placeholder routes */}
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
               <Route path="/candidates" element={<ComingSoon title="Candidates" />} />
