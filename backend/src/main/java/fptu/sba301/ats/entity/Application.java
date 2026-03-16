@@ -1,0 +1,58 @@
+package fptu.sba301.ats.entity;
+
+import fptu.sba301.ats.enums.ApplicationStage;
+import fptu.sba301.ats.enums.ApplicationStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.time.Instant;
+
+@Entity
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "applications", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"candidate_id", "job_id"})
+})
+public class Application {
+
+    @Id
+    @UuidGenerator
+    @Column(name = "id", updatable = false, nullable = false)
+    private java.util.UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "candidate_id")
+    private Candidate candidate;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
+    private Job job;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "stage")
+    @Builder.Default
+    private ApplicationStage stage = ApplicationStage.APPLIED;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Builder.Default
+    private ApplicationStatus status = ApplicationStatus.ACTIVE;
+
+    @Column(name = "applied_at")
+    @Builder.Default
+    private Instant appliedAt = Instant.now();
+
+    @Column(name = "updated_at")
+    @Builder.Default
+    private Instant updatedAt = Instant.now();
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = Instant.now();
+    }
+}

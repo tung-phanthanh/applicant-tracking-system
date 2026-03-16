@@ -1,0 +1,48 @@
+package fptu.sba301.ats.entity;
+
+import fptu.sba301.ats.enums.OfferStatus;
+import jakarta.persistence.*;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
+
+import java.math.BigDecimal;
+import java.time.Instant;
+
+@Entity
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "offers")
+public class Offer {
+
+    @Id
+    @UuidGenerator
+    @Column(name = "id", updatable = false, nullable = false)
+    private java.util.UUID id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_id")
+    private Application application;
+
+    @Column(name = "salary", precision = 15, scale = 2)
+    private BigDecimal salary;
+
+    @Column(name = "position_title")
+    private String positionTitle;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Builder.Default
+    private OfferStatus status = OfferStatus.DRAFT;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by")
+    private User createdBy;
+
+    @Column(name = "created_at")
+    @Builder.Default
+    private Instant createdAt = Instant.now();
+}

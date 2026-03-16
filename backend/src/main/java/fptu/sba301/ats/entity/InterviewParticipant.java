@@ -1,0 +1,45 @@
+package fptu.sba301.ats.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.io.Serializable;
+
+@Entity
+@Getter
+@Setter
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "interview_participants")
+public class InterviewParticipant {
+
+    @EmbeddedId
+    private InterviewParticipantId id;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("interviewId")
+    @JoinColumn(name = "interview_id")
+    private Interview interview;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @Column(name = "role", length = 50)
+    private String role;
+
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class InterviewParticipantId implements Serializable {
+        @Column(name = "interview_id")
+        private java.util.UUID interviewId;
+
+        @Column(name = "user_id")
+        private java.util.UUID userId;
+    }
+}
