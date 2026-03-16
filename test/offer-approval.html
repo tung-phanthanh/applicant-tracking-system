@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Approvals - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Offer Approvals">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="sm:flex sm:items-center">
+                <div class="sm:flex-auto">
+                    <h1 class="text-base font-semibold leading-6 text-gray-900">Pending Approvals</h1>
+                    <p class="mt-2 text-sm text-gray-700">Offers waiting for your review.</p>
+                </div>
+            </div>
+
+            <div class="mt-8 flow-root">
+                <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-300 bg-white">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            Candidate</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Role</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Salary
+                                        </th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Equity
+                                        </th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Requester
+                                        </th>
+                                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                            <span class="sr-only">Actions</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    <!-- Row 1 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td
+                                            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                            Sarah Jenkins
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Senior Frontend
+                                            Developer</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium">
+                                            $160,000</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">5,000</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">John Doe</td>
+                                        <td
+                                            class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 space-x-2">
+                                            <button type="button" class="text-green-600 hover:text-green-900"
+                                                title="Approve"><i data-lucide="check"
+                                                    class="inline w-5 h-5"></i></button>
+                                            <button type="button" class="text-red-600 hover:text-red-900"
+                                                title="Reject"><i data-lucide="x" class="inline w-5 h-5"></i></button>
+                                            <a href="offer-preview.html" class="text-indigo-600 hover:text-indigo-900"
+                                                title="View Details"><i data-lucide="eye"
+                                                    class="inline w-5 h-5"></i></a>
+                                        </td>
+                                    </tr>
+                                    <!-- Row 2 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td
+                                            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                            Mike Ross
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Product Designer
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-medium">
+                                            $135,000</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">2,500</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Alice Smith</td>
+                                        <td
+                                            class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6 space-x-2">
+                                            <button type="button" class="text-green-600 hover:text-green-900"
+                                                title="Approve"><i data-lucide="check"
+                                                    class="inline w-5 h-5"></i></button>
+                                            <button type="button" class="text-red-600 hover:text-red-900"
+                                                title="Reject"><i data-lucide="x" class="inline w-5 h-5"></i></button>
+                                            <a href="#" class="text-indigo-600 hover:text-indigo-900"
+                                                title="View Details"><i data-lucide="eye"
+                                                    class="inline w-5 h-5"></i></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

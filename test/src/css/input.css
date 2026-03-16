@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+    --font-sans: 'Inter', sans-serif;
+    --color-primary: #0f172a;
+    --color-secondary: #64748b;
+    --color-accent: #3b82f6;
+}
+
+@layer base {
+    body {
+        /* fallback to gray if slate missing, but slate is usually available */
+        @apply antialiased text-gray-900 bg-gray-50;
+    }
+}

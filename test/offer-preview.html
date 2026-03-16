@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Offer Preview - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Offer Preview">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <!-- Actions -->
+            <div class="flex justify-between items-center bg-white p-4 rounded-lg shadow">
+                <div class="flex items-center space-x-2">
+                    <button type="button"
+                        class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                        <i data-lucide="arrow-left" class="w-4 h-4 mr-1"></i> Back
+                    </button>
+                    <span class="text-sm text-gray-500">Previewing offer for <strong>Sarah Jenkins</strong></span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <button type="button"
+                        class="inline-flex items-center rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">
+                        <i data-lucide="download" class="w-4 h-4 mr-1"></i> Download PDF
+                    </button>
+                    <button type="button"
+                        class="inline-flex items-center rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-700">
+                        <i data-lucide="send" class="w-4 h-4 mr-1"></i> Send Offer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Letter Preview -->
+            <div class="bg-white shadow rounded-lg p-10 min-h-[800px] border border-gray-200">
+                <div class="flex justify-between items-start mb-10">
+                    <img src="https://via.placeholder.com/150x50?text=Enterprise+Co." alt="Logo" class="h-10">
+                    <div class="text-right text-sm text-gray-500">
+                        <p>123 Business Rd</p>
+                        <p>San Francisco, CA 94107</p>
+                    </div>
+                </div>
+
+                <div class="text-sm text-gray-900 space-y-6 leading-relaxed">
+                    <p>October 20, 2023</p>
+
+                    <p>
+                        Sarah Jenkins<br>
+                        456 Engineer Ln<br>
+                        San Francisco, CA 94105
+                    </p>
+
+                    <p>Dear Sarah,</p>
+
+                    <p>We are pleased to offer you the full-time position of <strong>Senior Frontend Developer</strong>
+                        at Enterprise Co., reporting to Alice Smith, Engineering Manager. We believe your skills and
+                        experience will be an ideal fit for our creative team.</p>
+
+                    <p><strong>Compensation Package:</strong></p>
+                    <ul class="list-disc list-inside pl-4 space-y-1">
+                        <li><strong>Annual Base Salary:</strong> $160,000 (USD), paid semi-monthly.</li>
+                        <li><strong>Sign-on Bonus:</strong> $10,000 (USD), payable after 30 days of employment.</li>
+                        <li><strong>Equity:</strong> Option to purchase 5,000 shares of Common Stock.</li>
+                    </ul>
+
+                    <p><strong>Benefits:</strong></p>
+                    <ul class="list-disc list-inside pl-4 space-y-1">
+                        <li>Comprehensive medical, dental, and vision coverage.</li>
+                        <li>401(k) retirement plan with company match.</li>
+                        <li>Unlimited Paid Time Off (PTO).</li>
+                    </ul>
+
+                    <p><strong>Start Date:</strong></p>
+                    <p>Your anticipated start date will be November 13, 2023.</p>
+
+                    <p>We are looking forward to having you join the team! If you have any questions, please feel free
+                        to reach out.</p>
+
+                    <p>Sincerely,</p>
+
+                    <div class="mt-8">
+                        <p class="font-bold">John Doe</p>
+                        <p>Head of Talent</p>
+                        <p>Enterprise Co.</p>
+                    </div>
+                </div>
+
+                <div class="mt-12 pt-8 border-t border-gray-200">
+                    <p class="text-sm font-bold mb-4">Acceptance</p>
+                    <p class="text-sm text-gray-600 mb-6">I accept the offer as outlined above.</p>
+
+                    <div class="flex justify-between items-end">
+                        <div class="w-64 border-b border-gray-900 pb-2">
+                            <span class="text-gray-400 text-xs">Signature</span>
+                        </div>
+                        <div class="w-40 border-b border-gray-900 pb-2">
+                            <span class="text-gray-400 text-xs">Date</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

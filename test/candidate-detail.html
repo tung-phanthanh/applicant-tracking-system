@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Detail - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #0f172a;
+            color: #0f172a;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Candidate Profile">
+        <!-- Header -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 md:flex md:justify-between md:items-center">
+                <div class="flex items-center">
+                    <div
+                        class="h-16 w-16 rounded-full bg-pink-100 flex items-center justify-center text-xl font-bold text-pink-600 ring-4 ring-white">
+                        SJ</div>
+                    <div class="ml-4">
+                        <h3 class="text-2xl font-bold leading-6 text-gray-900">Sarah Jenkins</h3>
+                        <div class="mt-1 flex items-center text-sm text-gray-500">
+                            <span class="mr-4"><i data-lucide="mail" class="inline w-4 h-4 mr-1"></i>
+                                sarah.j@example.com</span>
+                            <span><i data-lucide="phone" class="inline w-4 h-4 mr-1"></i> +1 (555) 987-6543</span>
+                        </div>
+                        <div class="mt-2 flex items-center space-x-2">
+                            <span class="text-sm text-gray-700">Applied for <strong>Senior Frontend
+                                    Developer</strong></span>
+                            <span
+                                class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Screening</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 md:mt-0 flex space-x-3">
+                    <button type="button"
+                        class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <i data-lucide="x" class="inline w-4 h-4 mr-1"></i> Reject
+                    </button>
+                    <button type="button"
+                        class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                        Move to Interview <i data-lucide="arrow-right" class="inline w-4 h-4 ml-1"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-t border-gray-200">
+                <nav class="-mb-px flex px-6 space-x-8" aria-label="Tabs">
+                    <button
+                        class="tab-btn active whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="profile">
+                        Profile & CV
+                    </button>
+                    <button
+                        class="tab-btn whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="scorecards">
+                        Scorecards
+                    </button>
+                    <button
+                        class="tab-btn whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="history">
+                        History
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <!-- Left Panel (Main Content) -->
+            <div class="lg:col-span-2 space-y-6">
+                <!-- Profile Tab -->
+                <div id="profile" class="tab-content active space-y-6">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h4 class="text-lg font-bold mb-4 flex justify-between items-center">
+                            CV Preview
+                            <button class="text-sm text-blue-600 hover:underline"><i data-lucide="download"
+                                    class="inline w-4 h-4 mr-1"></i> Download PDF</button>
+                        </h4>
+                        <!-- PDF Mock -->
+                        <div
+                            class="bg-gray-100 border border-gray-200 rounded h-96 flex items-center justify-center text-gray-500 flex-col">
+                            <i data-lucide="file-text" class="w-16 h-16 mb-2 opacity-50"></i>
+                            <p>PDF Viewer Placeholder</p>
+                            <p class="text-xs mt-2">resume_sarah_jenkins.pdf</p>
+                        </div>
+                    </div>
+
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h4 class="text-lg font-bold mb-4">Summary</h4>
+                        <p class="text-gray-700 text-sm leading-relaxed">
+                            Experienced Senior Frontend Developer with over 6 years of experience building responsive
+                            web applications.
+                            Expert in React, TypeScript, and modern CSS frameworks. Passionate about user experience and
+                            performance optimization.
+                            Previously worked at TechCorp and StartupInc.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Scorecards Tab -->
+                <div id="scorecards" class="tab-content space-y-6">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h4 class="text-lg font-bold">Initial Screening</h4>
+                            <span
+                                class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Passed</span>
+                        </div>
+                        <div class="space-y-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Interviewer</p>
+                                <p class="text-sm text-gray-900">John Doe</p>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700">Communication</span>
+                                    <span class="text-sm font-bold text-gray-900">4/5</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-slate-900 h-2 rounded-full" style="width: 80%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center justify-between mb-1">
+                                    <span class="text-sm font-medium text-gray-700">Technical Knowledge</span>
+                                    <span class="text-sm font-bold text-gray-900">5/5</span>
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="bg-slate-900 h-2 rounded-full" style="width: 100%"></div>
+                                </div>
+                            </div>
+                            <div>
+                                <p class="text-sm font-medium text-gray-500">Notes</p>
+                                <p class="text-sm text-gray-700 mt-1 italic">"Sarah was very articulate and showed deep
+                                    knowledge of React internals. Highly recommended for the next stage."</p>
+                            </div>
+                        </div>
+                    </div>
+                    <button type="button"
+                        class="w-full border-2 border-dashed border-gray-300 rounded-md p-3 text-center hover:border-gray-400 text-sm font-medium text-gray-600">
+                        + Add Scorecard
+                    </button>
+                </div>
+
+                <!-- History Tab -->
+                <div id="history" class="tab-content space-y-6">
+                    <div class="bg-white shadow rounded-lg p-6">
+                        <h4 class="text-lg font-bold mb-4">Activity Log</h4>
+                        <ul role="list" class="space-y-6">
+                            <li class="relative flex gap-x-4">
+                                <div class="absolute left-0 top-0 flex w-6 justify-center -bottom-6">
+                                    <div class="w-px bg-gray-200"></div>
+                                </div>
+                                <div class="relative flex h-6 w-6 flex-none items-center justify-center bg-white">
+                                    <div class="h-1.5 w-1.5 rounded-full ring-1 ring-gray-300 bg-gray-200"></div>
+                                </div>
+                                <p class="flex-auto py-0.5 text-xs leading-5 text-gray-500">
+                                    <span class="font-medium text-gray-900">John Doe</span> moved candidate to <span
+                                        class="font-medium text-gray-900">Screening</span>.
+                                </p>
+                                <time datetime="2023-01-23T10:32"
+                                    class="flex-none py-0.5 text-xs leading-5 text-gray-500">10m ago</time>
+                            </li>
+                            <li class="relative flex gap-x-4">
+                                <div class="absolute left-0 top-0 flex w-6 justify-center -bottom-6">
+                                    <div class="w-px bg-gray-200"></div>
+                                </div>
+                                <div class="relative flex h-6 w-6 flex-none items-center justify-center bg-white">
+                                    <div class="h-1.5 w-1.5 rounded-full ring-1 ring-gray-300 bg-gray-200"></div>
+                                </div>
+                                <p class="flex-auto py-0.5 text-xs leading-5 text-gray-500">
+                                    <span class="font-medium text-gray-900">System</span> received application.
+                                </p>
+                                <time datetime="2023-01-23T10:32"
+                                    class="flex-none py-0.5 text-xs leading-5 text-gray-500">2h ago</time>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel (Info) -->
+            <div class="space-y-6">
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h4 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Details</h4>
+                    <ul class="space-y-4 text-sm">
+                        <li class="flex justify-between">
+                            <span class="text-gray-500">Source</span>
+                            <span class="font-medium text-gray-900">LinkedIn</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span class="text-gray-500">Location</span>
+                            <span class="font-medium text-gray-900">San Francisco, CA</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span class="text-gray-500">Experience</span>
+                            <span class="font-medium text-gray-900">6 Years</span>
+                        </li>
+                        <li class="flex justify-between">
+                            <span class="text-gray-500">Current Company</span>
+                            <span class="font-medium text-gray-900">TechCorp</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white shadow rounded-lg p-6">
+                    <h4 class="text-sm font-medium text-slate-500 uppercase tracking-wider mb-4">Documents</h4>
+                    <div class="space-y-2">
+                        <a href="#" class="flex items-center p-2 rounded hover:bg-gray-50 border border-gray-200">
+                            <i data-lucide="file-text" class="w-8 h-8 text-red-500 mr-3"></i>
+                            <div class="overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 truncate">resume_sarah_jenkins.pdf</p>
+                                <p class="text-xs text-gray-500">2.4 MB</p>
+                            </div>
+                        </a>
+                        <a href="#" class="flex items-center p-2 rounded hover:bg-gray-50 border border-gray-200">
+                            <i data-lucide="file" class="w-8 h-8 text-blue-500 mr-3"></i>
+                            <div class="overflow-hidden">
+                                <p class="text-sm font-medium text-gray-900 truncate">portfolio_link.txt</p>
+                                <p class="text-xs text-gray-500">1 KB</p>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="./src/js/layout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    contents.forEach(c => c.classList.remove('active'));
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>

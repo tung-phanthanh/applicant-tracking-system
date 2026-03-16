@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scorecard Templates - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Scorecard Templates">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="sm:flex sm:items-center">
+                <div class="sm:flex-auto">
+                    <h1 class="text-base font-semibold leading-6 text-gray-900">Scorecard Templates</h1>
+                    <p class="mt-2 text-sm text-gray-700">Manage evaluation criteria and rating scales for interviews.
+                    </p>
+                </div>
+                <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                    <button type="button"
+                        class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                        <i data-lucide="plus" class="inline w-4 h-4 mr-1"></i> Create Template
+                    </button>
+                </div>
+            </div>
+
+            <!-- Templates Grid -->
+            <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Template Card 1 -->
+                <div
+                    class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+                    <div class="flex-shrink-0">
+                        <div class="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+                            <i data-lucide="code" class="text-blue-600 w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <a href="#" class="focus:outline-none">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            <p class="text-sm font-medium text-gray-900">Frontend Technical</p>
+                            <p class="truncate text-sm text-gray-500">React, CSS, Performance</p>
+                        </a>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button type="button"
+                            class="inline-flex items-center rounded-full border border-gray-200 bg-white p-1 text-gray-400 hover:text-gray-500 z-10 relative">
+                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Template Card 2 -->
+                <div
+                    class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+                    <div class="flex-shrink-0">
+                        <div class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
+                            <i data-lucide="users" class="text-purple-600 w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <a href="#" class="focus:outline-none">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            <p class="text-sm font-medium text-gray-900">Culture Fit</p>
+                            <p class="truncate text-sm text-gray-500">values, Communication, Leadership</p>
+                        </a>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button type="button"
+                            class="inline-flex items-center rounded-full border border-gray-200 bg-white p-1 text-gray-400 hover:text-gray-500 z-10 relative">
+                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Template Card 3 -->
+                <div
+                    class="relative flex items-center space-x-3 rounded-lg border border-gray-300 bg-white px-6 py-5 shadow-sm focus-within:ring-2 focus-within:ring-indigo-500 focus-within:ring-offset-2 hover:border-gray-400">
+                    <div class="flex-shrink-0">
+                        <div class="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                            <i data-lucide="briefcase" class="text-green-600 w-5 h-5"></i>
+                        </div>
+                    </div>
+                    <div class="min-w-0 flex-1">
+                        <a href="#" class="focus:outline-none">
+                            <span class="absolute inset-0" aria-hidden="true"></span>
+                            <p class="text-sm font-medium text-gray-900">Product Manager</p>
+                            <p class="truncate text-sm text-gray-500">Strategy, Analytics, UX</p>
+                        </a>
+                    </div>
+                    <div class="flex-shrink-0">
+                        <button type="button"
+                            class="inline-flex items-center rounded-full border border-gray-200 bg-white p-1 text-gray-400 hover:text-gray-500 z-10 relative">
+                            <i data-lucide="more-vertical" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor (Mock) -->
+            <div class="mt-10 bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-base font-semibold leading-6 text-gray-900">Create / Edit Template</h3>
+                    <form class="mt-5 space-y-6">
+                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                            <div class="sm:col-span-4">
+                                <label class="block text-sm font-medium text-gray-700">Template Name</label>
+                                <div class="mt-1">
+                                    <input type="text"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border"
+                                        placeholder="e.g., Backend Technical Interview">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700">Criteria</label>
+                            <div class="mt-2 space-y-2">
+                                <div class="flex items-center space-x-2">
+                                    <input type="text"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border"
+                                        value="Algorithm & Data Structures">
+                                    <select
+                                        class="block rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                        <option>1-5 Rating</option>
+                                        <option>Yes/No</option>
+                                        <option>Text</option>
+                                    </select>
+                                    <button type="button" class="text-red-600 hover:text-red-500"><i
+                                            data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                                <div class="flex items-center space-x-2">
+                                    <input type="text"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border"
+                                        value="System Design">
+                                    <select
+                                        class="block rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                        <option>1-5 Rating</option>
+                                        <option>Yes/No</option>
+                                        <option>Text</option>
+                                    </select>
+                                    <button type="button" class="text-red-600 hover:text-red-500"><i
+                                            data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                </div>
+                                <button type="button"
+                                    class="text-sm text-blue-600 hover:text-blue-500 font-medium flex items-center">
+                                    <i data-lucide="plus" class="w-4 h-4 mr-1"></i> Add Criteria
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-4">
+                            <button type="button"
+                                class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50">Cancel</button>
+                            <button type="submit"
+                                class="ml-3 rounded-md bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-800">Save
+                                Template</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

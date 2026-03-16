@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Candidate - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Add New Candidate">
+        <div class="max-w-3xl mx-auto">
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Upload CV</h3>
+                    <div class="mt-2 text-sm text-gray-500">
+                        <p>Upload a resume to automatically parse candidate details.</p>
+                    </div>
+                    <form class="mt-5 sm:flex sm:items-center">
+                        <div class="w-full">
+                            <div
+                                class="flex justify-center rounded-md border-2 border-dashed border-gray-300 px-6 pt-5 pb-6">
+                                <div class="space-y-1 text-center">
+                                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none"
+                                        viewBox="0 0 48 48" aria-hidden="true">
+                                        <path
+                                            d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
+                                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="flex text-sm text-gray-600">
+                                        <label for="file-upload"
+                                            class="relative cursor-pointer rounded-md bg-white font-medium text-slate-600 focus-within:outline-none focus-within:ring-2 focus-within:ring-slate-500 focus-within:ring-offset-2 hover:text-slate-500">
+                                            <span>Upload a file</span>
+                                            <input id="file-upload" name="file-upload" type="file" class="sr-only">
+                                        </label>
+                                        <p class="pl-1">or drag and drop</p>
+                                    </div>
+                                    <p class="text-xs text-gray-500">PDF, DOC, DOCX up to 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="relative py-8">
+                        <div class="absolute inset-0 flex items-center" aria-hidden="true">
+                            <div class="w-full border-t border-gray-300"></div>
+                        </div>
+                        <div class="relative flex justify-center">
+                            <span class="bg-white px-2 text-sm text-gray-500">Or enter manually</span>
+                        </div>
+                    </div>
+
+                    <form class="space-y-6">
+                        <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                            <div class="sm:col-span-3">
+                                <label for="first-name" class="block text-sm font-medium text-gray-700">First
+                                    name</label>
+                                <div class="mt-1">
+                                    <input type="text" name="first-name" id="first-name"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-3">
+                                <label for="last-name" class="block text-sm font-medium text-gray-700">Last name</label>
+                                <div class="mt-1">
+                                    <input type="text" name="last-name" id="last-name"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                </div>
+                            </div>
+
+                            <div class="sm:col-span-4">
+                                <label for="email" class="block text-sm font-medium text-gray-700">Email address</label>
+                                <div class="mt-1">
+                                    <input id="email" name="email" type="email"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                </div>
+                            </div>
+                            <div class="sm:col-span-3">
+                                <label for="job" class="block text-sm font-medium text-gray-700">Apply for Job</label>
+                                <div class="mt-1">
+                                    <select id="job" name="job"
+                                        class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                        <option>Senior Frontend Developer</option>
+                                        <option>Product Designer</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="pt-5 flex justify-end">
+                            <button type="button"
+                                class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">Cancel</button>
+                            <button type="submit"
+                                class="ml-3 inline-flex justify-center rounded-md border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">Save</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

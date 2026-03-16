@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Onboarding - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Onboarding: Sarah Jenkins">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <!-- Header -->
+            <div class="bg-white shadow rounded-lg p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                    <h3 class="text-lg font-bold leading-6 text-gray-900">Onboarding Checklist</h3>
+                    <p class="mt-1 text-sm text-gray-500">Sarah Jenkins (Senior Frontend Developer) starts on <span
+                            class="font-medium text-gray-900">Nov 13, 2023</span>.</p>
+                </div>
+                <div class="mt-4 sm:mt-0 flex items-center">
+                    <span class="text-sm font-medium text-gray-700 mr-3">Progress: 14%</span>
+                    <div class="w-32 bg-gray-200 rounded-full h-2.5">
+                        <div class="bg-indigo-600 h-2.5 rounded-full" style="width: 14%"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pre-Boarding -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Before Start Date</h4>
+                    <span class="bg-indigo-100 text-indigo-800 text-xs font-medium px-2.5 py-0.5 rounded">1/4
+                        Completed</span>
+                </div>
+                <ul role="list" class="divide-y divide-gray-200">
+                    <!-- Task 1 -->
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-start">
+                        <div class="flex h-5 items-center">
+                            <input id="task-1" name="task-1" type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600" checked>
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="task-1" class="font-medium text-gray-900 line-through text-gray-400">Send
+                                Welcome Email</label>
+                            <p class="text-gray-500 text-xs mt-1">Assigned to: <span
+                                    class="font-medium text-gray-700">Alice Smith</span> &bull; Due: Oct 25</p>
+                        </div>
+                    </li>
+                    <!-- Task 2 -->
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-start">
+                        <div class="flex h-5 items-center">
+                            <input id="task-2" name="task-2" type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="task-2" class="font-medium text-gray-900">Order IT Equipment (MacBook
+                                Pro)</label>
+                            <p class="text-gray-500 text-xs mt-1">Assigned to: <span
+                                    class="font-medium text-gray-700">IT Support</span> &bull; Due: Nov 1</p>
+                        </div>
+                        <div class="ml-auto flex items-center">
+                            <button type="button" class="text-gray-400 hover:text-gray-500"><i
+                                    data-lucide="message-square" class="w-4 h-4"></i></button>
+                        </div>
+                    </li>
+                    <!-- Task 3 -->
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-start">
+                        <div class="flex h-5 items-center">
+                            <input id="task-3" name="task-3" type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="task-3" class="font-medium text-gray-900">Setup Email & Slack Accounts</label>
+                            <p class="text-gray-500 text-xs mt-1">Assigned to: <span
+                                    class="font-medium text-gray-700">IT Support</span> &bull; Due: Nov 10</p>
+                        </div>
+                    </li>
+                    <!-- Task 4 -->
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-start">
+                        <div class="flex h-5 items-center">
+                            <input id="task-4" name="task-4" type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="task-4" class="font-medium text-gray-900">Assign Onboarding Buddy</label>
+                            <p class="text-gray-500 text-xs mt-1">Assigned to: <span
+                                    class="font-medium text-gray-700">Alice Smith</span> &bull; Due: Nov 10</p>
+                        </div>
+                    </li>
+                </ul>
+                <div class="bg-gray-50 px-4 py-3 sm:px-6">
+                    <button type="button" class="text-sm text-indigo-600 font-medium hover:text-indigo-500">+ Add
+                        Task</button>
+                </div>
+            </div>
+
+            <!-- Day 1 -->
+            <div class="bg-white shadow rounded-lg overflow-hidden">
+                <div class="bg-gray-50 px-4 py-3 border-b border-gray-200 flex justify-between items-center">
+                    <h4 class="text-sm font-bold text-gray-700 uppercase tracking-wider">Day 1</h4>
+                    <span class="bg-gray-100 text-gray-800 text-xs font-medium px-2.5 py-0.5 rounded">0/3
+                        Completed</span>
+                </div>
+                <ul role="list" class="divide-y divide-gray-200">
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-start">
+                        <div class="flex h-5 items-center">
+                            <input id="task-5" name="task-5" type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="task-5" class="font-medium text-gray-900">Team Introduction Meeting</label>
+                            <p class="text-gray-500 text-xs mt-1">Assigned to: <span
+                                    class="font-medium text-gray-700">Alice Smith</span> &bull; Time: 10:00 AM</p>
+                        </div>
+                    </li>
+                    <li class="px-4 py-4 sm:px-6 hover:bg-gray-50 flex items-start">
+                        <div class="flex h-5 items-center">
+                            <input id="task-6" name="task-6" type="checkbox"
+                                class="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-600">
+                        </div>
+                        <div class="ml-3 text-sm">
+                            <label for="task-6" class="font-medium text-gray-900">HR Benefits Overview</label>
+                            <p class="text-gray-500 text-xs mt-1">Assigned to: <span
+                                    class="font-medium text-gray-700">John Doe</span> &bull; Time: 2:00 PM</p>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

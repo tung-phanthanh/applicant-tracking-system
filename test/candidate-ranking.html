@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Candidate Ranking - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Candidate Ranking">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="sm:flex sm:items-center">
+                <div class="sm:flex-auto">
+                    <h1 class="text-base font-semibold leading-6 text-gray-900">Candidate Ranking</h1>
+                    <p class="mt-2 text-sm text-gray-700">Compare candidates for <strong>Senior Frontend
+                            Developer</strong>.</p>
+                </div>
+                <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                    <select
+                        class="block rounded-md border-0 py-1.5 pl-3 pr-10 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-slate-600 sm:text-sm sm:leading-6">
+                        <option>Senior Frontend Developer</option>
+                        <option>Product Designer</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="mt-8 flow-root">
+                <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-300 bg-white">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            Rank</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Candidate
+                                        </th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Overall
+                                            Score</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Tech</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Culture
+                                        </th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Status
+                                        </th>
+                                        <th scope="col" class="relative py-3.5 pl-3 pr-4 sm:pr-6">
+                                            <span class="sr-only">Actions</span>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    <!-- Rank 1 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td
+                                            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                            <div
+                                                class="flex items-center justify-center w-8 h-8 rounded-full bg-yellow-100 text-yellow-700 font-bold">
+                                                1</div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <div class="flex items-center">
+                                                <div class="h-10 w-10 flex-shrink-0">
+                                                    <div
+                                                        class="h-10 w-10 rounded-full bg-pink-100 flex items-center justify-center text-pink-600 font-bold">
+                                                        SJ</div>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="font-medium text-gray-900">Sarah Jenkins</div>
+                                                    <div class="text-gray-500">sarah.j@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-bold">4.2
+                                            <span class="text-xs text-gray-400 font-normal">/ 5</span></td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 w-24">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 85%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 w-24">
+                                                <div class="bg-blue-500 h-2 rounded-full" style="width: 90%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <span
+                                                class="inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20">Offer
+                                                Sent</span>
+                                        </td>
+                                        <td
+                                            class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                            <a href="candidate-evaluation.html"
+                                                class="text-indigo-600 hover:text-indigo-900">View<span
+                                                    class="sr-only">, Sarah Jenkins</span></a>
+                                        </td>
+                                    </tr>
+
+                                    <!-- Rank 2 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td
+                                            class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                            <div
+                                                class="flex items-center justify-center w-8 h-8 rounded-full bg-gray-100 text-gray-700 font-bold">
+                                                2</div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <div class="flex items-center">
+                                                <div class="h-10 w-10 flex-shrink-0">
+                                                    <div
+                                                        class="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center text-purple-600 font-bold">
+                                                        AL</div>
+                                                </div>
+                                                <div class="ml-4">
+                                                    <div class="font-medium text-gray-900">Alice Lee</div>
+                                                    <div class="text-gray-500">alice.lee@example.com</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-900 font-bold">3.8
+                                            <span class="text-xs text-gray-400 font-normal">/ 5</span></td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 w-24">
+                                                <div class="bg-yellow-500 h-2 rounded-full" style="width: 70%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <div class="w-full bg-gray-200 rounded-full h-2 w-24">
+                                                <div class="bg-green-500 h-2 rounded-full" style="width: 80%"></div>
+                                            </div>
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            <span
+                                                class="inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20">Interview</span>
+                                        </td>
+                                        <td
+                                            class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                                            <a href="#" class="text-indigo-600 hover:text-indigo-900">View<span
+                                                    class="sr-only">, Alice Lee</span></a>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

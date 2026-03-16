@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Draft Offer - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Draft Offer">
+        <div class="max-w-4xl mx-auto">
+            <div class="bg-white shadow sm:rounded-lg">
+                <div class="px-4 py-5 sm:p-6">
+                    <h3 class="text-lg font-medium leading-6 text-gray-900">Draft Offer: Sarah Jenkins</h3>
+                    <p class="mt-1 text-sm text-gray-500">Create an offer for the Senior Frontend Developer position.
+                    </p>
+
+                    <form class="mt-6 space-y-6">
+                        <!-- Compensation -->
+                        <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-900 mb-4">Compensation</h4>
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div class="sm:col-span-3">
+                                    <label for="salary" class="block text-sm font-medium text-gray-700">Annual Salary
+                                        (USD)</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" name="salary" id="salary"
+                                            class="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-3">
+                                    <label for="equity" class="block text-sm font-medium text-gray-700">Equity
+                                        (Options)</label>
+                                    <div class="mt-1">
+                                        <input type="number" name="equity" id="equity"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border"
+                                            placeholder="1000">
+                                    </div>
+                                </div>
+
+                                <div class="sm:col-span-3">
+                                    <label for="bonus" class="block text-sm font-medium text-gray-700">Sign-on
+                                        Bonus</label>
+                                    <div class="mt-1 relative rounded-md shadow-sm">
+                                        <div
+                                            class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
+                                            <span class="text-gray-500 sm:text-sm">$</span>
+                                        </div>
+                                        <input type="number" name="bonus" id="bonus"
+                                            class="block w-full rounded-md border-gray-300 pl-7 pr-12 focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border"
+                                            placeholder="0.00">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Dates & Details -->
+                        <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-900 mb-4">Key Dates</h4>
+                            <div class="grid grid-cols-1 gap-y-6 gap-x-4 sm:grid-cols-6">
+                                <div class="sm:col-span-3">
+                                    <label for="start-date" class="block text-sm font-medium text-gray-700">Start
+                                        Date</label>
+                                    <div class="mt-1">
+                                        <input type="date" name="start-date" id="start-date"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-3">
+                                    <label for="expiry-date" class="block text-sm font-medium text-gray-700">Offer
+                                        Expiry</label>
+                                    <div class="mt-1">
+                                        <input type="date" name="expiry-date" id="expiry-date"
+                                            class="block w-full rounded-md border-gray-300 shadow-sm focus:border-slate-500 focus:ring-slate-500 sm:text-sm p-2 border">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Approval Chain -->
+                        <div class="bg-gray-50 p-4 rounded-md border border-gray-200">
+                            <h4 class="text-sm font-medium text-gray-900 mb-4">Approval Chain</h4>
+                            <div class="space-y-4">
+                                <div
+                                    class="flex items-center justify-between p-3 bg-white rounded border border-gray-200">
+                                    <div class="flex items-center">
+                                        <span
+                                            class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 mr-3">HM</span>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">Hiring Manager</p>
+                                            <p class="text-xs text-gray-500">Alice Smith</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-500">Required</span>
+                                </div>
+                                <div
+                                    class="flex items-center justify-between p-3 bg-white rounded border border-gray-200">
+                                    <div class="flex items-center">
+                                        <span
+                                            class="h-8 w-8 rounded-full bg-gray-200 flex items-center justify-center text-xs font-medium text-gray-600 mr-3">VP</span>
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-900">VP of Engineering</p>
+                                            <p class="text-xs text-gray-500">Bob Jones</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-xs font-medium text-gray-500">Required (> $150k)</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-end pt-5">
+                            <button type="button"
+                                class="rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">Save
+                                Draft</button>
+                            <button type="button" onclick="window.location.href='offer-approval.html'"
+                                class="ml-3 inline-flex justify-center rounded-md border border-transparent bg-slate-900 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-500 focus:ring-offset-2">Submit
+                                for Approval</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

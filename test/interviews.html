@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interview Calendar - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: 60px repeat(5, 1fr);
+            grid-template-rows: 50px repeat(9, 1fr);
+            /* 9am to 6pm */
+        }
+
+        .calendar-cell {
+            border-right: 1px solid #e5e7eb;
+            border-bottom: 1px solid #e5e7eb;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Interview Calendar">
+        <div class="h-full flex flex-col">
+            <!-- Toolbar -->
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center space-x-4">
+                    <div class="flex items-center bg-white rounded-md shadow-sm border border-gray-300">
+                        <button type="button" class="p-1 hover:bg-gray-100 rounded-l-md"><i data-lucide="chevron-left"
+                                class="w-5 h-5 text-gray-500"></i></button>
+                        <span class="px-3 py-1 font-medium text-gray-900 text-sm">Oct 16 - 20, 2023</span>
+                        <button type="button" class="p-1 hover:bg-gray-100 rounded-r-md"><i data-lucide="chevron-right"
+                                class="w-5 h-5 text-gray-500"></i></button>
+                    </div>
+                    <button type="button" class="text-sm font-medium text-gray-600 hover:text-gray-900">Today</button>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <div class="inline-flex rounded-md shadow-sm" role="group">
+                        <button type="button"
+                            class="px-4 py-2 text-sm font-medium text-blue-700 bg-white border border-gray-200 rounded-l-lg hover:bg-gray-100 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                            Week
+                        </button>
+                        <button type="button"
+                            class="px-4 py-2 text-sm font-medium text-gray-900 bg-white border border-gray-200 rounded-r-lg hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-2 focus:ring-blue-700 focus:text-blue-700">
+                            Month
+                        </button>
+                    </div>
+                    <button type="button" onclick="window.location.href='schedule-interview.html'"
+                        class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                        <i data-lucide="plus" class="inline w-4 h-4 mr-1"></i> Schedule
+                    </button>
+                </div>
+            </div>
+
+            <!-- Calendar View -->
+            <div class="bg-white rounded-lg shadow ring-1 ring-gray-200 flex flex-col flex-1 overflow-hidden">
+                <div class="calendar-grid flex-1">
+                    <!-- Headers -->
+                    <div
+                        class="calendar-cell bg-gray-50 flex items-center justify-center text-xs font-medium text-gray-500">
+                        Time</div>
+                    <div class="calendar-cell bg-gray-50 py-2 text-center text-sm font-semibold text-gray-900">Mon 16
+                    </div>
+                    <div class="calendar-cell bg-gray-50 py-2 text-center text-sm font-semibold text-gray-900">Tue 17
+                    </div>
+                    <div class="calendar-cell bg-gray-50 py-2 text-center text-sm font-semibold text-gray-900">Wed 18
+                    </div>
+                    <div class="calendar-cell bg-gray-50 py-2 text-center text-sm font-semibold text-gray-900">Thu 19
+                    </div>
+                    <div class="calendar-cell bg-gray-50 py-2 text-center text-sm font-semibold text-gray-900">Fri 20
+                    </div>
+
+                    <!-- Time Slots -->
+                    <!-- 9 AM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">9 AM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 10 AM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">10 AM</div>
+                    <div class="calendar-cell relative p-1">
+                        <!-- Event Mock -->
+                        <div class="absolute inset-x-1 top-2 bottom-2 bg-blue-100 border border-blue-200 rounded p-1 text-xs overflow-hidden cursor-pointer hover:bg-blue-200"
+                            onclick="window.location.href='interview-detail.html'">
+                            <p class="font-semibold text-blue-700 truncate">Screening: Sarah Jenkins</p>
+                            <p class="text-blue-500">10:00 - 11:00 AM</p>
+                        </div>
+                    </div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 11 AM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">11 AM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell relative p-1">
+                        <div class="absolute inset-x-1 top-2 bottom-2 bg-purple-100 border border-purple-200 rounded p-1 text-xs overflow-hidden cursor-pointer hover:bg-purple-200"
+                            onclick="window.location.href='interview-detail.html'">
+                            <p class="font-semibold text-purple-700 truncate">Tech: Mike Ross</p>
+                            <p class="text-purple-500">11:00 - 12:00 PM</p>
+                        </div>
+                    </div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 12 PM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">12 PM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 1 PM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">1 PM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 2 PM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">2 PM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell relative p-1">
+                        <div class="absolute inset-x-1 top-2 bottom-2 bg-pink-100 border border-pink-200 rounded p-1 text-xs overflow-hidden cursor-pointer hover:bg-pink-200"
+                            onclick="window.location.href='interview-detail.html'">
+                            <p class="font-semibold text-pink-700 truncate">Culture: Alice Lee</p>
+                            <p class="text-pink-500">2:00 - 3:00 PM</p>
+                        </div>
+                    </div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 3 PM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">3 PM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 4 PM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">4 PM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+
+                    <!-- 5 PM -->
+                    <div class="calendar-cell text-xs text-gray-500 text-right pr-2 pt-2">5 PM</div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                    <div class="calendar-cell"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

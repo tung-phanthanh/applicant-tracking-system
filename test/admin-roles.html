@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roles & Permissions - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Roles & Permissions">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="sm:flex sm:items-center">
+                <div class="sm:flex-auto">
+                    <h1 class="text-base font-semibold leading-6 text-gray-900">Roles & Permissions</h1>
+                    <p class="mt-2 text-sm text-gray-700">Define roles and assign permissions to control access to
+                        system features.</p>
+                </div>
+                <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                    <button type="button"
+                        class="block rounded-md bg-slate-900 px-3 py-2 text-center text-sm font-semibold text-white shadow-sm hover:bg-slate-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">Create
+                        Role</button>
+                </div>
+            </div>
+
+            <!-- Role Cards -->
+            <div class="mt-8 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                <!-- Admin -->
+                <div
+                    class="relative flex flex-col rounded-lg border border-gray-300 bg-white p-6 shadow-sm hover:border-gray-400">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center">
+                            <i data-lucide="shield" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900">Administrator</h3>
+                    </div>
+                    <p class="text-sm text-gray-500 flex-1">Full access to all system features, settings, and user
+                        management.</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span
+                            class="inline-flex items-center rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-800">4
+                            Users</span>
+                        <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Edit
+                            Permissions</a>
+                    </div>
+                </div>
+
+                <!-- Hiring Manager -->
+                <div
+                    class="relative flex flex-col rounded-lg border border-gray-300 bg-white p-6 shadow-sm hover:border-gray-400">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div class="h-10 w-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+                            <i data-lucide="briefcase" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900">Hiring Manager</h3>
+                    </div>
+                    <p class="text-sm text-gray-500 flex-1">Can create jobs, manage candidates, and extend offers for
+                        their department.</p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span
+                            class="inline-flex items-center rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium text-blue-800">12
+                            Users</span>
+                        <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Edit
+                            Permissions</a>
+                    </div>
+                </div>
+
+                <!-- Interviewer -->
+                <div
+                    class="relative flex flex-col rounded-lg border border-gray-300 bg-white p-6 shadow-sm hover:border-gray-400">
+                    <div class="flex items-center space-x-3 mb-4">
+                        <div
+                            class="h-10 w-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+                            <i data-lucide="users" class="w-5 h-5"></i>
+                        </div>
+                        <h3 class="text-sm font-medium text-gray-900">Interviewer</h3>
+                    </div>
+                    <p class="text-sm text-gray-500 flex-1">Can view assigned candidates and submit interview feedback.
+                    </p>
+                    <div class="mt-4 flex items-center justify-between">
+                        <span
+                            class="inline-flex items-center rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">45
+                            Users</span>
+                        <a href="#" class="text-sm font-medium text-indigo-600 hover:text-indigo-500">Edit
+                            Permissions</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Permission Matrix (Mock) -->
+            <div class="mt-10">
+                <h3 class="text-lg font-medium leading-6 text-gray-900 mb-4">Permission Matrix: Hiring Manager</h3>
+                <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                    <table class="min-w-full divide-y divide-gray-300 bg-white">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th scope="col"
+                                    class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                    Module</th>
+                                <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">View
+                                </th>
+                                <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                                    Create</th>
+                                <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">Edit
+                                </th>
+                                <th scope="col" class="px-3 py-3.5 text-center text-sm font-semibold text-gray-900">
+                                    Delete</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gray-200 bg-white">
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                    Jobs</td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox" checked
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox" checked
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox" checked
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox"
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                            </tr>
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                    Candidates</td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox" checked
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox" checked
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox" checked
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox"
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                            </tr>
+                            <tr>
+                                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
+                                    Settings</td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox"
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox"
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox"
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                                <td class="px-3 py-4 text-center"><input type="checkbox"
+                                        class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-600"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-4 flex justify-end">
+                    <button type="button"
+                        class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">Save
+                        Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>

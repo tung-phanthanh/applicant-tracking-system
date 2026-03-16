@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Audit Logs - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Audit Logs">
+        <div class="px-4 sm:px-6 lg:px-8">
+            <div class="sm:flex sm:items-center">
+                <div class="sm:flex-auto">
+                    <h1 class="text-base font-semibold leading-6 text-gray-900">Audit Logs</h1>
+                    <p class="mt-2 text-sm text-gray-700">A security log of important events in the system.</p>
+                </div>
+                <div class="mt-4 sm:ml-16 sm:mt-0 sm:flex-none">
+                    <button type="button"
+                        class="block rounded-md bg-white px-3 py-2 text-center text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">Export
+                        CSV</button>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mt-6 flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm">
+                <div class="sm:w-48">
+                    <label for="date-range" class="sr-only">Date Range</label>
+                    <input type="date" id="date-range"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-slate-600 sm:text-sm sm:leading-6">
+                </div>
+                <div class="sm:w-48">
+                    <select id="action-type" name="action-type"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-slate-600 sm:text-sm sm:leading-6">
+                        <option value="">All Actions</option>
+                        <option value="login">Login</option>
+                        <option value="create">Create</option>
+                        <option value="update">Update</option>
+                        <option value="delete">Delete</option>
+                    </select>
+                </div>
+                <div class="sm:flex-1">
+                    <label for="search-user" class="sr-only">Search User</label>
+                    <input type="text" name="search-user" id="search-user"
+                        class="block w-full rounded-md border-0 py-1.5 text-gray-900 ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-slate-600 sm:text-sm sm:leading-6"
+                        placeholder="Search by user or IP...">
+                </div>
+            </div>
+
+            <div class="mt-8 flow-root">
+                <div class="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
+                    <div class="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
+                        <div class="overflow-hidden shadow ring-1 ring-black ring-opacity-5 sm:rounded-lg">
+                            <table class="min-w-full divide-y divide-gray-300 bg-white">
+                                <thead class="bg-gray-50">
+                                    <tr>
+                                        <th scope="col"
+                                            class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">
+                                            Timestamp</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">User</th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Action
+                                        </th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Resource
+                                        </th>
+                                        <th scope="col"
+                                            class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">IP Address
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200 bg-white">
+                                    <!-- Log 1 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">Oct
+                                            24, 2023 10:45 AM</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">John
+                                            Doe</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><span
+                                                class="text-green-600 font-medium">Create</span> Offer</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Offer #1024 (Sarah
+                                            Jenkins)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">192.168.1.45</td>
+                                    </tr>
+                                    <!-- Log 2 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">Oct
+                                            24, 2023 09:30 AM</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">Alice
+                                            Smith</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><span
+                                                class="text-blue-600 font-medium">Update</span> Status</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">Candidate #55
+                                            (Mike Ross)</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">192.168.1.22</td>
+                                    </tr>
+                                    <!-- Log 3 -->
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm text-gray-500 sm:pl-6">Oct
+                                            23, 2023 04:15 PM</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm font-medium text-gray-900">System
+                                        </td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><span
+                                                class="text-red-600 font-medium">Failed Login</span></td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                                            admin@enterprise.com</td>
+                                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">203.0.113.5</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="./src/js/layout.js"></script>
+</body>
+
+</html>
