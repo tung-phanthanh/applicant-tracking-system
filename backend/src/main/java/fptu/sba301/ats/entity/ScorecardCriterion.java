@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "scorecard_criteria")
-public class ScorecardCriterion {
+public class ScorecardCriterion extends BaseEntity {
 
     @Id
     @UuidGenerator

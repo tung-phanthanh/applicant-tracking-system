@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -14,7 +14,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "scorecard_templates")
-public class ScorecardTemplate {
+public class ScorecardTemplate extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -28,7 +28,4 @@ public class ScorecardTemplate {
     @JoinColumn(name = "department_id")
     private Department department;
 
-    @Column(name = "created_at")
-    @Builder.Default
-    private Instant createdAt = Instant.now();
 }

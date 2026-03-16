@@ -7,7 +7,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -16,7 +16,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "offers")
-public class Offer {
+public class Offer extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -38,11 +38,4 @@ public class Offer {
     @Builder.Default
     private OfferStatus status = OfferStatus.DRAFT;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
-
-    @Column(name = "created_at")
-    @Builder.Default
-    private Instant createdAt = Instant.now();
 }

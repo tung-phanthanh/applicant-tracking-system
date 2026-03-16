@@ -16,7 +16,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "interviews")
-public class Interview {
+public class Interview extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -37,9 +37,7 @@ public class Interview {
     @Column(name = "type")
     private InterviewType type;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")

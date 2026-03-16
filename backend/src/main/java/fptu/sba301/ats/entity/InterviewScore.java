@@ -12,7 +12,7 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "interview_scores")
-public class InterviewScore {
+public class InterviewScore extends BaseEntity {
 
     @Id
     @UuidGenerator

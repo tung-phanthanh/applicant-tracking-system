@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -15,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "jobs")
-public class Job {
+public class Job extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -36,9 +36,6 @@ public class Job {
     @JoinColumn(name = "hiring_manager_id")
     private User hiringManager;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
@@ -49,16 +46,4 @@ public class Job {
     @Builder.Default
     private Integer headcount = 1;
 
-    @Column(name = "created_at")
-    @Builder.Default
-    private Instant createdAt = Instant.now();
-
-    @Column(name = "updated_at")
-    @Builder.Default
-    private Instant updatedAt = Instant.now();
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = Instant.now();
-    }
 }

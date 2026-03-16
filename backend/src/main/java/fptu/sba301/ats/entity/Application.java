@@ -7,7 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -16,9 +16,9 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "applications", uniqueConstraints = {
-    @UniqueConstraint(columnNames = {"candidate_id", "job_id"})
+        @UniqueConstraint(columnNames = { "candidate_id", "job_id" })
 })
-public class Application {
+public class Application extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -43,16 +43,4 @@ public class Application {
     @Builder.Default
     private ApplicationStatus status = ApplicationStatus.ACTIVE;
 
-    @Column(name = "applied_at")
-    @Builder.Default
-    private Instant appliedAt = Instant.now();
-
-    @Column(name = "updated_at")
-    @Builder.Default
-    private Instant updatedAt = Instant.now();
-
-    @PreUpdate
-    protected void onUpdate() {
-        updatedAt = Instant.now();
-    }
 }

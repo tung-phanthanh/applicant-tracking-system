@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -15,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "candidate_stage_history")
-public class CandidateStageHistory {
+public class CandidateStageHistory extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -34,11 +34,6 @@ public class CandidateStageHistory {
     @Column(name = "to_stage")
     private ApplicationStage toStage;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "changed_by")
-    private User changedBy;
 
-    @Column(name = "changed_at")
-    @Builder.Default
-    private Instant changedAt = Instant.now();
+
 }

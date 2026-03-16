@@ -5,7 +5,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -14,7 +14,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "candidate_notes")
-public class CandidateNote {
+public class CandidateNote extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -25,14 +25,9 @@ public class CandidateNote {
     @JoinColumn(name = "application_id")
     private Application application;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "created_by")
-    private User createdBy;
+
 
     @Column(name = "content", columnDefinition = "TEXT")
     private String content;
 
-    @Column(name = "created_at")
-    @Builder.Default
-    private Instant createdAt = Instant.now();
 }

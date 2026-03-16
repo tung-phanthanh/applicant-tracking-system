@@ -6,7 +6,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
 @Getter
@@ -15,7 +15,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "offer_approvals")
-public class OfferApproval {
+public class OfferApproval extends BaseEntity {
 
     @Id
     @UuidGenerator
@@ -37,7 +37,4 @@ public class OfferApproval {
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
-    @Column(name = "approved_at")
-    @Builder.Default
-    private Instant approvedAt = Instant.now();
 }
