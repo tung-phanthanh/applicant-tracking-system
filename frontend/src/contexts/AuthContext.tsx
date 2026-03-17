@@ -28,7 +28,28 @@ function buildUserFromStorage(): User | null {
     try {
         const raw = getStoredItem("user");
         if (!raw) return null;
-        return JSON.parse(raw) as User;
+        const parsed = JSON.parse(raw) as
+            | (Partial<User> & { name?: string; full_name?: string })
+            | null;
+        if (!parsed) return null;
+
+        const fullName =
+            parsed.fullName?.trim() ||
+            parsed.name?.trim() ||
+            parsed.full_name?.trim() ||
+            "";
+
+        if (!parsed.id || !parsed.email || !parsed.role || !fullName) {
+            return null;
+        }
+
+        return {
+            id: parsed.id,
+            email: parsed.email,
+            role: parsed.role,
+            fullName,
+            department: parsed.department,
+        };
     } catch {
         return null;
     }
