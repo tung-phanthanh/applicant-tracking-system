@@ -7,6 +7,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.time.Instant;
 
 
 @Entity
@@ -42,5 +43,15 @@ public class Application extends BaseEntity {
     @Column(name = "status")
     @Builder.Default
     private ApplicationStatus status = ApplicationStatus.ACTIVE;
+
+    @Column(name = "applied_at")
+    private Instant appliedAt;
+
+    @PrePersist
+    protected void setAppliedAtIfMissing() {
+        if (appliedAt == null) {
+            appliedAt = Instant.now();
+        }
+    }
 
 }
