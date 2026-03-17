@@ -33,4 +33,16 @@ public class Candidate extends BaseEntity {
     @Column(name = "current_company")
     private String currentCompany;
 
+    @Column(name = "source")
+    private String source;
+
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "experience_years")
+    private Integer experienceYears;
+
+    @Column(name = "summary", columnDefinition = "TEXT")
+    private String summary;
+
 }
