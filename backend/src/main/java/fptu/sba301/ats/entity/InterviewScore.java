@@ -1,9 +1,17 @@
 package fptu.sba301.ats.entity;
-
+import fptu.sba301.ats.entity.BaseEntity;
+import fptu.sba301.ats.entity.Interview;
+import fptu.sba301.ats.entity.InterviewParticipant;
+import fptu.sba301.ats.entity.ScorecardCriterion;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
+
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -11,24 +19,32 @@ import org.hibernate.annotations.UuidGenerator;
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "interview_scores")
+@Table(
+        name = "interview_scores",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"interview_id", "user_id", "criterion_id"}
+        )
+)
 public class InterviewScore extends BaseEntity {
 
     @Id
     @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private java.util.UUID id;
-
+    private UUID id;
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_id")
+    @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
-
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interviewer_id")
-    private User interviewer;
-
+    @JoinColumns({
+            @JoinColumn(name = "interview_id", referencedColumnName = "interview_id", insertable = false, updatable = false),
+            @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    })
+    private InterviewParticipant participant;
+    
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "criterion_id")
+    @JoinColumn(name = "criterion_id", nullable = false)
     private ScorecardCriterion criterion;
 
     @Column(name = "score")
