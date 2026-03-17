@@ -3,6 +3,7 @@ package fptu.sba301.ats.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -26,8 +27,17 @@ public class InterviewParticipant {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "role", length = 50)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private ParticipantRole role;
+
+
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+
+
+    @Column(name = "overall_score")
+    private Integer overallScore;
 
     @Embeddable
     @Getter
@@ -37,9 +47,9 @@ public class InterviewParticipant {
     @EqualsAndHashCode
     public static class InterviewParticipantId implements Serializable {
         @Column(name = "interview_id")
-        private java.util.UUID interviewId;
+        private UUID interviewId;
 
         @Column(name = "user_id")
-        private java.util.UUID userId;
+        private UUID userId;
     }
 }
