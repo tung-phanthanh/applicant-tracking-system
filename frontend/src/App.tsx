@@ -2,6 +2,7 @@ import { Navigate, BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminRoute from "@/routes/AdminRoute";
+import HrRoute from "@/routes/HrRoute";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -11,6 +12,7 @@ import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
+import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
@@ -39,8 +41,12 @@ function App() {
 
               {/* Placeholder routes */}
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
-              <Route path="/candidates" element={<ComingSoon title="Candidates" />} />
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
+
+              {/* HR-only route */}
+              <Route element={<HrRoute />}>
+                <Route path="/candidates" element={<CandidateListPage />} />
+              </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}
               <Route element={<AdminRoute />}>
