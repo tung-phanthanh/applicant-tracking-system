@@ -16,6 +16,14 @@ import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
+import ScorecardTemplatesPage from "@/pages/recruiter/ScorecardTemplatesPage";
+import InterviewScorecardPage from "@/pages/recruiter/InterviewScorecardPage";
+import CandidateRankingPage from "@/pages/recruiter/CandidateRankingPage";
+import CandidateEvaluationPage from "@/pages/recruiter/CandidateEvaluationPage";
+import OfferDraftPage from "@/pages/recruiter/OfferDraftPage";
+import OfferApprovalPage from "@/pages/recruiter/OfferApprovalPage";
+import OfferPreviewPage from "@/pages/recruiter/OfferPreviewPage";
+import OnboardingChecklistPage from "@/pages/recruiter/OnboardingChecklistPage";
 
 function App() {
   return (
@@ -43,9 +51,30 @@ function App() {
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
 
-              {/* HR-only route */}
+              {/* HR-only routes */}
               <Route element={<HrRoute />}>
                 <Route path="/candidates" element={<CandidateListPage />} />
+
+                {/* Scorecard Templates */}
+                <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
+
+                {/* Interview Scorecard */}
+                <Route path="/interviews/:interviewId/scorecard" element={<InterviewScorecardPage />} />
+
+                {/* Candidate Ranking */}
+                <Route path="/candidates/ranking" element={<CandidateRankingPage />} />
+
+                {/* Candidate Evaluation */}
+                <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
+
+                {/* Offers */}
+                <Route path="/offers/draft" element={<OfferDraftPage />} />
+                <Route path="/offers/draft/:id" element={<OfferDraftPage />} />
+                <Route path="/offers/approvals" element={<OfferApprovalPage />} />
+                <Route path="/offers/:id/preview" element={<OfferPreviewPage />} />
+
+                {/* Onboarding */}
+                <Route path="/onboarding/:applicationId" element={<OnboardingChecklistPage />} />
               </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}

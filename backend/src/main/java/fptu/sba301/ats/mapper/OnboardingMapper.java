@@ -17,7 +17,19 @@ import java.util.List;
 )
 public interface OnboardingMapper {
 
-    OnboardingTaskResponse toResponse(OnboardingTask task);
+    default OnboardingTaskResponse toResponse(OnboardingTask task) {
+        if (task == null) return null;
+        return OnboardingTaskResponse.builder()
+                .id(task.getId())
+                .applicationId(task.getApplication() != null ? task.getApplication().getId() : null)
+                .title(task.getTitle())
+                .category(task.getCategory())
+                .assignedTo(task.getAssignedTo())
+                .dueDate(task.getDueDate())
+                .completed(task.isCompleted())
+                .sortOrder(task.getSortOrder())
+                .build();
+    }
 
     List<OnboardingTaskResponse> toResponseList(List<OnboardingTask> tasks);
 
