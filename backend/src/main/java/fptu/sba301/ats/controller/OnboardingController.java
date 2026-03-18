@@ -34,6 +34,13 @@ public class OnboardingController {
 
     private final OnboardingService onboardingService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<Page<OnboardingTaskResponse>> getAllTasks(
+            @PageableDefault(size = 20) Pageable pageable) {
+        return ResponseEntity.ok(onboardingService.getAllTasks(pageable));
+    }
+
     // GET /onboarding/application/{id}/progress — full list + progress summary
     @GetMapping("/application/{applicationId}/progress")
     @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")

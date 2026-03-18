@@ -34,6 +34,13 @@ public class OfferController {
 
     private final OfferService offerService;
 
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<Page<OfferResponse>> getAll(
+            @PageableDefault(size = 10) Pageable pageable) {
+        return ResponseEntity.ok(offerService.getAll(pageable));
+    }
+
     @PostMapping
     @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
     public ResponseEntity<OfferResponse> create(@Valid @RequestBody CreateOfferRequest request) {

@@ -54,6 +54,13 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<OnboardingTaskResponse> getAllTasks(Pageable pageable) {
+        return taskRepository.findAll(pageable)
+                .map(onboardingMapper::toResponse);
+    }
+
+    @Override
     public OnboardingTaskResponse createTask(CreateOnboardingTaskRequest request) {
         long count = taskRepository.countByApplicationId(request.getApplicationId());
         OnboardingTask task = onboardingMapper.toEntity(request);

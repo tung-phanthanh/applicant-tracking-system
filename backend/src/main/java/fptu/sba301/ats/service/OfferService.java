@@ -11,6 +11,7 @@ import java.util.UUID;
 public interface OfferService {
     OfferResponse create(CreateOfferRequest request);
     OfferResponse update(UUID id, CreateOfferRequest request);
+    Page<OfferResponse> getAll(Pageable pageable);
     OfferResponse getById(UUID id);
     OfferResponse getByApplication(UUID applicationId);
     OfferResponse submitForApproval(UUID id);

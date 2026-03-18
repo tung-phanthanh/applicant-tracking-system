@@ -12,6 +12,7 @@ import java.util.UUID;
 public interface OnboardingService {
     OnboardingProgressResponse getByApplication(UUID applicationId);
     Page<OnboardingTaskResponse> getTasksPaged(UUID applicationId, Pageable pageable);
+    Page<OnboardingTaskResponse> getAllTasks(Pageable pageable);
     OnboardingTaskResponse createTask(CreateOnboardingTaskRequest request);
     OnboardingTaskResponse updateTask(UUID id, UpdateOnboardingTaskRequest request);
     OnboardingTaskResponse toggleTask(UUID id);

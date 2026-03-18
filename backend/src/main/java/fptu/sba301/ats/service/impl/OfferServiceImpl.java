@@ -68,6 +68,13 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional(readOnly = true)
+    public Page<OfferResponse> getAll(Pageable pageable) {
+        return offerRepository.findAll(pageable)
+                .map(offerMapper::toResponse);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public OfferResponse getByApplication(UUID applicationId) {
         Offer offer = offerRepository.findByApplicationId(applicationId)
                 .orElseThrow(() -> new BusinessException("No offer found for application: " + applicationId, HttpStatus.NOT_FOUND));
