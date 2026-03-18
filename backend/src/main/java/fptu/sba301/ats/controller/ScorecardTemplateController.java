@@ -50,7 +50,7 @@ public class ScorecardTemplateController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'INTERVIEWER')")
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'INTERVIEWER', 'SYSTEM_ADMIN')")
     public ResponseEntity<ScorecardTemplateResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(templateService.getById(id));
     }
