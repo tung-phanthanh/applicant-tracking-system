@@ -1,14 +1,17 @@
 package fptu.sba301.ats.entity;
-import fptu.sba301.ats.entity.BaseEntity;
-import fptu.sba301.ats.entity.Interview;
-import fptu.sba301.ats.entity.InterviewParticipant;
-import fptu.sba301.ats.entity.ScorecardCriterion;
-import jakarta.persistence.*;
+
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.util.UUID;
@@ -16,39 +19,31 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@SuperBuilder
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        name = "interview_scores",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"interview_id", "user_id", "criterion_id"}
-        )
-)
+@Table(name = "interview_scores")
 public class InterviewScore extends BaseEntity {
 
     @Id
     @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "interview_id", referencedColumnName = "interview_id", insertable = false, updatable = false),
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    })
-    private InterviewParticipant participant;
-    
+    @JoinColumn(name = "interviewer_id")
+    private User interviewer;
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "criterion_id", nullable = false)
+    @JoinColumn(name = "criterion_id")
     private ScorecardCriterion criterion;
 
-    @Column(name = "score")
-    private Integer score;
+    @Column(name = "score", nullable = false)
+    private int score;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;

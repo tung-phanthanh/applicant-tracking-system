@@ -1,6 +1,12 @@
 package fptu.sba301.ats.entity;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -26,13 +32,13 @@ public class CandidateDocument {
     private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidate_id")
+    @JoinColumn(name = "candidate_id", nullable = false)
     private Candidate candidate;
 
-    @Column(name = "file_name", nullable = false, length = 255)
+    @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(name = "file_url", nullable = false, length = 1000)
+    @Column(name = "file_url", length = 1000, nullable = false)
     private String fileUrl;
 
     @Column(name = "file_type", length = 50)
@@ -41,6 +47,11 @@ public class CandidateDocument {
     @Column(name = "file_size_bytes")
     private Long fileSizeBytes;
 
-    @Column(name = "uploaded_at")
+    @Column(name = "uploaded_at", updatable = false)
     private Instant uploadedAt;
+
+    @jakarta.persistence.PrePersist
+    protected void onCreate() {
+        if (uploadedAt == null) uploadedAt = Instant.now();
+    }
 }
