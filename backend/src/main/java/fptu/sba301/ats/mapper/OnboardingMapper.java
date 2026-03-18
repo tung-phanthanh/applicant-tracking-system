@@ -17,19 +17,16 @@ import java.util.List;
 )
 public interface OnboardingMapper {
 
-    @Mapping(target = "applicationId", source = "application.id")
     OnboardingTaskResponse toResponse(OnboardingTask task);
 
     List<OnboardingTaskResponse> toResponseList(List<OnboardingTask> tasks);
 
-    // CreateOnboardingTaskRequest → OnboardingTask (id, completed, sortOrder, application set in service)
     @Mapping(target = "id",          ignore = true)
     @Mapping(target = "completed",   ignore = true)
     @Mapping(target = "sortOrder",   ignore = true)
     @Mapping(target = "application", ignore = true)
     OnboardingTask toEntity(CreateOnboardingTaskRequest request);
 
-    // Patch existing task from update request (nulls are ignored via strategy)
     @Mapping(target = "id",          ignore = true)
     @Mapping(target = "application", ignore = true)
     @Mapping(target = "sortOrder",   ignore = true)

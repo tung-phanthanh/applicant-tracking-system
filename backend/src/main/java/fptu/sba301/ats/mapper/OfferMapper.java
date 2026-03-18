@@ -6,12 +6,9 @@ import fptu.sba301.ats.dto.response.OfferResponse;
 import fptu.sba301.ats.entity.Offer;
 import fptu.sba301.ats.entity.OfferApproval;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
 import org.mapstruct.NullValuePropertyMappingStrategy;
 import org.mapstruct.ReportingPolicy;
-
-import java.util.List;
 
 @Mapper(
         componentModel = "spring",
@@ -21,16 +18,8 @@ import java.util.List;
 )
 public interface OfferMapper {
 
-    @Mapping(target = "applicationId", ignore = true)
-    @Mapping(target = "candidateName", ignore = true)
-    @Mapping(target = "createdByName", ignore = true)
-    @Mapping(target = "approvals", ignore = true)
     OfferResponse toResponse(Offer offer);
 
-    List<OfferResponse> toResponseList(List<Offer> offers);
-
-    @Mapping(target = "offerId", ignore = true)
-    @Mapping(target = "approvedByName", ignore = true)
     OfferApprovalResponse toApprovalResponse(OfferApproval approval);
 
     default Offer toEntity(CreateOfferRequest request) {
