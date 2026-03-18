@@ -66,8 +66,6 @@ public class Application {
     @Column(name = "updated_at")
     private Instant updatedAt;
 
-    // ── Bidirectional back-refs ──
-
     @OneToMany(mappedBy = "application", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private List<CandidateStageHistory> stageHistory = new ArrayList<>();

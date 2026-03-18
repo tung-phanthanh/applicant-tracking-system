@@ -16,25 +16,23 @@ import java.util.List;
 @Mapper(
         componentModel = "spring",
         nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE,
-        unmappedTargetPolicy = ReportingPolicy.IGNORE
+        unmappedTargetPolicy = ReportingPolicy.IGNORE,
+        unmappedSourcePolicy = ReportingPolicy.IGNORE
 )
 public interface OfferMapper {
 
-    // Offer → OfferResponse
-    @Mapping(target = "applicationId", source = "application.id")
-    @Mapping(target = "createdByName", expression = "java(offer.getCreatedBy() != null ? offer.getCreatedBy().toString() : null)")
-    @Mapping(target = "candidateName", source = "application.candidate.fullName")
-    @Mapping(target = "approvals",     source = "approvals")
+    @Mapping(target = "applicationId", ignore = true)
+    @Mapping(target = "candidateName", ignore = true)
+    @Mapping(target = "createdByName", ignore = true)
+    @Mapping(target = "approvals", ignore = true)
     OfferResponse toResponse(Offer offer);
 
     List<OfferResponse> toResponseList(List<Offer> offers);
 
-    // OfferApproval → OfferApprovalResponse
-    @Mapping(target = "offerId",        source = "offer.id")
-    @Mapping(target = "approvedByName", source = "approvedBy.fullName")
+    @Mapping(target = "offerId", ignore = true)
+    @Mapping(target = "approvedByName", ignore = true)
     OfferApprovalResponse toApprovalResponse(OfferApproval approval);
 
-    // CreateOfferRequest → Offer (manual mapping due to BaseEntity fields)
     default Offer toEntity(CreateOfferRequest request) {
         Offer offer = Offer.builder()
                 .salary(request.getSalary())
@@ -47,7 +45,6 @@ public interface OfferMapper {
         return offer;
     }
 
-    // Update existing Offer from request
     default void updateFromRequest(CreateOfferRequest request, Offer offer) {
         if (request.getSalary() != null) {
             offer.setSalary(request.getSalary());

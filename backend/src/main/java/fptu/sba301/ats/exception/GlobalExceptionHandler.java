@@ -186,11 +186,11 @@ public class GlobalExceptionHandler {
             Exception ex,
             HttpServletRequest request) {
 
-        log.error("Unhandled exception: ", ex);
+        log.error("Unhandled exception at {}: ", request.getRequestURI(), ex);
 
         ApiError error = buildError(
                 HttpStatus.INTERNAL_SERVER_ERROR,
-                "Internal Server Error",
+                ex.getClass().getSimpleName() + ": " + ex.getMessage(),
                 request.getRequestURI(),
                 null
         );

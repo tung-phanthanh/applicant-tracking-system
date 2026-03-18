@@ -34,6 +34,11 @@ public class OfferController {
 
     private final OfferService offerService;
 
+    @GetMapping("/test")
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("Offer endpoint works!");
+    }
+
     @GetMapping
     @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Page<OfferResponse>> getAll(

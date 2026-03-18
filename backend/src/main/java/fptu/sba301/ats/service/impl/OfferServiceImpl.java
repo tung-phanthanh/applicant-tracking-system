@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Collections;
 import java.util.UUID;
 
 @Service
@@ -45,7 +46,7 @@ public class OfferServiceImpl implements OfferService {
         Offer offer = offerMapper.toEntity(request);
         offer.setApplication(application);
         offer.setStatus(OfferStatus.DRAFT);
-        return offerMapper.toResponse(offerRepository.save(offer));
+        return mapToResponse(offerRepository.save(offer));
     }
 
     @Override
@@ -57,20 +58,20 @@ public class OfferServiceImpl implements OfferService {
         }
 
         offerMapper.updateFromRequest(request, offer);
-        return offerMapper.toResponse(offerRepository.save(offer));
+        return mapToResponse(offerRepository.save(offer));
     }
 
     @Override
     @Transactional(readOnly = true)
     public OfferResponse getById(UUID id) {
-        return offerMapper.toResponse(findOfferOrThrow(id));
+        return mapToResponse(findOfferOrThrow(id));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<OfferResponse> getAll(Pageable pageable) {
         return offerRepository.findAll(pageable)
-                .map(offerMapper::toResponse);
+                .map(this::mapToResponse);
     }
 
     @Override
@@ -78,7 +79,7 @@ public class OfferServiceImpl implements OfferService {
     public OfferResponse getByApplication(UUID applicationId) {
         Offer offer = offerRepository.findByApplicationId(applicationId)
                 .orElseThrow(() -> new BusinessException("No offer found for application: " + applicationId, HttpStatus.NOT_FOUND));
-        return offerMapper.toResponse(offer);
+        return mapToResponse(offer);
     }
 
     @Override
@@ -90,14 +91,14 @@ public class OfferServiceImpl implements OfferService {
         }
 
         offer.setStatus(OfferStatus.PENDING_APPROVAL);
-        return offerMapper.toResponse(offerRepository.save(offer));
+        return mapToResponse(offerRepository.save(offer));
     }
 
     @Override
     @Transactional(readOnly = true)
     public Page<OfferResponse> getPendingApprovals(Pageable pageable) {
         return offerRepository.findByStatus(OfferStatus.PENDING_APPROVAL, pageable)
-                .map(offerMapper::toResponse);
+                .map(this::mapToResponse);
     }
 
     @Override
@@ -124,10 +125,33 @@ public class OfferServiceImpl implements OfferService {
                 ? OfferStatus.APPROVED
                 : OfferStatus.REJECTED);
 
-        return offerMapper.toResponse(offerRepository.save(offer));
+        return mapToResponse(offerRepository.save(offer));
     }
 
-    // ── helpers ────────────────────────────────────────────────────────────
+    private OfferResponse mapToResponse(Offer offer) {
+        OfferResponse.OfferResponseBuilder builder = OfferResponse.builder()
+                .id(offer.getId())
+                .salary(offer.getSalary())
+                .equity(offer.getEquity())
+                .signOnBonus(offer.getSignOnBonus())
+                .positionTitle(offer.getPositionTitle())
+                .startDate(offer.getStartDate())
+                .expiryDate(offer.getExpiryDate())
+                .status(offer.getStatus())
+                .approvals(Collections.emptyList());
+
+        if (offer.getApplication() != null) {
+            builder.applicationId(offer.getApplication().getId());
+            if (offer.getApplication().getCandidate() != null) {
+                builder.candidateName(offer.getApplication().getCandidate().getFullName());
+            }
+        }
+        if (offer.getCreatedBy() != null) {
+            userRepository.findById(offer.getCreatedBy()).ifPresent(user -> 
+                builder.createdByName(user.getFullName()));
+        }
+        return builder.build();
+    }
 
     private Offer findOfferOrThrow(UUID id) {
         return offerRepository.findById(id)
