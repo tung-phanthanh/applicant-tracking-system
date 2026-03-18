@@ -1,18 +1,11 @@
 package fptu.sba301.ats.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.EmbeddedId;
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.MapsId;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import fptu.sba301.ats.enums.ParticipantRole;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
 @Getter
@@ -36,6 +29,27 @@ public class InterviewParticipant {
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column(name = "role", length = 50)
-    private String role; // INTERVIEWER, OBSERVER
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private ParticipantRole role;
+    
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+    
+    @Column(name = "overall_score")
+    private Integer overallScore;
+
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class InterviewParticipantId implements Serializable {
+        @Column(name = "interview_id")
+        private UUID interviewId;
+
+        @Column(name = "user_id")
+        private UUID userId;
+    }
 }

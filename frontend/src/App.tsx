@@ -2,6 +2,7 @@ import { Navigate, BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminRoute from "@/routes/AdminRoute";
+import HrRoute from "@/routes/HrRoute";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -11,17 +12,10 @@ import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
+import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
-import ScorecardTemplatesPage from "@/pages/recruiter/ScorecardTemplatesPage";
-import InterviewScorecardPage from "@/pages/recruiter/InterviewScorecardPage";
-import CandidateEvaluationPage from "@/pages/recruiter/CandidateEvaluationPage";
-import CandidateRankingPage from "@/pages/recruiter/CandidateRankingPage";
-import OfferDraftPage from "@/pages/recruiter/OfferDraftPage";
-import OfferApprovalPage from "@/pages/recruiter/OfferApprovalPage";
-import OfferPreviewPage from "@/pages/recruiter/OfferPreviewPage";
-import OnboardingChecklistPage from "@/pages/recruiter/OnboardingChecklistPage";
 
 function App() {
   return (
@@ -47,24 +41,12 @@ function App() {
 
               {/* Placeholder routes */}
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
-              <Route path="/candidates" element={<ComingSoon title="Candidates" />} />
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
 
-              {/* Hải Anh features — Scoring & Evaluation */}
-              <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
-              <Route path="/interviews/:interviewId/scorecard" element={<InterviewScorecardPage />} />
-              <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
-              <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
-
-              {/* Hải Anh features — Offers */}
-              <Route path="/offers/create" element={<OfferDraftPage />} />
-              <Route path="/offers/draft" element={<OfferDraftPage />} />
-              <Route path="/offers/:id/edit" element={<OfferDraftPage />} />
-              <Route path="/offers/approvals" element={<OfferApprovalPage />} />
-              <Route path="/offers/:id/preview" element={<OfferPreviewPage />} />
-
-              {/* Hải Anh features — Onboarding */}
-              <Route path="/onboarding/:applicationId" element={<OnboardingChecklistPage />} />
+              {/* HR-only route */}
+              <Route element={<HrRoute />}>
+                <Route path="/candidates" element={<CandidateListPage />} />
+              </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}
               <Route element={<AdminRoute />}>

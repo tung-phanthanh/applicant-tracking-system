@@ -6,9 +6,6 @@ import {
     User,
     Users,
     ShieldCheck,
-    ClipboardList,
-    ClipboardCheck,
-    FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -16,18 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
-    { to: "/candidates", icon: Users, label: "Candidates" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
     { to: "/profile", icon: User, label: "My Profile" },
-];
-
-const scoringNavItems = [
-    { to: "/scorecard-templates", icon: ClipboardList, label: "Scorecard Templates" },
-];
-
-const offerNavItems = [
-    { to: "/offers/approvals", icon: ClipboardCheck, label: "Offer Approvals" },
-    { to: "/offers/create", icon: FileText, label: "Create Offer" },
 ];
 
 const adminNavItems = [
@@ -37,6 +24,7 @@ const adminNavItems = [
 export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
+    const isHr = user?.role === "HR";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -72,16 +60,10 @@ export default function Sidebar() {
                         </li>
                     ))}
 
-                    {/* Scoring section */}
-                    <li className="pt-3">
-                        <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                            Scoring
-                        </p>
-                    </li>
-                    {scoringNavItems.map(({ to, icon: Icon, label }) => (
-                        <li key={to}>
+                    {isHr && (
+                        <li>
                             <NavLink
-                                to={to}
+                                to="/candidates"
                                 className={({ isActive }) =>
                                     cn(
                                         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -91,36 +73,11 @@ export default function Sidebar() {
                                     )
                                 }
                             >
-                                <Icon className="h-4 w-4 shrink-0" />
-                                {label}
+                                <Users className="h-4 w-4 shrink-0" />
+                                Candidates
                             </NavLink>
                         </li>
-                    ))}
-
-                    {/* Offers section */}
-                    <li className="pt-3">
-                        <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                            Offers
-                        </p>
-                    </li>
-                    {offerNavItems.map(({ to, icon: Icon, label }) => (
-                        <li key={to}>
-                            <NavLink
-                                to={to}
-                                className={({ isActive }) =>
-                                    cn(
-                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                        isActive
-                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                    )
-                                }
-                            >
-                                <Icon className="h-4 w-4 shrink-0" />
-                                {label}
-                            </NavLink>
-                        </li>
-                    ))}
+                    )}
 
                     {/* Admin section */}
                     {isAdmin && (
