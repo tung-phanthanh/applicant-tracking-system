@@ -42,7 +42,7 @@ public class AuditLogServiceImpl implements AuditLogService {
 
     @Override
     @Transactional
-    public void logAction(UUID userId, String action, String entityType, UUID entityId,
+    public void logAction(UUID userId, String action, String entityType, String entityId,
             Map<String, Object> oldValue, Map<String, Object> newValue,
             String ipAddress, String userAgent) {
         AuditLog log = new AuditLog();

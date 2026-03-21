@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 @Repository
-public interface ScorecardCriterionRepository extends JpaRepository<ScorecardCriterion, Long> {
+public interface ScorecardCriterionRepository extends JpaRepository<ScorecardCriterion, java.util.UUID> {
 
     List<ScorecardCriterion> findByTemplateId(Long templateId);
 

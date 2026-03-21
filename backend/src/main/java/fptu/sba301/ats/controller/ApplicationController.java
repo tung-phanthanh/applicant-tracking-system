@@ -27,7 +27,7 @@ public class ApplicationController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable Long id) {
+    public ResponseEntity<ApplicationResponse> getApplicationById(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(applicationService.getApplicationById(id));
     }
 }

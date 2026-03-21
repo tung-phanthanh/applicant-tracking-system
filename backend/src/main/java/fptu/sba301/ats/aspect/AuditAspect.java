@@ -68,7 +68,7 @@ public class AuditAspect {
 
             // --- Extract entity name/ID from result for description ---
             String entityName = extractEntityName(result);
-            UUID entityId = extractEntityId(result);
+            String entityId = extractEntityId(result);
 
             // --- Build a human-readable description ---
             String descriptionText = buildDescription(logAudit.action(), resource, entityName);
@@ -108,12 +108,12 @@ public class AuditAspect {
     }
 
     /** Try to extract the "id" field (UUID) from the result DTO via reflection. */
-    private UUID extractEntityId(Object result) {
+    private String extractEntityId(Object result) {
         if (result == null) return null;
         try {
             Method idMethod = result.getClass().getMethod("getId");
             Object val = idMethod.invoke(result);
-            if (val instanceof UUID uuid) return uuid;
+            if (val != null) return val.toString();
         } catch (Exception ignored) {
         }
         return null;

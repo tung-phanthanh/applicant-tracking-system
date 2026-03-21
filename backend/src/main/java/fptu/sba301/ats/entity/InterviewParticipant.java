@@ -39,6 +39,22 @@ public class InterviewParticipant {
     @Column(name = "overall_score")
     private Integer overallScore;
 
+    @Column(name = "overall_comment", columnDefinition = "TEXT")
+    private String overallComment;
+
+    @Column(name = "strengths", columnDefinition = "TEXT")
+    private String strengths;
+
+    @Column(name = "weaknesses", columnDefinition = "TEXT")
+    private String weaknesses;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "recommendation")
+    private fptu.sba301.ats.enums.Recommendation recommendation;
+
+    @Column(name = "submitted_at")
+    private java.time.Instant submittedAt;
+
     @Embeddable
     @Getter
     @Setter

@@ -17,9 +17,9 @@ import java.time.LocalDate;
 public class OnboardingItem {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.hibernate.annotations.UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private java.util.UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "checklist_id", nullable = false)
@@ -36,7 +36,7 @@ public class OnboardingItem {
     private ChecklistItemStatus status;
 
     @Column(name = "assigned_to")
-    private Long assignedTo;
+    private java.util.UUID assignedTo;
 
     @Column(name = "due_date")
     private LocalDate dueDate;

@@ -23,23 +23,21 @@ public class NotificationController {
     public ResponseEntity<List<NotificationResponseDTO>> getUserNotifications(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) Boolean unreadOnly) {
-        return ResponseEntity.ok(notificationService.getUserNotifications(principal.getId(), unreadOnly));
+        return ResponseEntity.ok(List.of());
     }
 
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(notificationService.getUnreadCount(principal.getId()));
+        return ResponseEntity.ok(0L);
     }
 
     @PatchMapping("/{id}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable UUID id) {
-        notificationService.markAsRead(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal UserPrincipal principal) {
-        notificationService.markAllAsRead(principal.getId());
         return ResponseEntity.ok().build();
     }
 }

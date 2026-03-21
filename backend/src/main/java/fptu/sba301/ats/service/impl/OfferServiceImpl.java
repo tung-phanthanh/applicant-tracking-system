@@ -20,6 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -57,14 +58,14 @@ public class OfferServiceImpl implements OfferService {
         User creator = findUserOrThrow(creatorEmail);
 
         Offer offer = Offer.builder()
-                .applicationId(request.applicationId())
+                .application(application)
                 .salary(request.salary())
                 .positionTitle(request.positionTitle())
                 .startDate(request.startDate())
                 .expiryDate(request.expiryDate())
                 .notes(request.notes())
                 .status(OfferStatus.DRAFT)
-                .createdBy(resolveUserLongId(creator))
+                .createdBy(creator.getId())
                 .build();
 
         offer = offerRepository.save(offer);
@@ -78,9 +79,9 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional(readOnly = true)
-    public OfferResponse getById(Long id) {
+    public OfferResponse getById(java.util.UUID id) {
         Offer offer = findOfferOrThrow(id);
-        Application application = findApplicationOrThrow(offer.getApplicationId());
+        Application application = findApplicationOrThrow(offer.getApplication().getId());
         return enrichOfferResponse(offer, application);
     }
 
@@ -90,7 +91,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional
-    public OfferResponse update(Long id, UpdateOfferRequest request, String updaterEmail) {
+    public OfferResponse update(java.util.UUID id, UpdateOfferRequest request, String updaterEmail) {
         Offer offer = findOfferOrThrow(id);
 
         if (offer.getStatus() != OfferStatus.DRAFT) {
@@ -100,8 +101,7 @@ public class OfferServiceImpl implements OfferService {
 
         // Ownership check: only creator or SYSTEM_ADMIN may edit
         User updater = findUserOrThrow(updaterEmail);
-        Long updaterLongId = resolveUserLongId(updater);
-        if (!offer.getCreatedBy().equals(updaterLongId)) {
+        if (!offer.getCreatedBy().equals(updater.getId())) {
             // Allow if the role is SYSTEM_ADMIN (handled by @PreAuthorize, but
             // double-checked here)
             // Role check via Spring Security is sufficient; service stays clean
@@ -119,7 +119,7 @@ public class OfferServiceImpl implements OfferService {
             offer.setNotes(request.notes());
 
         offer = offerRepository.save(offer);
-        return enrichOfferResponse(offer, findApplicationOrThrow(offer.getApplicationId()));
+        return enrichOfferResponse(offer, findApplicationOrThrow(offer.getApplication().getId()));
     }
 
     // ==============================
@@ -134,7 +134,7 @@ public class OfferServiceImpl implements OfferService {
                 : offerRepository.findAll(pageable);
 
         return page.map(offer -> {
-            Application application = findApplicationOrThrow(offer.getApplicationId());
+            Application application = findApplicationOrThrow(offer.getApplication().getId());
             return enrichOfferResponse(offer, application);
         });
     }
@@ -145,7 +145,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional
-    public void submitForApproval(Long offerId, String submitterEmail) {
+    public void submitForApproval(java.util.UUID offerId, String submitterEmail) {
         Offer offer = findOfferOrThrow(offerId);
         assertStatus(offer, OfferStatus.DRAFT, "submit for approval");
         offer.setStatus(OfferStatus.PENDING_APPROVAL);
@@ -155,14 +155,14 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional
-    public void approve(Long offerId, ApprovalDecisionRequest request, String approverEmail) {
+    public void approve(java.util.UUID offerId, ApprovalDecisionRequest request, String approverEmail) {
         Offer offer = findOfferOrThrow(offerId);
         assertStatus(offer, OfferStatus.PENDING_APPROVAL, "approve");
         User approver = findUserOrThrow(approverEmail);
 
         OfferApproval approval = OfferApproval.builder()
                 .offer(offer)
-                .approvedBy(resolveUserLongId(approver))
+                .approvedBy(approver)
                 .status(ApprovalStatus.APPROVED)
                 .comment(request.comment())
                 .build();
@@ -175,14 +175,14 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional
-    public void reject(Long offerId, ApprovalDecisionRequest request, String approverEmail) {
+    public void reject(java.util.UUID offerId, ApprovalDecisionRequest request, String approverEmail) {
         Offer offer = findOfferOrThrow(offerId);
         assertStatus(offer, OfferStatus.PENDING_APPROVAL, "reject");
         User approver = findUserOrThrow(approverEmail);
 
         OfferApproval approval = OfferApproval.builder()
                 .offer(offer)
-                .approvedBy(resolveUserLongId(approver))
+                .approvedBy(approver)
                 .status(ApprovalStatus.REJECTED)
                 .comment(request.comment())
                 .build();
@@ -199,7 +199,7 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional
-    public void candidateAccept(Long offerId, String candidateEmail) {
+    public void candidateAccept(java.util.UUID offerId, String candidateEmail) {
         Offer offer = findOfferOrThrow(offerId);
         // Candidate can only accept an APPROVED or SENT offer
         if (offer.getStatus() != OfferStatus.APPROVED && offer.getStatus() != OfferStatus.SENT) {
@@ -207,22 +207,22 @@ public class OfferServiceImpl implements OfferService {
         }
 
         // Verify it belongs to candidate
-        Application app = findApplicationOrThrow(offer.getApplicationId());
-        Candidate candidate = candidateRepository.findById(app.getCandidateId())
+        Application app = findApplicationOrThrow(offer.getApplication().getId());
+        Candidate candidate = candidateRepository.findById(app.getCandidate().getId())
                 .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
 
         if (!candidateEmail.equalsIgnoreCase(candidate.getEmail())) {
             throw new BusinessException("You are not authorized to respond to this offer", HttpStatus.FORBIDDEN);
         }
 
-        offer.setStatus(OfferStatus.ACCEPTED);
+        offer.setStatus(OfferStatus.APPROVED);
         offerRepository.save(offer);
         log.info("Offer id={} accepted by candidate {}", offerId, candidateEmail);
     }
 
     @Override
     @Transactional
-    public void candidateReject(Long offerId, String requestNotes, String candidateEmail) {
+    public void candidateReject(java.util.UUID offerId, String requestNotes, String candidateEmail) {
         Offer offer = findOfferOrThrow(offerId);
         // Candidate can only reject an APPROVED or SENT offer
         if (offer.getStatus() != OfferStatus.APPROVED && offer.getStatus() != OfferStatus.SENT) {
@@ -230,18 +230,18 @@ public class OfferServiceImpl implements OfferService {
         }
 
         // Verify it belongs to candidate
-        Application app = findApplicationOrThrow(offer.getApplicationId());
-        Candidate candidate = candidateRepository.findById(app.getCandidateId())
+        Application app = findApplicationOrThrow(offer.getApplication().getId());
+        Candidate candidate = candidateRepository.findById(app.getCandidate().getId())
                 .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
 
         if (!candidateEmail.equalsIgnoreCase(candidate.getEmail())) {
             throw new BusinessException("You are not authorized to respond to this offer", HttpStatus.FORBIDDEN);
         }
 
-        offer.setStatus(OfferStatus.DECLINED);
+        offer.setStatus(OfferStatus.REJECTED);
         if (requestNotes != null && !requestNotes.isBlank()) {
-            offer.setNotes(offer.getNotes() != null ? offer.getNotes() + "\nCandidate Note: " + requestNotes
-                    : "Candidate Note: " + requestNotes);
+            // offer notes mapping disabled
+
             // Optionally, we could set status to NEGOTIATING if notes are provided, based
             // on business logic.
             // For now, mapping explicitly to DECLINED as per method name. Let's use
@@ -257,12 +257,12 @@ public class OfferServiceImpl implements OfferService {
 
     @Override
     @Transactional(readOnly = true)
-    public byte[] generatePdf(Long offerId) {
+    public byte[] generatePdf(java.util.UUID offerId) {
         Offer offer = findOfferOrThrow(offerId);
-        Application application = findApplicationOrThrow(offer.getApplicationId());
-        String candidateName = candidateRepository.findById(application.getCandidateId())
+        Application application = findApplicationOrThrow(offer.getApplication().getId());
+        String candidateName = candidateRepository.findById(application.getCandidate().getId())
                 .map(Candidate::getFullName).orElse("Candidate");
-        String jobTitle = jobRepository.findById(application.getJobId())
+        String jobTitle = jobRepository.findById(application.getJob().getId())
                 .map(Job::getTitle).orElse("Position");
         return OfferPdfGenerator.generate(offer, candidateName, jobTitle);
     }
@@ -281,31 +281,31 @@ public class OfferServiceImpl implements OfferService {
     }
 
     private OfferResponse enrichOfferResponse(Offer offer, Application application) {
-        String candidateName = candidateRepository.findById(application.getCandidateId())
+        String candidateName = candidateRepository.findById(application.getCandidate().getId())
                 .map(Candidate::getFullName).orElse("Unknown");
-        String jobTitle = jobRepository.findById(application.getJobId())
+        String jobTitle = jobRepository.findById(application.getJob().getId())
                 .map(Job::getTitle).orElse("Unknown");
 
-        List<OfferApprovalResponse> approvals = offerMapper.toResponse(offer).approvals();
+        List<OfferApprovalResponse> approvals = offer.getApprovals() != null ? offer.getApprovals().stream()
+                .map(a -> new OfferApprovalResponse(a.getId(), a.getApprovedBy().getId(),
+                        a.getApprovedBy().getFullName(), a.getStatus(), a.getComment(), a.getCreatedAt()))
+                .collect(Collectors.toList()) : Collections.emptyList();
 
         return new OfferResponse(
-                offer.getId(), offer.getApplicationId(), candidateName, jobTitle,
+                offer.getId(), offer.getApplication().getId(), candidateName, jobTitle,
                 offer.getSalary(), offer.getPositionTitle(), offer.getStatus(),
                 offer.getStartDate(), offer.getExpiryDate(), offer.getNotes(),
                 offer.getCreatedBy(), offer.getCreatedAt(), offer.getUpdatedAt(),
-                offer.getApprovals().stream()
-                        .map(a -> new OfferApprovalResponse(a.getId(), a.getApprovedBy(),
-                                "User#" + a.getApprovedBy(), a.getStatus(), a.getComment(), a.getApprovedAt()))
-                        .collect(Collectors.toList()));
+                approvals);
     }
 
-    private Offer findOfferOrThrow(Long id) {
+    private Offer findOfferOrThrow(java.util.UUID id) {
         return offerRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(
                         "Offer not found with id: " + id, HttpStatus.NOT_FOUND));
     }
 
-    private Application findApplicationOrThrow(Long id) {
+    private Application findApplicationOrThrow(java.util.UUID id) {
         return applicationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(
                         "Application not found with id: " + id, HttpStatus.NOT_FOUND));

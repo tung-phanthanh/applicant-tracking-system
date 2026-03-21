@@ -12,7 +12,7 @@ public interface AuditLogService {
 
     List<AuditLogResponseDTO> getLogsByAction(String action);
 
-    void logAction(UUID userId, String action, String entityType, UUID entityId,
+    void logAction(UUID userId, String action, String entityType, String entityId,
             Map<String, Object> oldValue, Map<String, Object> newValue,
             String ipAddress, String userAgent);
 }

@@ -8,5 +8,5 @@ public interface InterviewService {
 
     List<InterviewResponse> getUpcomingInterviews();
 
-    InterviewResponse getInterviewById(Long id);
+    InterviewResponse getInterviewById(java.util.UUID id);
 }

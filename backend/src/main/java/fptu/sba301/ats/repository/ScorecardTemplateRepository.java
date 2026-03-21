@@ -5,9 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface ScorecardTemplateRepository extends JpaRepository<ScorecardTemplate, Long> {
+public interface ScorecardTemplateRepository extends JpaRepository<ScorecardTemplate, java.util.UUID> {
 
     boolean existsByName(String name);
 
-    boolean existsByNameAndIdNot(String name, Long id);
+    boolean existsByNameAndIdNot(String name, java.util.UUID id);
 }

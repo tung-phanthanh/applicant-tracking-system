@@ -24,7 +24,7 @@ public class OnboardingController {
     @PostMapping("/{applicationId}/checklist")
     @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
     public ResponseEntity<OnboardingChecklistResponse> create(
-            @PathVariable Long applicationId,
+            @PathVariable java.util.UUID applicationId,
             @Valid @RequestBody CreateOnboardingChecklistRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(onboardingService.createChecklist(applicationId, request));
@@ -32,14 +32,14 @@ public class OnboardingController {
 
     @GetMapping("/{applicationId}/checklist")
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<OnboardingChecklistResponse> get(@PathVariable Long applicationId) {
+    public ResponseEntity<OnboardingChecklistResponse> get(@PathVariable java.util.UUID applicationId) {
         return ResponseEntity.ok(onboardingService.getChecklist(applicationId));
     }
 
     @PutMapping("/items/{itemId}")
     @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
     public ResponseEntity<OnboardingItemResponse> updateItem(
-            @PathVariable Long itemId,
+            @PathVariable java.util.UUID itemId,
             @Valid @RequestBody UpdateOnboardingItemRequest request) {
         return ResponseEntity.ok(onboardingService.updateItem(itemId, request));
     }

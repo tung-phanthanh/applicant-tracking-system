@@ -24,7 +24,7 @@ public class InterviewScoreController {
     @PostMapping
     @PreAuthorize("hasRole('INTERVIEWER')")
     public ResponseEntity<InterviewScoresResponse> submit(
-            @PathVariable Long interviewId,
+            @PathVariable java.util.UUID interviewId,
             @Valid @RequestBody SubmitInterviewScoresRequest request) {
         String email = SecurityUtils.getCurrentUserEmail();
         return ResponseEntity.ok(scoreService.submitScores(interviewId, request, email));
@@ -32,13 +32,13 @@ public class InterviewScoreController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<List<InterviewScoresResponse>> getAll(@PathVariable Long interviewId) {
+    public ResponseEntity<List<InterviewScoresResponse>> getAll(@PathVariable java.util.UUID interviewId) {
         return ResponseEntity.ok(scoreService.getAllScores(interviewId));
     }
 
     @GetMapping("/my")
     @PreAuthorize("hasRole('INTERVIEWER')")
-    public ResponseEntity<InterviewScoresResponse> getMy(@PathVariable Long interviewId) {
+    public ResponseEntity<InterviewScoresResponse> getMy(@PathVariable java.util.UUID interviewId) {
         String email = SecurityUtils.getCurrentUserEmail();
         return ResponseEntity.ok(scoreService.getMyScores(interviewId, email));
     }

@@ -4,5 +4,5 @@ import fptu.sba301.ats.dto.response.EvaluationSummaryResponse;
 
 public interface CandidateEvaluationService {
 
-    EvaluationSummaryResponse getEvaluation(Long applicationId);
+    EvaluationSummaryResponse getEvaluation(java.util.UUID applicationId);
 }

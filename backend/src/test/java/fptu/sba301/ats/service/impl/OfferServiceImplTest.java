@@ -17,8 +17,10 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -47,9 +49,14 @@ class OfferServiceImplTest {
     @InjectMocks
     private OfferServiceImpl service;
 
+    private final UUID appId = UUID.randomUUID();
+    private final UUID offerId = UUID.randomUUID();
+    private final UUID userId = UUID.randomUUID();
+    private final UUID candidateId = UUID.randomUUID();
+    private final UUID jobId = UUID.randomUUID();
+
     @Test
     void createOffer_BlockedIfActiveOfferExists() {
-        Long appId = 1L;
         CreateOfferRequest req = new CreateOfferRequest(appId, new BigDecimal("1000"), "Title", LocalDate.now(), null,
                 "Note");
 
@@ -64,12 +71,12 @@ class OfferServiceImplTest {
     @Test
     void submitForApproval_SuccessForDraftState() {
         Offer offer = new Offer();
-        offer.setId(10L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.DRAFT);
 
-        when(offerRepository.findById(10L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
-        assertDoesNotThrow(() -> service.submitForApproval(10L, "user@test.com"));
+        assertDoesNotThrow(() -> service.submitForApproval(offerId, "user@test.com"));
         assertEquals(OfferStatus.PENDING_APPROVAL, offer.getStatus());
         verify(offerRepository).save(offer);
     }
@@ -77,25 +84,21 @@ class OfferServiceImplTest {
     @Test
     void submitForApproval_BlockedForNonDraftState() {
         Offer offer = new Offer();
-        offer.setId(10L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.APPROVED);
 
-        when(offerRepository.findById(10L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.submitForApproval(10L, "user@test.com"));
+                () -> service.submitForApproval(offerId, "user@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
     }
 
-    // ==========================================
-    // Additional exception paths
-    // ==========================================
-
     @Test
     void createOffer_ApplicationNotFound_ThrowsNotFound() {
-        when(applicationRepository.findById(99L)).thenReturn(Optional.empty());
+        when(applicationRepository.findById(appId)).thenReturn(Optional.empty());
 
-        CreateOfferRequest req = new CreateOfferRequest(99L, new java.math.BigDecimal("5000"),
+        CreateOfferRequest req = new CreateOfferRequest(appId, new java.math.BigDecimal("5000"),
                 "Dev", java.time.LocalDate.now(), null, "note");
 
         BusinessException ex = assertThrows(BusinessException.class,
@@ -107,15 +110,15 @@ class OfferServiceImplTest {
     @Test
     void updateOffer_NotDraftState_ThrowsConflict() {
         Offer offer = new Offer();
-        offer.setId(1L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.APPROVED);
-        offer.setCreatedBy(0L);
+        offer.setCreatedBy(UUID.randomUUID());
 
-        when(offerRepository.findById(1L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         UpdateOfferRequest req = new UpdateOfferRequest(null, null, null, null, "updated");
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.update(1L, req, "hr@test.com"));
+                () -> service.update(offerId, req, "hr@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         assertTrue(ex.getMessage().contains("Only DRAFT"));
     }
@@ -123,66 +126,66 @@ class OfferServiceImplTest {
     @Test
     void approve_NotPendingApproval_ThrowsConflict() {
         Offer offer = new Offer();
-        offer.setId(2L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.DRAFT);
 
-        when(offerRepository.findById(2L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         ApprovalDecisionRequest req = new ApprovalDecisionRequest("ok");
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.approve(2L, req, "manager@test.com"));
+                () -> service.approve(offerId, req, "manager@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
     }
 
     @Test
     void reject_NotPendingApproval_ThrowsConflict() {
         Offer offer = new Offer();
-        offer.setId(3L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.APPROVED);
 
-        when(offerRepository.findById(3L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         ApprovalDecisionRequest req = new ApprovalDecisionRequest("not ok");
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.reject(3L, req, "manager@test.com"));
+                () -> service.reject(offerId, req, "manager@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
     }
 
     @Test
     void candidateAccept_WrongOfferStatus_ThrowsConflict() {
         Offer offer = new Offer();
-        offer.setId(4L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.DRAFT); // Not APPROVED/SENT
 
-        when(offerRepository.findById(4L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.candidateAccept(4L, "candidate@test.com"));
+                () -> service.candidateAccept(offerId, "candidate@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         assertTrue(ex.getMessage().contains("APPROVED or SENT"));
     }
 
     @Test
     void candidateAccept_WrongCandidate_ThrowsForbidden() {
-        Offer offer = new Offer();
-        offer.setId(5L);
-        offer.setStatus(OfferStatus.APPROVED);
-        offer.setApplicationId(10L);
-
         Application app = new Application();
-        app.setId(10L);
-        app.setCandidateId(20L);
-
+        app.setId(appId);
+        
         Candidate candidate = new Candidate();
-        candidate.setId(20L);
+        candidate.setId(candidateId);
         candidate.setEmail("real@candidate.com");
+        app.setCandidate(candidate);
 
-        when(offerRepository.findById(5L)).thenReturn(Optional.of(offer));
-        when(applicationRepository.findById(10L)).thenReturn(Optional.of(app));
-        when(candidateRepository.findById(20L)).thenReturn(Optional.of(candidate));
+        Offer offer = new Offer();
+        offer.setId(offerId);
+        offer.setStatus(OfferStatus.APPROVED);
+        offer.setApplication(app);
+
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
+        when(applicationRepository.findById(appId)).thenReturn(Optional.of(app));
+        when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.candidateAccept(5L, "wrong@candidate.com"));
+                () -> service.candidateAccept(offerId, "wrong@candidate.com"));
         assertEquals(HttpStatus.FORBIDDEN, ex.getStatus());
         assertTrue(ex.getMessage().contains("not authorized"));
     }
@@ -190,106 +193,101 @@ class OfferServiceImplTest {
     @Test
     void candidateReject_WrongOfferStatus_ThrowsConflict() {
         Offer offer = new Offer();
-        offer.setId(6L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.REJECTED); // Not APPROVED/SENT
 
-        when(offerRepository.findById(6L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.candidateReject(6L, "note", "candidate@test.com"));
+                () -> service.candidateReject(offerId, "note", "candidate@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         assertTrue(ex.getMessage().contains("APPROVED or SENT"));
     }
 
-    // ==========================================
-    // Offer Approval — Happy paths
-    // ==========================================
-
     @Test
     void approve_PendingApproval_SetsStatusToApproved() {
         Offer offer = new Offer();
-        offer.setId(7L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.PENDING_APPROVAL);
 
-        fptu.sba301.ats.entity.User approver = new fptu.sba301.ats.entity.User();
+        User approver = new User();
+        approver.setId(userId);
         approver.setEmail("manager@test.com");
 
-        when(offerRepository.findById(7L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
         when(userRepository.findByEmailAndDeletedFalse("manager@test.com")).thenReturn(Optional.of(approver));
         when(approvalRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(offerRepository.save(offer)).thenReturn(offer);
 
         ApprovalDecisionRequest req = new ApprovalDecisionRequest("Looks good");
-        assertDoesNotThrow(() -> service.approve(7L, req, "manager@test.com"));
+        assertDoesNotThrow(() -> service.approve(offerId, req, "manager@test.com"));
 
         assertEquals(OfferStatus.APPROVED, offer.getStatus());
-        verify(approvalRepository).save(any(fptu.sba301.ats.entity.OfferApproval.class));
+        verify(approvalRepository).save(any(OfferApproval.class));
         verify(offerRepository).save(offer);
     }
 
     @Test
     void reject_PendingApproval_SetsStatusToRejected() {
         Offer offer = new Offer();
-        offer.setId(8L);
+        offer.setId(offerId);
         offer.setStatus(OfferStatus.PENDING_APPROVAL);
 
-        fptu.sba301.ats.entity.User approver = new fptu.sba301.ats.entity.User();
+        User approver = new User();
+        approver.setId(userId);
         approver.setEmail("manager@test.com");
 
-        when(offerRepository.findById(8L)).thenReturn(Optional.of(offer));
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
         when(userRepository.findByEmailAndDeletedFalse("manager@test.com")).thenReturn(Optional.of(approver));
         when(approvalRepository.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(offerRepository.save(offer)).thenReturn(offer);
 
         ApprovalDecisionRequest req = new ApprovalDecisionRequest("Salary too high");
-        assertDoesNotThrow(() -> service.reject(8L, req, "manager@test.com"));
+        assertDoesNotThrow(() -> service.reject(offerId, req, "manager@test.com"));
 
         assertEquals(OfferStatus.REJECTED, offer.getStatus());
-        verify(approvalRepository).save(any(fptu.sba301.ats.entity.OfferApproval.class));
+        verify(approvalRepository).save(any(OfferApproval.class));
     }
-
-    // ==========================================
-    // Offer PDF Preview
-    // ==========================================
 
     @Test
     void generatePdf_OfferNotFound_ThrowsNotFound() {
-        when(offerRepository.findById(999L)).thenReturn(Optional.empty());
+        UUID randomId = UUID.randomUUID();
+        when(offerRepository.findById(randomId)).thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.generatePdf(999L));
+                () -> service.generatePdf(randomId));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("Offer not found"));
     }
 
     @Test
     void generatePdf_ValidOffer_ReturnsPdfBytes() {
+        Candidate candidate = new Candidate();
+        candidate.setId(candidateId);
+        candidate.setFullName("Nguyen Van A");
+
+        Job job = new Job();
+        job.setId(jobId);
+        job.setTitle("Backend Developer");
+
+        Application app = new Application();
+        app.setId(appId);
+        app.setCandidate(candidate);
+        app.setJob(job);
+
         Offer offer = new Offer();
-        offer.setId(9L);
-        offer.setApplicationId(100L);
+        offer.setId(offerId);
+        offer.setApplication(app);
         offer.setPositionTitle("Backend Dev");
         offer.setSalary(new java.math.BigDecimal("5000.00"));
         offer.setStatus(OfferStatus.APPROVED);
 
-        Application app = new Application();
-        app.setId(100L);
-        app.setCandidateId(50L);
-        app.setJobId(60L);
+        when(offerRepository.findById(offerId)).thenReturn(Optional.of(offer));
+        when(applicationRepository.findById(appId)).thenReturn(Optional.of(app));
+        when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
 
-        fptu.sba301.ats.entity.Candidate candidate = new fptu.sba301.ats.entity.Candidate();
-        candidate.setId(50L);
-        candidate.setFullName("Nguyen Van A");
-
-        fptu.sba301.ats.entity.Job job = new fptu.sba301.ats.entity.Job();
-        job.setId(60L);
-        job.setTitle("Backend Developer");
-
-        when(offerRepository.findById(9L)).thenReturn(Optional.of(offer));
-        when(applicationRepository.findById(100L)).thenReturn(Optional.of(app));
-        when(candidateRepository.findById(50L)).thenReturn(Optional.of(candidate));
-        when(jobRepository.findById(60L)).thenReturn(Optional.of(job));
-
-        byte[] pdf = service.generatePdf(9L);
+        byte[] pdf = service.generatePdf(offerId);
 
         assertNotNull(pdf, "PDF bytes should not be null");
         assertTrue(pdf.length > 0, "PDF should have content");

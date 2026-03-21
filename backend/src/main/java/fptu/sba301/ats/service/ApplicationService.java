@@ -8,5 +8,5 @@ public interface ApplicationService {
 
     List<ApplicationResponse> getRecentApplications(int limit);
 
-    ApplicationResponse getApplicationById(Long id);
+    ApplicationResponse getApplicationById(java.util.UUID id);
 }

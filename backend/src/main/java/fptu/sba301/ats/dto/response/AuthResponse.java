@@ -7,6 +7,7 @@ import lombok.Data;
 import java.util.UUID;
 
 import java.util.UUID;
+import lombok.Getter;
 
 @Getter
 @Builder

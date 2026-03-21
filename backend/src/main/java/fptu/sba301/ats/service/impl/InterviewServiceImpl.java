@@ -40,7 +40,7 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     @Override
-    public InterviewResponse getInterviewById(Long id) {
+    public InterviewResponse getInterviewById(java.util.UUID id) {
         Interview interview = interviewRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Interview not found: " + id));
         return mapToResponse(interview);
@@ -50,19 +50,19 @@ public class InterviewServiceImpl implements InterviewService {
         String candidateName = "Unknown Candidate";
         String jobTitle = "Unknown Job";
 
-        Application application = applicationRepository.findById(interview.getApplicationId()).orElse(null);
+        Application application = applicationRepository.findById(interview.getApplication().getId()).orElse(null);
         if (application != null) {
-            candidateName = candidateRepository.findById(application.getCandidateId())
+            candidateName = candidateRepository.findById(application.getCandidate().getId())
                     .map(Candidate::getFullName)
                     .orElse("Unknown Candidate");
-            jobTitle = jobRepository.findById(application.getJobId())
+            jobTitle = jobRepository.findById(application.getJob().getId())
                     .map(Job::getTitle)
                     .orElse("Unknown Job");
         }
 
         return InterviewResponse.builder()
                 .id(interview.getId())
-                .applicationId(interview.getApplicationId())
+                .applicationId(interview.getApplication().getId())
                 .scheduledAt(interview.getScheduledAt())
                 .location(interview.getLocation())
                 .status(interview.getStatus())

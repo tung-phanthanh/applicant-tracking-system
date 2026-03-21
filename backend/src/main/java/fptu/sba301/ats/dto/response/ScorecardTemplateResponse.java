@@ -3,10 +3,12 @@ package fptu.sba301.ats.dto.response;
 import java.time.Instant;
 import java.util.List;
 
+import java.util.UUID;
+
 public record ScorecardTemplateResponse(
-        Long id,
+        UUID id,
         String name,
-        Long departmentId,
+        java.util.UUID departmentId,
         Instant createdAt,
         List<ScorecardCriterionResponse> criteria) {
 }

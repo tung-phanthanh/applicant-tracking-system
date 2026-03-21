@@ -7,9 +7,9 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface OnboardingChecklistRepository extends JpaRepository<OnboardingChecklist, Long> {
+public interface OnboardingChecklistRepository extends JpaRepository<OnboardingChecklist, java.util.UUID> {
 
-    Optional<OnboardingChecklist> findByApplicationId(Long applicationId);
+    java.util.Optional<OnboardingChecklist> findByApplicationId(java.util.UUID applicationId);
 
-    boolean existsByApplicationId(Long applicationId);
+    boolean existsByApplicationId(java.util.UUID applicationId);
 }

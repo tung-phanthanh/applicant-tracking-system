@@ -15,5 +15,6 @@ public interface OfferMapper {
     OfferResponse toResponse(Offer offer);
 
     @Mapping(target = "approverName", ignore = true)
+    @Mapping(target = "approvedBy", source = "approvedBy.id")
     OfferApprovalResponse toResponse(OfferApproval approval);
 }

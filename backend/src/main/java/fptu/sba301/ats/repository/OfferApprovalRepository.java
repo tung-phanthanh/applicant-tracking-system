@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OfferApprovalRepository extends JpaRepository<OfferApproval, Long> {
+public interface OfferApprovalRepository extends JpaRepository<OfferApproval, java.util.UUID> {
 
     List<OfferApproval> findByOfferIdOrderByApprovedAtDesc(Long offerId);
 

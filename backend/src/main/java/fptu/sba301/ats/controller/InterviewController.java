@@ -26,7 +26,7 @@ public class InterviewController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<InterviewResponse> getInterviewById(@PathVariable Long id) {
+    public ResponseEntity<InterviewResponse> getInterviewById(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(interviewService.getInterviewById(id));
     }
 }

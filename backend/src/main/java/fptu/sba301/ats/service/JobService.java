@@ -10,13 +10,13 @@ import java.util.Optional;
 
 public interface JobService {
     List<Job> findAll();
-    Optional<Job> findById(Long id);
+    Optional<Job> findById(java.util.UUID id);
     Job save(Job job);
-    Job update(Long id, Job job);
-    void delete(Long id);
+    Job update(java.util.UUID id, Job job);
+    void delete(java.util.UUID id);
       List<JobResponse> getAllJobs();
 
-    JobResponse getJobById(Long id);
+    JobResponse getJobById(java.util.UUID id);
 
     long countActiveJobs();
 }

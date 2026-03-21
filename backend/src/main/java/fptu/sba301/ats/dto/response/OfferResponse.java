@@ -7,9 +7,11 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
+import java.util.UUID;
+
 public record OfferResponse(
-        Long id,
-        Long applicationId,
+        UUID id,
+        UUID applicationId,
         String candidateName,
         String jobTitle,
         BigDecimal salary,
@@ -18,7 +20,7 @@ public record OfferResponse(
         LocalDate startDate,
         LocalDate expiryDate,
         String notes,
-        Long createdBy,
+        UUID createdBy,
         Instant createdAt,
         Instant updatedAt,
         List<OfferApprovalResponse> approvals) {

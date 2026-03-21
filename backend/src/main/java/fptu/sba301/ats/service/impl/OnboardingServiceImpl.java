@@ -39,7 +39,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     @Transactional
-    public OnboardingChecklistResponse createChecklist(Long applicationId,
+    public OnboardingChecklistResponse createChecklist(java.util.UUID applicationId,
             CreateOnboardingChecklistRequest request) {
 
         Application application = applicationRepository.findById(applicationId)
@@ -77,7 +77,7 @@ public class OnboardingServiceImpl implements OnboardingService {
         }).collect(Collectors.toList());
 
         itemRepository.saveAll(items);
-        checklist.getItems().addAll(items);
+        checklist.setItems(items);
 
         log.info("Created onboarding checklist for applicationId={}", applicationId);
         return buildChecklistResponse(checklist, application);
@@ -89,7 +89,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     @Transactional(readOnly = true)
-    public OnboardingChecklistResponse getChecklist(Long applicationId) {
+    public OnboardingChecklistResponse getChecklist(java.util.UUID applicationId) {
         OnboardingChecklist checklist = checklistRepository.findByApplicationId(applicationId)
                 .orElseThrow(() -> new BusinessException(
                         "Onboarding checklist not found for application " + applicationId, HttpStatus.NOT_FOUND));
@@ -103,7 +103,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     @Override
     @Transactional
-    public OnboardingItemResponse updateItem(Long itemId, UpdateOnboardingItemRequest request) {
+    public OnboardingItemResponse updateItem(java.util.UUID itemId, UpdateOnboardingItemRequest request) {
         OnboardingItem item = itemRepository.findById(itemId)
                 .orElseThrow(() -> new BusinessException(
                         "Onboarding item not found with id: " + itemId, HttpStatus.NOT_FOUND));
@@ -137,7 +137,7 @@ public class OnboardingServiceImpl implements OnboardingService {
 
     private OnboardingChecklistResponse buildChecklistResponse(OnboardingChecklist checklist,
             Application application) {
-        String candidateName = candidateRepository.findById(application.getCandidateId())
+        String candidateName = candidateRepository.findById(application.getCandidate().getId())
                 .map(Candidate::getFullName).orElse("Unknown");
 
         List<OnboardingItemResponse> itemResponses = checklist.getItems().stream()

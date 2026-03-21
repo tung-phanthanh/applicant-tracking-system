@@ -35,11 +35,10 @@ public class NotificationEventListener {
 
         for (User user : users) {
             Notification notification = Notification.builder()
-                    .userId(user.getId())
+                    .userId((long) user.getEmail().hashCode())
                     .title(event.getTitle())
-                    .content(event.getContent())
-                    .type(event.getType())
-                    .link(event.getLink())
+                    .message(event.getContent())
+                    .type(parseNotificationType(event.getType()))
                     .isRead(false)
                     .build();
             notificationRepository.save(java.util.Objects.requireNonNull(notification));
@@ -47,5 +46,13 @@ public class NotificationEventListener {
         }
 
         log.info("Notifications dispatched for SystemEvent");
+    }
+
+    private fptu.sba301.ats.enums.NotificationType parseNotificationType(String type) {
+        try {
+            return fptu.sba301.ats.enums.NotificationType.valueOf(type);
+        } catch (Exception e) {
+            return fptu.sba301.ats.enums.NotificationType.INTERVIEW_PENDING; // Fallback
+        }
     }
 }

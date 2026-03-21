@@ -8,11 +8,11 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface InterviewRepository extends JpaRepository<Interview, Long> {
+public interface InterviewRepository extends JpaRepository<Interview, java.util.UUID> {
 
-    List<Interview> findByApplicationId(Long applicationId);
+    List<Interview> findByApplicationId(java.util.UUID applicationId);
 
-    List<Interview> findByApplicationIdAndStatus(Long applicationId, InterviewStatus status);
+    List<Interview> findByApplicationIdAndStatus(java.util.UUID applicationId, InterviewStatus status);
 
-    List<Interview> findByApplicationIdIn(List<Long> applicationIds);
+    List<Interview> findByApplicationIdIn(List<java.util.UUID> applicationIds);
 }

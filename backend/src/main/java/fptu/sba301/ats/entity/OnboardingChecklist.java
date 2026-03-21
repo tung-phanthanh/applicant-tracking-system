@@ -17,15 +17,18 @@ import java.util.List;
 public class OnboardingChecklist {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @org.hibernate.annotations.UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private java.util.UUID id;
 
     @Column(name = "application_id", nullable = false, unique = true)
-    private Long applicationId;
+    private java.util.UUID applicationId;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private Instant createdAt;
+
+    @Column(name = "assigned_to")
+    private java.util.UUID assignedTo;
 
     @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @OrderBy("displayOrder ASC, id ASC")

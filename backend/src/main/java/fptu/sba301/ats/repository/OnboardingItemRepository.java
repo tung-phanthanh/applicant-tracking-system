@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface OnboardingItemRepository extends JpaRepository<OnboardingItem, Long> {
+public interface OnboardingItemRepository extends JpaRepository<OnboardingItem, java.util.UUID> {
 
-    List<OnboardingItem> findByChecklistIdOrderByDisplayOrderAscIdAsc(Long checklistId);
+    java.util.List<OnboardingItem> findByChecklistIdOrderByDisplayOrderAscIdAsc(java.util.UUID checklistId);
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 
 @Repository
-public interface CandidateNoteRepository extends JpaRepository<CandidateNote, Long> {
+public interface CandidateNoteRepository extends JpaRepository<CandidateNote, java.util.UUID> {
 
     List<CandidateNote> findByApplicationIdOrderByCreatedAtDesc(Long applicationId);
 }

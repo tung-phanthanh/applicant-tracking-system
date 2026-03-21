@@ -3,6 +3,7 @@ package fptu.sba301.ats.service.impl;
 import fptu.sba301.ats.dto.request.SubmitInterviewScoresRequest;
 import fptu.sba301.ats.dto.response.InterviewScoreItemResponse;
 import fptu.sba301.ats.dto.response.InterviewScoresResponse;
+import fptu.sba301.ats.entity.InterviewParticipant;
 import fptu.sba301.ats.entity.InterviewScore;
 import fptu.sba301.ats.entity.ScorecardCriterion;
 import fptu.sba301.ats.entity.User;
@@ -16,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -24,229 +26,187 @@ import java.util.stream.Collectors;
 @Log4j2
 public class InterviewScoreServiceImpl implements InterviewScoreService {
 
-        private final InterviewRepository interviewRepository;
-        private final InterviewParticipantRepository participantRepository;
-        private final InterviewScoreRepository scoreRepository;
-        private final ScorecardCriterionRepository criterionRepository;
-        private final UserRepository userRepository;
+    private final InterviewRepository interviewRepository;
+    private final InterviewParticipantRepository participantRepository;
+    private final InterviewScoreRepository scoreRepository;
+    private final ScorecardCriterionRepository criterionRepository;
+    private final UserRepository userRepository;
 
-        // ==============================
-        // SUBMIT SCORES (UPSERT)
-        // ==============================
+    @Override
+    @Transactional
+    public InterviewScoresResponse submitScores(java.util.UUID interviewId,
+                                                SubmitInterviewScoresRequest request,
+                                                String interviewerEmail) {
 
-        @Override
-        @Transactional
-        public InterviewScoresResponse submitScores(Long interviewId,
-                        SubmitInterviewScoresRequest request,
-                        String interviewerEmail) {
+        // 1. Verify interview exists and is COMPLETED
+        var interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new BusinessException(
+                        "Interview not found with id: " + interviewId, HttpStatus.NOT_FOUND));
 
-                // 1. Verify interview exists and is COMPLETED
-                var interview = interviewRepository.findById(interviewId)
-                                .orElseThrow(() -> new BusinessException(
-                                                "Interview not found with id: " + interviewId, HttpStatus.NOT_FOUND));
-
-                if (interview.getStatus() != InterviewStatus.COMPLETED) {
-                        throw new BusinessException(
-                                        "Scores can only be submitted for COMPLETED interviews", HttpStatus.CONFLICT);
-                }
-
-                // 2. Resolve interviewer
-                User interviewer = userRepository.findByEmailAndDeletedFalse(interviewerEmail)
-                                .orElseThrow(() -> new BusinessException("Interviewer not found",
-                                                HttpStatus.NOT_FOUND));
-
-                // 3. Note: InterviewParticipant.userId is Long; User.id is UUID.
-                // This check is best-effort; align types when User entity migrates to Long PK.
-                // For now, skip the participant check and trust Spring Security @PreAuthorize.
-                // TODO: participantRepository.existsByInterviewIdAndUserId check once PK types
-                // align.
-
-                // 4. Upsert scores
-                String overallComment = request.overallComment();
-                String strengths = request.strengths();
-                String weaknesses = request.weaknesses();
-                fptu.sba301.ats.enums.Recommendation recommendation = request.recommendation();
-
-                List<InterviewScore> savedScores = new ArrayList<>();
-
-                for (var item : request.scores()) {
-                        // Validate criterion exists
-                        ScorecardCriterion criterion = criterionRepository.findById(item.criterionId())
-                                        .orElseThrow(() -> new BusinessException(
-                                                        "Criterion not found with id: " + item.criterionId(),
-                                                        HttpStatus.NOT_FOUND));
-
-                        // Use interviewer's Long reference — resolved via email, but User has UUID PK.
-                        // We store -1L as placeholder; replace with Long user.id when DB types are
-                        // aligned.
-                        Long interviewerLongId = resolveInterviewerLongId(interviewer);
-
-                        Optional<InterviewScore> existing = scoreRepository
-                                        .findByInterviewIdAndInterviewerIdAndCriterionId(
-                                                        interviewId, interviewerLongId, criterion.getId());
-
-                        InterviewScore score;
-                        if (existing.isPresent()) {
-                                score = existing.get();
-                                score.setScore(item.score());
-                                score.setComment(item.comment());
-                                score.setOverallComment(overallComment);
-                                score.setStrengths(strengths);
-                                score.setWeaknesses(weaknesses);
-                                score.setRecommendation(recommendation);
-                        } else {
-                                score = InterviewScore.builder()
-                                                .interviewId(interviewId)
-                                                .interviewerId(interviewerLongId)
-                                                .criterionId(criterion.getId())
-                                                .score(item.score())
-                                                .comment(item.comment())
-                                                .overallComment(overallComment)
-                                                .strengths(strengths)
-                                                .weaknesses(weaknesses)
-                                                .recommendation(recommendation)
-                                                .build();
-                        }
-                        savedScores.add(scoreRepository.save(score));
-                }
-
-                return buildScoresResponse(interviewId, resolveInterviewerLongId(interviewer),
-                                interviewer.getFullName(), overallComment, strengths, weaknesses, recommendation,
-                                savedScores,
-                                buildCriterionMap(savedScores));
+        if (interview.getStatus() != InterviewStatus.COMPLETED) {
+            throw new BusinessException(
+                    "Scores can only be submitted for COMPLETED interviews", HttpStatus.CONFLICT);
         }
 
-        // ==============================
-        // GET ALL SCORES (by interview)
-        // ==============================
+        // 2. Resolve interviewer
+        User interviewer = userRepository.findByEmailAndDeletedFalse(interviewerEmail)
+                .orElseThrow(() -> new BusinessException("Interviewer not found", HttpStatus.NOT_FOUND));
 
-        @Override
-        @Transactional(readOnly = true)
-        public List<InterviewScoresResponse> getAllScores(Long interviewId) {
-                if (!interviewRepository.existsById(interviewId)) {
-                        throw new BusinessException(
-                                        "Interview not found with id: " + interviewId, HttpStatus.NOT_FOUND);
-                }
+        // 3. Update Participant
+        InterviewParticipant participant = participantRepository.findById(
+                new InterviewParticipant.InterviewParticipantId(interviewId, interviewer.getId()))
+                .orElseThrow(() -> new BusinessException("Interviewer is not a participant of this interview", HttpStatus.FORBIDDEN));
 
-                List<InterviewScore> allScores = scoreRepository.findByInterviewId(interviewId);
-                Map<Long, List<InterviewScore>> byInterviewer = allScores.stream()
-                                .collect(Collectors.groupingBy(InterviewScore::getInterviewerId));
+        participant.setOverallComment(request.overallComment());
+        participant.setStrengths(request.strengths());
+        participant.setWeaknesses(request.weaknesses());
+        participant.setRecommendation(request.recommendation());
+        participant.setSubmittedAt(Instant.now());
+        participantRepository.save(participant);
 
-                Map<Long, String> criterionNames = buildCriterionNameMap(allScores);
+        // 4. Upsert scores
+        List<InterviewScore> savedScores = new ArrayList<>();
 
-                return byInterviewer.entrySet().stream().map(entry -> {
-                        Long interviewerId = entry.getKey();
-                        List<InterviewScore> scores = entry.getValue();
-                        String overallComment = scores.stream()
-                                        .map(InterviewScore::getOverallComment).filter(Objects::nonNull).findFirst()
-                                        .orElse(null);
-                        String strengths = scores.stream()
-                                        .map(InterviewScore::getStrengths).filter(Objects::nonNull).findFirst()
-                                        .orElse(null);
-                        String weaknesses = scores.stream()
-                                        .map(InterviewScore::getWeaknesses).filter(Objects::nonNull).findFirst()
-                                        .orElse(null);
-                        fptu.sba301.ats.enums.Recommendation recommendation = scores.stream()
-                                        .map(InterviewScore::getRecommendation).filter(Objects::nonNull).findFirst()
-                                        .orElse(null);
-                        return buildScoresResponse(interviewId, interviewerId,
-                                        "User#" + interviewerId, // name resolved via separate query if needed
-                                        overallComment, strengths, weaknesses, recommendation, scores, criterionNames);
-                }).collect(Collectors.toList());
+        for (var item : request.scores()) {
+            ScorecardCriterion criterion = criterionRepository.findById(item.criterionId())
+                    .orElseThrow(() -> new BusinessException(
+                            "Criterion not found with id: " + item.criterionId(), HttpStatus.NOT_FOUND));
+
+            // In our InterviewScore entity, participant is mapped via interview_id and user_id fields
+            // Wait, does InterviewScore have setting for those fields directly or via Participant relation?
+            // The InterviewScore entity has: participant, criterion. 
+            // So we just need to set the participant and criterion.
+
+            Optional<InterviewScore> existingOpt = scoreRepository.findByInterviewIdAndParticipantKeyAndCriterionId(
+                    interviewId, interviewer.getId(), criterion.getId()
+            );
+
+            InterviewScore score;
+            if (existingOpt.isPresent()) {
+                score = existingOpt.get();
+                score.setScore(item.score());
+                score.setComment(item.comment());
+            } else {
+                score = InterviewScore.builder()
+                        .interview(interview)
+                        .participant(participant)
+                        .criterion(criterion)
+                        .score(item.score())
+                        .comment(item.comment())
+                        .build();
+            }
+            savedScores.add(scoreRepository.save(score));
         }
 
-        // ==============================
-        // GET MY SCORES
-        // ==============================
+        return buildScoresResponse(interviewId, interviewer.getId(),
+                interviewer.getFullName(), participant.getOverallComment(), participant.getStrengths(), 
+                participant.getWeaknesses(), participant.getRecommendation(),
+                savedScores, buildCriterionMap(savedScores));
+    }
 
-        @Override
-        @Transactional(readOnly = true)
-        public InterviewScoresResponse getMyScores(Long interviewId, String interviewerEmail) {
-                User interviewer = userRepository.findByEmailAndDeletedFalse(interviewerEmail)
-                                .orElseThrow(() -> new BusinessException("Interviewer not found",
-                                                HttpStatus.NOT_FOUND));
-
-                Long interviewerLongId = resolveInterviewerLongId(interviewer);
-                List<InterviewScore> scores = scoreRepository
-                                .findByInterviewIdAndInterviewerId(interviewId, interviewerLongId);
-
-                if (scores.isEmpty()) {
-                        throw new BusinessException(
-                                        "No scores found for this interviewer on interview " + interviewId,
-                                        HttpStatus.NOT_FOUND);
-                }
-
-                Map<Long, String> criterionNames = buildCriterionNameMap(scores);
-                String overallComment = scores.stream()
-                                .map(InterviewScore::getOverallComment).filter(Objects::nonNull).findFirst()
-                                .orElse(null);
-                String strengths = scores.stream()
-                                .map(InterviewScore::getStrengths).filter(Objects::nonNull).findFirst()
-                                .orElse(null);
-                String weaknesses = scores.stream()
-                                .map(InterviewScore::getWeaknesses).filter(Objects::nonNull).findFirst()
-                                .orElse(null);
-                fptu.sba301.ats.enums.Recommendation recommendation = scores.stream()
-                                .map(InterviewScore::getRecommendation).filter(Objects::nonNull).findFirst()
-                                .orElse(null);
-
-                return buildScoresResponse(interviewId, interviewerLongId,
-                                interviewer.getFullName(), overallComment, strengths, weaknesses, recommendation,
-                                scores, criterionNames);
+    @Override
+    @Transactional(readOnly = true)
+    public List<InterviewScoresResponse> getAllScores(java.util.UUID interviewId) {
+        if (!interviewRepository.existsById(interviewId)) {
+            throw new BusinessException(
+                    "Interview not found with id: " + interviewId, HttpStatus.NOT_FOUND);
         }
 
-        // ==============================
-        // Helpers
-        // ==============================
+        List<InterviewScore> allScores = scoreRepository.findAll()
+                .stream()
+                .filter(s -> s.getInterview().getId().equals(interviewId))
+                .collect(Collectors.toList());
 
-        /**
-         * Since User entity uses UUID PK but DB has BIGINT, we use -1L as a sentinel.
-         * Replace this method body when User PK is migrated to Long.
-         */
-        private Long resolveInterviewerLongId(User user) {
-                // TODO: once User PK is Long, return user.getId()
-                // For now, return a stable hash to differentiate interviewers
-                return (long) user.getEmail().hashCode();
+        Map<java.util.UUID, List<InterviewScore>> byInterviewer = allScores.stream()
+                .collect(Collectors.groupingBy(s -> s.getParticipant().getUser().getId()));
+
+        Map<java.util.UUID, String> criterionNames = buildCriterionNameMap(allScores);
+
+        // Get participants
+        List<InterviewParticipant> participants = participantRepository.findAll()
+                .stream()
+                .filter(p -> p.getId().getInterviewId().equals(interviewId))
+                .collect(Collectors.toList());
+        Map<java.util.UUID, InterviewParticipant> participantMap = participants.stream()
+                .collect(Collectors.toMap(p -> p.getUser().getId(), p -> p));
+
+        return byInterviewer.entrySet().stream().map(entry -> {
+            java.util.UUID interviewerId = entry.getKey();
+            List<InterviewScore> scores = entry.getValue();
+            InterviewParticipant p = participantMap.get(interviewerId);
+            
+            return buildScoresResponse(interviewId, interviewerId,
+                    p != null ? p.getUser().getFullName() : "User#" + interviewerId,
+                    p != null ? p.getOverallComment() : null,
+                    p != null ? p.getStrengths() : null,
+                    p != null ? p.getWeaknesses() : null,
+                    p != null ? p.getRecommendation() : null, 
+                    scores, criterionNames);
+        }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public InterviewScoresResponse getMyScores(java.util.UUID interviewId, String interviewerEmail) {
+        User interviewer = userRepository.findByEmailAndDeletedFalse(interviewerEmail)
+                .orElseThrow(() -> new BusinessException("Interviewer not found", HttpStatus.NOT_FOUND));
+
+        List<InterviewScore> scores = scoreRepository.findAll()
+                .stream()
+                .filter(s -> s.getInterview().getId().equals(interviewId) && 
+                             s.getParticipant().getUser().getId().equals(interviewer.getId()))
+                .collect(Collectors.toList());
+
+        if (scores.isEmpty()) {
+            throw new BusinessException(
+                    "No scores found for this interviewer on interview " + interviewId, HttpStatus.NOT_FOUND);
         }
 
-        private InterviewScoresResponse buildScoresResponse(Long interviewId,
-                        Long interviewerId,
-                        String interviewerName,
-                        String overallComment,
-                        String strengths,
-                        String weaknesses,
-                        fptu.sba301.ats.enums.Recommendation recommendation,
-                        List<InterviewScore> scores,
-                        Map<Long, String> criterionNames) {
-                List<InterviewScoreItemResponse> items = scores.stream()
-                                .map(s -> new InterviewScoreItemResponse(
-                                                s.getId(),
-                                                s.getCriterionId(),
-                                                criterionNames.getOrDefault(s.getCriterionId(), "Unknown"),
-                                                s.getScore(),
-                                                s.getComment()))
-                                .collect(Collectors.toList());
+        InterviewParticipant p = participantRepository.findById(
+                new InterviewParticipant.InterviewParticipantId(interviewId, interviewer.getId())).orElse(null);
 
-                var submittedAt = scores.stream()
-                                .map(InterviewScore::getSubmittedAt)
-                                .filter(Objects::nonNull)
-                                .max(Comparator.naturalOrder())
-                                .orElse(null);
+        Map<java.util.UUID, String> criterionNames = buildCriterionNameMap(scores);
+        return buildScoresResponse(interviewId, interviewer.getId(),
+                interviewer.getFullName(), 
+                p != null ? p.getOverallComment() : null, 
+                p != null ? p.getStrengths() : null, 
+                p != null ? p.getWeaknesses() : null, 
+                p != null ? p.getRecommendation() : null,
+                scores, criterionNames);
+    }
 
-                return new InterviewScoresResponse(interviewId, interviewerId, interviewerName,
-                                overallComment, strengths, weaknesses, recommendation, submittedAt, items);
-        }
+    private InterviewScoresResponse buildScoresResponse(java.util.UUID interviewId,
+                                                        java.util.UUID interviewerId,
+                                                        String interviewerName,
+                                                        String overallComment,
+                                                        String strengths,
+                                                        String weaknesses,
+                                                        fptu.sba301.ats.enums.Recommendation recommendation,
+                                                        List<InterviewScore> scores,
+                                                        Map<java.util.UUID, String> criterionNames) {
+        List<InterviewScoreItemResponse> items = scores.stream()
+                .map(s -> new InterviewScoreItemResponse(
+                        s.getId(),
+                        s.getCriterion().getId(),
+                        criterionNames.getOrDefault(s.getCriterion().getId(), "Unknown"),
+                        s.getScore(),
+                        s.getComment()))
+                .collect(Collectors.toList());
 
-        private Map<Long, String> buildCriterionNameMap(List<InterviewScore> scores) {
-                Set<Long> criterionIds = scores.stream()
-                                .map(InterviewScore::getCriterionId).collect(Collectors.toSet());
-                Map<Long, String> map = new HashMap<>();
-                criterionRepository.findAllById(criterionIds)
-                                .forEach(c -> map.put(c.getId(), c.getName()));
-                return map;
-        }
+        return new InterviewScoresResponse(interviewId, interviewerId, interviewerName,
+                overallComment, strengths, weaknesses, recommendation, null, items);
+    }
 
-        private Map<Long, String> buildCriterionMap(List<InterviewScore> scores) {
-                return buildCriterionNameMap(scores);
-        }
+    private Map<java.util.UUID, String> buildCriterionNameMap(List<InterviewScore> scores) {
+        Set<java.util.UUID> criterionIds = scores.stream()
+                .map(s -> s.getCriterion().getId()).collect(Collectors.toSet());
+        Map<java.util.UUID, String> map = new HashMap<>();
+        criterionRepository.findAllById(criterionIds)
+                .forEach(c -> map.put(c.getId(), c.getName()));
+        return map;
+    }
+
+    private Map<java.util.UUID, String> buildCriterionMap(List<InterviewScore> scores) {
+        return buildCriterionNameMap(scores);
+    }
 }

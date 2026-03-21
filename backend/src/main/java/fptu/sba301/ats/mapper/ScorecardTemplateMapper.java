@@ -8,14 +8,16 @@ import fptu.sba301.ats.entity.ScorecardTemplate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", builder = @org.mapstruct.Builder(disableBuilder = true))
 public interface ScorecardTemplateMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "criteria", ignore = true)
+    @Mapping(target = "department.id", source = "departmentId")
     ScorecardTemplate toEntity(CreateScorecardTemplateRequest request);
 
+    @Mapping(target = "departmentId", source = "department.id")
+    @Mapping(target = "criteria", ignore = true)
     ScorecardTemplateResponse toResponse(ScorecardTemplate template);
 
     ScorecardCriterionResponse toResponse(ScorecardCriterion criterion);

@@ -8,22 +8,26 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface InterviewScoreRepository extends JpaRepository<InterviewScore, Long> {
+public interface InterviewScoreRepository extends JpaRepository<InterviewScore, UUID> {
 
-    List<InterviewScore> findByInterviewId(Long interviewId);
+    List<InterviewScore> findByInterviewId(UUID interviewId);
 
-    List<InterviewScore> findByInterviewIdAndInterviewerId(Long interviewId, Long interviewerId);
+    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.participant.user.id = :interviewerId")
+    List<InterviewScore> findByInterviewIdAndInterviewerId(@Param("interviewId") UUID interviewId, @Param("interviewerId") UUID interviewerId);
 
-    Optional<InterviewScore> findByInterviewIdAndInterviewerIdAndCriterionId(
-            Long interviewId, Long interviewerId, Long criterionId);
+    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.participant.user.id = :userId AND s.criterion.id = :criterionId")
+    Optional<InterviewScore> findByInterviewIdAndParticipantKeyAndCriterionId(
+            @Param("interviewId") UUID interviewId, @Param("userId") UUID userId, @Param("criterionId") UUID criterionId);
 
+    @Query("SELECT count(s) > 0 FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.participant.user.id = :interviewerId AND s.criterion.id = :criterionId")
     boolean existsByInterviewIdAndInterviewerIdAndCriterionId(
-            Long interviewId, Long interviewerId, Long criterionId);
+            @Param("interviewId") UUID interviewId, @Param("interviewerId") UUID interviewerId, @Param("criterionId") UUID criterionId);
 
-    @Query("SELECT s FROM InterviewScore s WHERE s.interviewId IN :interviewIds")
-    List<InterviewScore> findByInterviewIdIn(@Param("interviewIds") List<Long> interviewIds);
+    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id IN :interviewIds")
+    List<InterviewScore> findByInterviewIdIn(@Param("interviewIds") List<UUID> interviewIds);
 
-    boolean existsByCriterionId(Long criterionId);
+    boolean existsByCriterionId(UUID criterionId);
 }

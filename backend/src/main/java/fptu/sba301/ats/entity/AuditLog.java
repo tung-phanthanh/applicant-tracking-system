@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Entity
 @Table(name = "audit_logs")
@@ -18,8 +19,8 @@ public class AuditLog {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "actor_email")
-    private String actorEmail;
+    @Column(name = "user_id")
+    private UUID userId;
 
     @Column(nullable = false)
     private String action;
@@ -28,13 +29,19 @@ public class AuditLog {
     private String entityType;
 
     @Column(name = "entity_id")
-    private Long entityId;
+    private String entityId;
 
     @Column(name = "old_value", columnDefinition = "jsonb")
     private String oldValue;
 
     @Column(name = "new_value", columnDefinition = "jsonb")
     private String newValue;
+
+    @Column(name = "ip_address")
+    private String ipAddress;
+
+    @Column(name = "user_agent")
+    private String userAgent;
 
     @Column(name = "created_at", insertable = false, updatable = false)
     private Instant createdAt;

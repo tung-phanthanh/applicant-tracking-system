@@ -19,7 +19,7 @@ public class CandidateEvaluationController {
     @GetMapping("/{applicationId}/evaluation")
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<EvaluationSummaryResponse> getEvaluation(
-            @PathVariable Long applicationId) {
+            @PathVariable java.util.UUID applicationId) {
         return ResponseEntity.ok(evaluationService.getEvaluation(applicationId));
     }
 }

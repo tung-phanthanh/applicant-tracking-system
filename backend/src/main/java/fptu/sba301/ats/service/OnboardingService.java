@@ -7,10 +7,10 @@ import fptu.sba301.ats.dto.response.OnboardingItemResponse;
 
 public interface OnboardingService {
 
-    OnboardingChecklistResponse createChecklist(Long applicationId,
+    OnboardingChecklistResponse createChecklist(java.util.UUID applicationId,
             CreateOnboardingChecklistRequest request);
 
-    OnboardingChecklistResponse getChecklist(Long applicationId);
+    OnboardingChecklistResponse getChecklist(java.util.UUID applicationId);
 
-    OnboardingItemResponse updateItem(Long itemId, UpdateOnboardingItemRequest request);
+    OnboardingItemResponse updateItem(java.util.UUID itemId, UpdateOnboardingItemRequest request);
 }

@@ -7,25 +7,16 @@ import fptu.sba301.ats.service.JobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
-import fptu.sba301.ats.entity.Job;
-import fptu.sba301.ats.repository.JobRepository;
-import fptu.sba301.ats.service.JobService;
-import org.springframework.stereotype.Service;
-
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class JobServiceImpl implements JobService {
     private final JobRepository jobRepository;
-
-    public JobServiceImpl(JobRepository jobRepository) {
-        this.jobRepository = jobRepository;
-    }
 
     @Override
     public List<Job> findAll() {
@@ -33,25 +24,24 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public Optional<Job> findById(Long id) {
+    public Optional<Job> findById(UUID id) {
         return jobRepository.findById(id);
     }
 
     @Override
     public Job save(Job job) {
-        if (job.getPostedDate() == null) {
-            job.setPostedDate(Instant.now());
+        if (job.getCreatedAt() == null) {
+            job.setCreatedAt(Instant.now());
         }
         return jobRepository.save(job);
     }
 
     @Override
-    public Job update(Long id, Job job) {
+    public Job update(UUID id, Job job) {
         return jobRepository.findById(id)
                 .map(existing -> {
                     existing.setTitle(job.getTitle());
                     existing.setDepartment(job.getDepartment());
-                    existing.setLocation(job.getLocation());
                     existing.setDescription(job.getDescription());
                     existing.setStatus(job.getStatus());
                     // postedDate should not change on update
@@ -61,12 +51,9 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public void delete(Long id) {
+    public void delete(UUID id) {
         jobRepository.deleteById(id);
     }
-  
-  
-    private final JobRepository jobRepository;
 
     @Override
     public List<JobResponse> getAllJobs() {
@@ -76,7 +63,7 @@ public class JobServiceImpl implements JobService {
     }
 
     @Override
-    public JobResponse getJobById(Long id) {
+    public JobResponse getJobById(UUID id) {
         Job job = jobRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Job not found"));
         return mapToResponse(job);
@@ -85,7 +72,7 @@ public class JobServiceImpl implements JobService {
     @Override
     public long countActiveJobs() {
         return jobRepository.findAll().stream()
-                .filter(job -> "ACTIVE".equalsIgnoreCase(job.getStatus()))
+                .filter(job -> "ACTIVE".equalsIgnoreCase(job.getStatus().name()))
                 .count();
     }
 
@@ -94,12 +81,12 @@ public class JobServiceImpl implements JobService {
                 .id(job.getId())
                 .title(job.getTitle())
                 .description(job.getDescription())
-                .departmentId(job.getDepartmentId())
-                .hiringManagerId(job.getHiringManagerId())
-                .status(job.getStatus())
+                .departmentId((job.getDepartment() != null ? job.getDepartment().getId() : null))
+                .hiringManagerId((job.getHiringManager() != null ? job.getHiringManager().getId() : null))
+                .status(job.getStatus().name())
                 .headcount(job.getHeadcount())
                 .createdAt(job.getCreatedAt())
-                .updatedAt(job.getUpdatedAt())
+                .updatedAt(job.getLastModifiedDate())
                 .build();
-  }
+    }
 }

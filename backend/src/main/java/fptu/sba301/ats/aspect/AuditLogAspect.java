@@ -19,6 +19,7 @@ import org.springframework.stereotype.Component;
 public class AuditLogAspect {
 
     private final AuditLogRepository auditLogRepository;
+    private final fptu.sba301.ats.repository.UserRepository userRepository;
     private final ObjectMapper objectMapper;
 
     @Pointcut("execution(* fptu.sba301.ats.service.impl.OfferServiceImpl.*(..)) " +
@@ -48,6 +49,13 @@ public class AuditLogAspect {
                 } catch (Exception e) {
                     // Not authenticated, fallback to "system"
                 }
+                
+                java.util.UUID userUuid = null;
+                if (!"system".equals(email)) {
+                    try {
+                         userUuid = userRepository.findByEmailAndDeletedFalse(email).map(fptu.sba301.ats.entity.User::getId).orElse(null);
+                    } catch (Exception e) {}
+                }
 
                 String entityType = joinPoint.getTarget().getClass().getSimpleName().replace("ServiceImpl", "");
                 String action = methodName;
@@ -60,7 +68,7 @@ public class AuditLogAspect {
                 }
 
                 AuditLog logEntry = AuditLog.builder()
-                        .actorEmail(email)
+                        .userId(userUuid)
                         .action(action)
                         .entityType(entityType)
                         .newValue(argsJson) // Using new_value to store method arguments detail

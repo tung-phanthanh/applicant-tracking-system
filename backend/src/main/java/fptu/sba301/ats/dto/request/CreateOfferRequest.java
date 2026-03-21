@@ -7,7 +7,7 @@ import java.time.LocalDate;
 
 public record CreateOfferRequest(
 
-        @NotNull(message = "Application ID is required") Long applicationId,
+        @NotNull(message = "Application ID is required") java.util.UUID applicationId,
 
         @NotNull(message = "Salary is required") @DecimalMin(value = "0", inclusive = true, message = "Salary must be non-negative") BigDecimal salary,
 

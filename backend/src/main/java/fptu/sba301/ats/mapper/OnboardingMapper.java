@@ -8,6 +8,7 @@ import fptu.sba301.ats.entity.OnboardingItem;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface OnboardingMapper {

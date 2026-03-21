@@ -4,5 +4,5 @@ import fptu.sba301.ats.dto.response.CandidateRankingResponse;
 
 public interface CandidateRankingService {
 
-    CandidateRankingResponse getRanking(Long jobId);
+    CandidateRankingResponse getRanking(java.util.UUID jobId);
 }

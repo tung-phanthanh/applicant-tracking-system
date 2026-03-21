@@ -18,7 +18,7 @@ public class CandidateRankingController {
 
     @GetMapping("/{jobId}/ranking")
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<CandidateRankingResponse> getRanking(@PathVariable Long jobId) {
+    public ResponseEntity<CandidateRankingResponse> getRanking(@PathVariable java.util.UUID jobId) {
         return ResponseEntity.ok(rankingService.getRanking(jobId));
     }
 }

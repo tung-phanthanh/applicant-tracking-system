@@ -38,4 +38,20 @@ public class Offer extends BaseEntity {
     @Builder.Default
     private OfferStatus status = OfferStatus.DRAFT;
 
+    @Column(name = "start_date")
+    private java.time.LocalDate startDate;
+
+    @Column(name = "expiry_date")
+    private java.time.LocalDate expiryDate;
+
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
+
+    @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private java.util.List<OfferApproval> approvals;
+
+    public java.time.Instant getUpdatedAt() {
+        return getLastModifiedDate();
+    }
+
 }

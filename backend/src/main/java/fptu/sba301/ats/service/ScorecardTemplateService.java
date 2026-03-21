@@ -14,19 +14,19 @@ public interface ScorecardTemplateService {
 
     Page<ScorecardTemplateResponse> getAll(Pageable pageable);
 
-    ScorecardTemplateResponse getById(Long id);
+    ScorecardTemplateResponse getById(java.util.UUID id);
 
     ScorecardTemplateResponse create(CreateScorecardTemplateRequest request);
 
-    ScorecardTemplateResponse update(Long id, UpdateScorecardTemplateRequest request);
+    ScorecardTemplateResponse update(java.util.UUID id, UpdateScorecardTemplateRequest request);
 
-    void delete(Long id);
+    void delete(java.util.UUID id);
 
     /** Soft-archive a template so it no longer appears in default listing */
-    ScorecardTemplateResponse archive(Long id);
+    ScorecardTemplateResponse archive(java.util.UUID id);
 
     /** Restore a previously archived template */
-    ScorecardTemplateResponse unarchive(Long id);
+    ScorecardTemplateResponse unarchive(java.util.UUID id);
 
     /**
      * Reorder criteria for a template.
@@ -35,11 +35,11 @@ public interface ScorecardTemplateService {
      * @param orderedCriterionIds criterion IDs in desired display order (1-indexed
      *                            position = list index + 1)
      */
-    void reorderCriteria(Long templateId, List<Long> orderedCriterionIds);
+    void reorderCriteria(java.util.UUID templateId, List<java.util.UUID> orderedCriterionIds);
 
-    ScorecardCriterionResponse addCriterion(Long templateId, CreateScorecardCriterionRequest request);
+    ScorecardCriterionResponse addCriterion(java.util.UUID templateId, CreateScorecardCriterionRequest request);
 
-    ScorecardCriterionResponse updateCriterion(Long criterionId, CreateScorecardCriterionRequest request);
+    ScorecardCriterionResponse updateCriterion(java.util.UUID criterionId, CreateScorecardCriterionRequest request);
 
-    void deleteCriterion(Long criterionId);
+    void deleteCriterion(java.util.UUID criterionId);
 }

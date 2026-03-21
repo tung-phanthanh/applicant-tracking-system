@@ -4,15 +4,16 @@ import fptu.sba301.ats.enums.ApplicationStage;
 import fptu.sba301.ats.enums.ApplicationStatus;
 import lombok.Builder;
 import lombok.Data;
+import java.util.UUID;
 
 import java.time.Instant;
 
 @Data
 @Builder
 public class ApplicationResponse {
-    private Long id;
-    private Long candidateId;
-    private Long jobId;
+    private java.util.UUID id;
+    private java.util.UUID candidateId;
+    private java.util.UUID jobId;
     private ApplicationStage stage;
     private ApplicationStatus status;
     private Instant appliedAt;

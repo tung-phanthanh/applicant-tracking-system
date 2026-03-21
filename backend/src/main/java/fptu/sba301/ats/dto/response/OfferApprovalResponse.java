@@ -4,9 +4,11 @@ import fptu.sba301.ats.enums.ApprovalStatus;
 
 import java.time.Instant;
 
+import java.util.UUID;
+
 public record OfferApprovalResponse(
-        Long id,
-        Long approvedBy,
+        UUID id,
+        UUID approvedBy,
         String approverName,
         ApprovalStatus status,
         String comment,

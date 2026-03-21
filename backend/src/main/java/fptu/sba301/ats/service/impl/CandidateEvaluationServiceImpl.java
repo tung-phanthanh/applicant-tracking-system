@@ -29,7 +29,7 @@ public class CandidateEvaluationServiceImpl implements CandidateEvaluationServic
 
     @Override
     @Transactional(readOnly = true)
-    public EvaluationSummaryResponse getEvaluation(Long applicationId) {
+    public EvaluationSummaryResponse getEvaluation(java.util.UUID applicationId) {
 
         // 1. Load application
         Application application = applicationRepository.findById(applicationId)
@@ -37,9 +37,9 @@ public class CandidateEvaluationServiceImpl implements CandidateEvaluationServic
                         "Application not found with id: " + applicationId, HttpStatus.NOT_FOUND));
 
         // 2. Resolve names
-        String candidateName = candidateRepository.findById(application.getCandidateId())
+        String candidateName = candidateRepository.findById(application.getCandidate().getId())
                 .map(Candidate::getFullName).orElse("Unknown Candidate");
-        String jobTitle = jobRepository.findById(application.getJobId())
+        String jobTitle = jobRepository.findById(application.getJob().getId())
                 .map(Job::getTitle).orElse("Unknown Job");
 
         // 3. Load completed interviews for this application
@@ -51,7 +51,7 @@ public class CandidateEvaluationServiceImpl implements CandidateEvaluationServic
                     null, Collections.emptyList(), Collections.emptyList());
         }
 
-        List<Long> interviewIds = completedInterviews.stream()
+        List<java.util.UUID> interviewIds = completedInterviews.stream()
                 .map(Interview::getId).collect(Collectors.toList());
 
         // 4. Load all scores for these interviews
@@ -62,23 +62,23 @@ public class CandidateEvaluationServiceImpl implements CandidateEvaluationServic
                     null, Collections.emptyList(), Collections.emptyList());
         }
 
-        Set<Long> criterionIds = allScores.stream()
-                .map(InterviewScore::getCriterionId).collect(Collectors.toSet());
-        Map<Long, ScorecardCriterion> criterionMap = new HashMap<>();
+        Set<java.util.UUID> criterionIds = allScores.stream()
+                .map(s -> s.getCriterion().getId()).collect(Collectors.toSet());
+        Map<java.util.UUID, ScorecardCriterion> criterionMap = new HashMap<>();
         criterionRepository.findAllById(criterionIds)
                 .forEach(c -> criterionMap.put(c.getId(), c));
 
         // 6. Group scores by criterion and compute per-criterion averages
-        Map<Long, List<Integer>> scoresByCriterion = allScores.stream()
+        Map<java.util.UUID, List<Integer>> scoresByCriterion = allScores.stream()
                 .collect(Collectors.groupingBy(
-                        InterviewScore::getCriterionId,
+                        s -> s.getCriterion().getId(),
                         Collectors.mapping(InterviewScore::getScore, Collectors.toList())));
 
         List<CriterionScoreSummary> criterionSummaries = new ArrayList<>();
         double aggregateScore = 0.0;
 
-        for (Map.Entry<Long, List<Integer>> entry : scoresByCriterion.entrySet()) {
-            Long criterionId = entry.getKey();
+        for (Map.Entry<java.util.UUID, List<Integer>> entry : scoresByCriterion.entrySet()) {
+            java.util.UUID criterionId = entry.getKey();
             List<Integer> scores = entry.getValue();
             ScorecardCriterion criterion = criterionMap.get(criterionId);
             if (criterion == null)
@@ -94,20 +94,20 @@ public class CandidateEvaluationServiceImpl implements CandidateEvaluationServic
         }
 
         // 7. Build per-interviewer breakdown
-        Map<Long, List<InterviewScore>> scoresByInterviewer = allScores.stream()
-                .collect(Collectors.groupingBy(InterviewScore::getInterviewerId));
+        Map<java.util.UUID, List<InterviewScore>> scoresByInterviewer = allScores.stream()
+                .collect(Collectors.groupingBy(s -> s.getParticipant().getUser().getId()));
 
         List<InterviewerScoreBreakdown> breakdowns = scoresByInterviewer.entrySet().stream().map(entry -> {
-            Long interviewerId = entry.getKey();
+            java.util.UUID interviewerId = entry.getKey();
             List<InterviewScore> iScores = entry.getValue();
             Map<String, Integer> byName = new LinkedHashMap<>();
             iScores.forEach(s -> {
-                ScorecardCriterion c = criterionMap.get(s.getCriterionId());
+                ScorecardCriterion c = criterionMap.get(s.getCriterion().getId());
                 if (c != null)
                     byName.put(c.getName(), s.getScore());
             });
             String overallComment = iScores.stream()
-                    .map(InterviewScore::getOverallComment)
+                    .map(InterviewScore::getComment)
                     .filter(Objects::nonNull).findFirst().orElse(null);
             return new InterviewerScoreBreakdown(interviewerId, "Interviewer#" + interviewerId,
                     byName, overallComment);

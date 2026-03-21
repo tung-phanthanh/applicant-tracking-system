@@ -40,29 +40,29 @@ public class ApplicationServiceImpl implements ApplicationService {
     }
 
     @Override
-    public ApplicationResponse getApplicationById(Long id) {
+    public ApplicationResponse getApplicationById(java.util.UUID id) {
         Application application = applicationRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
         return mapToResponse(application);
     }
 
     private ApplicationResponse mapToResponse(Application application) {
-        String candidateName = candidateRepository.findById(application.getCandidateId())
+        String candidateName = candidateRepository.findById(application.getCandidate().getId())
                 .map(Candidate::getFullName)
                 .orElse("Unknown Candidate");
 
-        String jobTitle = jobRepository.findById(application.getJobId())
+        String jobTitle = jobRepository.findById(application.getJob().getId())
                 .map(Job::getTitle)
                 .orElse("Unknown Job");
 
         return ApplicationResponse.builder()
                 .id(application.getId())
-                .candidateId(application.getCandidateId())
-                .jobId(application.getJobId())
+                .candidateId(application.getCandidate().getId())
+                .jobId(application.getJob().getId())
                 .stage(application.getStage())
                 .status(application.getStatus())
                 .appliedAt(application.getAppliedAt())
-                .updatedAt(application.getUpdatedAt())
+                .updatedAt(application.getLastModifiedDate())
                 .candidateName(candidateName)
                 .jobTitle(jobTitle)
                 .build();

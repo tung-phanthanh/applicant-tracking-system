@@ -9,8 +9,8 @@ import java.time.Instant;
 @Data
 @Builder
 public class InterviewResponse {
-    private Long id;
-    private Long applicationId;
+    private java.util.UUID id;
+    private java.util.UUID applicationId;
     private Instant scheduledAt;
     private String location;
     private InterviewStatus status;

@@ -38,14 +38,14 @@ public class OfferController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<OfferResponse> getById(@PathVariable Long id) {
+    public ResponseEntity<OfferResponse> getById(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(offerService.getById(id));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
     public ResponseEntity<OfferResponse> update(
-            @PathVariable Long id,
+            @PathVariable java.util.UUID id,
             @Valid @RequestBody UpdateOfferRequest request) {
         String email = SecurityUtils.getCurrentUserEmail();
         return ResponseEntity.ok(offerService.update(id, request, email));
@@ -61,7 +61,7 @@ public class OfferController {
 
     @PostMapping("/{offerId}/submit")
     @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
-    public ResponseEntity<Void> submit(@PathVariable Long offerId) {
+    public ResponseEntity<Void> submit(@PathVariable java.util.UUID offerId) {
         String email = SecurityUtils.getCurrentUserEmail();
         offerService.submitForApproval(offerId, email);
         return ResponseEntity.noContent().build();
@@ -70,7 +70,7 @@ public class OfferController {
     @PostMapping("/{offerId}/approve")
     @PreAuthorize("hasAnyRole('HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> approve(
-            @PathVariable Long offerId,
+            @PathVariable java.util.UUID offerId,
             @Valid @RequestBody ApprovalDecisionRequest request) {
         String email = SecurityUtils.getCurrentUserEmail();
         offerService.approve(offerId, request, email);
@@ -80,7 +80,7 @@ public class OfferController {
     @PostMapping("/{offerId}/reject")
     @PreAuthorize("hasAnyRole('HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<Void> reject(
-            @PathVariable Long offerId,
+            @PathVariable java.util.UUID offerId,
             @Valid @RequestBody ApprovalDecisionRequest request) {
         String email = SecurityUtils.getCurrentUserEmail();
         offerService.reject(offerId, request, email);
@@ -89,7 +89,7 @@ public class OfferController {
 
     @PostMapping("/{offerId}/accept")
     @PreAuthorize("hasAuthority('CANDIDATE')")
-    public ResponseEntity<Void> candidateAccept(@PathVariable Long offerId) {
+    public ResponseEntity<Void> candidateAccept(@PathVariable java.util.UUID offerId) {
         String email = SecurityUtils.getCurrentUserEmail();
         offerService.candidateAccept(offerId, email);
         return ResponseEntity.noContent().build();
@@ -98,7 +98,7 @@ public class OfferController {
     @PostMapping("/{offerId}/decline")
     @PreAuthorize("hasAuthority('CANDIDATE')")
     public ResponseEntity<Void> candidateReject(
-            @PathVariable Long offerId,
+            @PathVariable java.util.UUID offerId,
             @Valid @RequestBody(required = false) fptu.sba301.ats.dto.request.CandidateRejectOfferRequest request) {
         String email = SecurityUtils.getCurrentUserEmail();
         String notes = (request != null) ? request.notes() : null;
@@ -108,7 +108,7 @@ public class OfferController {
 
     @GetMapping("/{offerId}/preview")
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
-    public ResponseEntity<byte[]> preview(@PathVariable Long offerId) {
+    public ResponseEntity<byte[]> preview(@PathVariable java.util.UUID offerId) {
         byte[] pdf = offerService.generatePdf(offerId);
         return ResponseEntity.ok()
                 .contentType(MediaType.APPLICATION_PDF)

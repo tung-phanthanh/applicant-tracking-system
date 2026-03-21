@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface InterviewScoreService {
 
-    InterviewScoresResponse submitScores(Long interviewId,
+    InterviewScoresResponse submitScores(java.util.UUID interviewId,
             SubmitInterviewScoresRequest request,
             String interviewerEmail);
 
-    List<InterviewScoresResponse> getAllScores(Long interviewId);
+    List<InterviewScoresResponse> getAllScores(java.util.UUID interviewId);
 
-    InterviewScoresResponse getMyScores(Long interviewId, String interviewerEmail);
+    InterviewScoresResponse getMyScores(java.util.UUID interviewId, String interviewerEmail);
 }

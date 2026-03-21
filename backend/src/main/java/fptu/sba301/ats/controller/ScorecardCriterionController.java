@@ -21,14 +21,14 @@ public class ScorecardCriterionController {
     @PutMapping("/{criterionId}")
     @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
     public ResponseEntity<ScorecardCriterionResponse> update(
-            @PathVariable Long criterionId,
+            @PathVariable java.util.UUID criterionId,
             @Valid @RequestBody CreateScorecardCriterionRequest request) {
         return ResponseEntity.ok(templateService.updateCriterion(criterionId, request));
     }
 
     @DeleteMapping("/{criterionId}")
     @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
-    public ResponseEntity<Void> delete(@PathVariable Long criterionId) {
+    public ResponseEntity<Void> delete(@PathVariable java.util.UUID criterionId) {
         templateService.deleteCriterion(criterionId);
         return ResponseEntity.noContent().build();
     }

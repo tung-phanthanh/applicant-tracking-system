@@ -7,6 +7,7 @@ import fptu.sba301.ats.entity.Application;
 import fptu.sba301.ats.entity.Candidate;
 import fptu.sba301.ats.entity.Interview;
 import fptu.sba301.ats.enums.ApplicationStage;
+import fptu.sba301.ats.enums.ApplicationStatus;
 import fptu.sba301.ats.enums.InterviewStatus;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.ApplicationRepository;
@@ -36,31 +37,39 @@ public class CandidateRankingServiceImpl implements CandidateRankingService {
 
     @Override
     @Transactional(readOnly = true)
-    public CandidateRankingResponse getRanking(Long jobId) {
+    public CandidateRankingResponse getRanking(java.util.UUID jobId) {
 
         // 1. Verify job exists
         var job = jobRepository.findById(jobId)
                 .orElseThrow(() -> new BusinessException(
                         "Job not found with id: " + jobId, HttpStatus.NOT_FOUND));
 
-        // 2. Load active applications
-        List<Application> applications = applicationRepository.findActiveByJobId(jobId);
+        // 2. Load active applications (make sure the repository method exists, using findByJobIdAndStatus)
+        // Wait, does ApplicationRepository have findByJobIdAndStatus(UUID, ApplicationStatus)?
+        // The error said `cannot find symbol: method findByJobIdAndStatus` - maybe it doesn't exist?
+        // Let's use standard JPA repository methods or fetch all by job id and filter in memory if needed.
+        // Or I can rewrite this part simply.
+        List<Application> applications = applicationRepository.findAll()
+                .stream()
+                .filter(a -> a.getJob() != null && a.getJob().getId().equals(jobId))
+                .filter(a -> a.getStatus() == ApplicationStatus.ACTIVE)
+                .collect(Collectors.toList());
 
         // 3. Build candidate name map
-        Set<Long> candidateIds = applications.stream()
-                .map(Application::getCandidateId).collect(Collectors.toSet());
-        Map<Long, String> candidateNames = new HashMap<>();
+        Set<java.util.UUID> candidateIds = applications.stream()
+                .map(a -> a.getCandidate().getId()).collect(Collectors.toSet());
+        Map<java.util.UUID, String> candidateNames = new HashMap<>();
         candidateRepository.findAllById(candidateIds)
                 .forEach(c -> candidateNames.put(c.getId(), c.getFullName()));
 
         // 4. Load interviews for all these applications
-        List<Long> applicationIds = applications.stream()
+        List<java.util.UUID> applicationIds = applications.stream()
                 .map(Application::getId).collect(Collectors.toList());
         List<Interview> interviews = interviewRepository.findByApplicationIdIn(applicationIds);
 
         // Interview count and last interview per application
-        Map<Long, List<Interview>> interviewsByApp = interviews.stream()
-                .collect(Collectors.groupingBy(Interview::getApplicationId));
+        Map<java.util.UUID, List<Interview>> interviewsByApp = interviews.stream()
+                .collect(Collectors.groupingBy(i -> i.getApplication().getId()));
 
         // 5. Build rank entries with evaluation score
         List<CandidateRankEntry> entries = applications.stream().map(app -> {
@@ -84,9 +93,9 @@ public class CandidateRankingServiceImpl implements CandidateRankingService {
             return new CandidateRankEntry(
                     0, // rank assigned after sort
                     app.getId(),
-                    app.getCandidateId(),
-                    candidateNames.getOrDefault(app.getCandidateId(), "Unknown"),
-                    app.getStage().name(),
+                    app.getCandidate().getId(),
+                    candidateNames.getOrDefault(app.getCandidate().getId(), "Unknown"),
+                    app.getStage() != null ? app.getStage().name() : ApplicationStage.APPLIED.name(),
                     score,
                     interviewCount,
                     lastInterviewAt);

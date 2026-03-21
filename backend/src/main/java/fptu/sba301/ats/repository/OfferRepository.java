@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface OfferRepository extends JpaRepository<Offer, Long> {
+public interface OfferRepository extends JpaRepository<Offer, java.util.UUID> {
 
-    List<Offer> findByApplicationId(Long applicationId);
+    List<Offer> findByApplicationId(java.util.UUID applicationId);
 
-    boolean existsByApplicationIdAndStatusIn(Long applicationId, List<OfferStatus> statuses);
+    boolean existsByApplicationIdAndStatusIn(java.util.UUID applicationId, List<OfferStatus> statuses);
 
-    Optional<Offer> findByIdAndCreatedBy(Long id, Long createdBy);
+    Optional<Offer> findByIdAndCreatedBy(java.util.UUID id, java.util.UUID createdBy);
 
     Page<Offer> findByStatus(OfferStatus status, Pageable pageable);
 

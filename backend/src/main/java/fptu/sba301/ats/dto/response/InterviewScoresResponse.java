@@ -4,8 +4,8 @@ import java.time.Instant;
 import java.util.List;
 
 public record InterviewScoresResponse(
-                Long interviewId,
-                Long interviewerId,
+                java.util.UUID interviewId,
+                java.util.UUID interviewerId,
                 String interviewerName,
                 String overallComment,
                 String strengths,

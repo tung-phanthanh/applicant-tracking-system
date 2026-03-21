@@ -1,8 +1,10 @@
 package fptu.sba301.ats.controller;
 
 import fptu.sba301.ats.dto.response.JobResponse;
+import fptu.sba301.ats.entity.Job;
 import fptu.sba301.ats.service.JobService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,28 +23,22 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<JobResponse> getJobById(@PathVariable Long id) {
+    public ResponseEntity<JobResponse> getJobById(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(jobService.getJobById(id));
     }
 
     @GetMapping("/active/count")
     public ResponseEntity<Long> getActiveJobsCount() {
         return ResponseEntity.ok(jobService.countActiveJobs());
-@RequestMapping("/api/jobs")
-public class JobController {
-    private final JobService jobService;
-
-    public JobController(JobService jobService) {
-        this.jobService = jobService;
     }
 
-    @GetMapping
+    @GetMapping("/entity/all")
     public List<Job> getAll() {
         return jobService.findAll();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<Job> getById(@PathVariable Long id) {
+    @GetMapping("/entity/{id}")
+    public ResponseEntity<Job> getById(@PathVariable java.util.UUID id) {
         return jobService.findById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
@@ -55,7 +51,7 @@ public class JobController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Job> update(@PathVariable Long id, @RequestBody Job job) {
+    public ResponseEntity<Job> update(@PathVariable java.util.UUID id, @RequestBody Job job) {
         try {
             Job updated = jobService.update(id, job);
             return ResponseEntity.ok(updated);
@@ -65,7 +61,7 @@ public class JobController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
+    public ResponseEntity<Void> delete(@PathVariable java.util.UUID id) {
         jobService.delete(id);
         return ResponseEntity.noContent().build();
     }
