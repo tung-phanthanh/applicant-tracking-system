@@ -38,6 +38,7 @@ export default function AuditLogPage() {
 
     useEffect(() => {
         const actionParam = selectedAction === "ALL" ? undefined : selectedAction;
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         auditLogService.getLogs(actionParam).then((data: any[]) => {
             setLogs(
                 data.map(d => {
@@ -72,6 +73,7 @@ export default function AuditLogPage() {
                         detail: description,
                         detailData: detailData,
                         ipAddress: d.ipAddress || '127.0.0.1'
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
                     } as AuditLog & { detailData: any };
                 })
             );
@@ -179,6 +181,7 @@ export default function AuditLogPage() {
                     </div>
                 )}
 
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                 {filtered.map((log: any) => (
                     <div key={log.id} className="border-b border-border last:border-0">
                         {/* Row */}

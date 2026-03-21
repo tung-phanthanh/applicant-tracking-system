@@ -1,4 +1,4 @@
-import api from '@/lib/axios';
+import api from '@/lib/api';
 import type { Role, PermissionKey } from '@/types';
 
 type RoleDTO = { id: string, name: string, description?: string, isSystemRole?: boolean, permissions?: { key: string }[], userCount?: number };
@@ -16,28 +16,28 @@ const mapRoleDTO = (dto: RoleDTO): Role => ({
 
 export const roleService = {
     getAllRoles: async (): Promise<Role[]> => {
-        const data = await api.get('/roles');
+        const { data } = await api.get('/roles');
         return (data as unknown as RoleDTO[]).map(mapRoleDTO);
     },
 
-    createRole: async (data: Partial<Role>): Promise<Role> => {
+    createRole: async (payloadData: Partial<Role>): Promise<Role> => {
         const payload = {
-            name: data.name,
-            description: data.description,
-            permissionKeys: data.permissions
+            name: payloadData.name,
+            description: payloadData.description,
+            permissionKeys: payloadData.permissions
         };
-        const res = await api.post('/roles', payload);
-        return mapRoleDTO(res as unknown as RoleDTO);
+        const { data } = await api.post('/roles', payload);
+        return mapRoleDTO(data as unknown as RoleDTO);
     },
 
-    updateRole: async (id: string, data: Partial<Role>): Promise<Role> => {
+    updateRole: async (id: string, payloadData: Partial<Role>): Promise<Role> => {
         const payload = {
-            name: data.name,
-            description: data.description,
-            permissionKeys: data.permissions
+            name: payloadData.name,
+            description: payloadData.description,
+            permissionKeys: payloadData.permissions
         };
-        const res = await api.put(`/roles/${id}`, payload);
-        return mapRoleDTO(res as unknown as RoleDTO);
+        const { data } = await api.put(`/roles/${id}`, payload);
+        return mapRoleDTO(data as unknown as RoleDTO);
     },
 
     deleteRole: async (id: string): Promise<void> => {

@@ -24,7 +24,8 @@ public class UserPrincipal implements UserDetails {
                 .id(user.getId())
                 .email(user.getEmail())
                 .password(user.getPasswordHash())
-                .authorities(List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole())))
+                // Use role name directly (no ROLE_ prefix) to match @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+                .authorities(List.of(new SimpleGrantedAuthority(user.getRole().name())))
                 .build();
     }
 

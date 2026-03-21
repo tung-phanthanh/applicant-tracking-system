@@ -1,21 +1,23 @@
-import api from '@/lib/axios';
+import api from '@/lib/api';
 import type { Notification } from '@/types';
 
 export const notificationService = {
     getNotifications: async (unreadOnly?: boolean): Promise<Notification[]> => {
-        return api.get('/notifications', { params: { unreadOnly } });
+        const { data } = await api.get('/notifications', { params: { unreadOnly } });
+        return data;
     },
 
     getUnreadCount: async (): Promise<number> => {
         // Assume backend returns `{ count: number }` or simply a number
-        return api.get('/notifications/unread-count');
+        const { data } = await api.get('/notifications/unread-count');
+        return data;
     },
 
     markAsRead: async (id: string): Promise<void> => {
-        return api.patch(`/notifications/${id}/read`);
+        await api.patch(`/notifications/${id}/read`);
     },
 
     markAllAsRead: async (): Promise<void> => {
-        return api.patch('/notifications/read-all');
+        await api.patch('/notifications/read-all');
     }
 };

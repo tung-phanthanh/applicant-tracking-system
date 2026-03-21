@@ -1,4 +1,4 @@
-import api from '@/lib/axios';
+import api from '@/lib/api';
 import type { Department, DepartmentStatus } from '@/types';
 
 type DeptDTO = { id: string, name: string, description?: string, managerName?: string, employeeCount?: number, openPositions?: number, active?: boolean };
@@ -16,37 +16,37 @@ const mapDeptDTO = (dto: DeptDTO): Department => ({
 
 export const departmentService = {
     getAllDepartments: async (): Promise<Department[]> => {
-        const data = await api.get('/departments');
+        const { data } = await api.get('/departments');
         return (data as unknown as DeptDTO[]).map(mapDeptDTO);
     },
 
     getDepartmentById: async (id: string): Promise<Department> => {
-        const data = await api.get(`/departments/${id}`);
+        const { data } = await api.get(`/departments/${id}`);
         return mapDeptDTO(data as unknown as DeptDTO);
     },
 
-    createDepartment: async (data: Partial<Department>): Promise<Department> => {
+    createDepartment: async (payloadData: Partial<Department>): Promise<Department> => {
         const payload = {
-            name: data.name,
-            description: data.description,
+            name: payloadData.name,
+            description: payloadData.description,
             // Assuming no manager UI yet, backend handles missing manager
         };
-        const res = await api.post('/departments', payload);
-        return mapDeptDTO(res as unknown as DeptDTO);
+        const { data } = await api.post('/departments', payload);
+        return mapDeptDTO(data as unknown as DeptDTO);
     },
 
-    updateDepartment: async (id: string, data: Partial<Department>): Promise<Department> => {
+    updateDepartment: async (id: string, payloadData: Partial<Department>): Promise<Department> => {
         const payload = {
-            name: data.name,
-            description: data.description,
+            name: payloadData.name,
+            description: payloadData.description,
         };
-        const res = await api.put(`/departments/${id}`, payload);
-        return mapDeptDTO(res as unknown as DeptDTO);
+        const { data } = await api.put(`/departments/${id}`, payload);
+        return mapDeptDTO(data as unknown as DeptDTO);
     },
 
     toggleStatus: async (id: string, activate: boolean): Promise<Department> => {
-        const res = await api.patch(`/departments/${id}/status`, null, { params: { active: activate } });
-        return mapDeptDTO(res as unknown as DeptDTO);
+        const { data } = await api.patch(`/departments/${id}/status`, null, { params: { active: activate } });
+        return mapDeptDTO(data as unknown as DeptDTO);
     },
 
     deleteDepartment: async (id: string): Promise<void> => {

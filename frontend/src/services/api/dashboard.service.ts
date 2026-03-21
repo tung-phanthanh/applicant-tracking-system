@@ -1,4 +1,4 @@
-import api from '@/lib/axios';
+import api from '@/lib/api';
 
 export interface DashboardStats {
     activeJobs: number;
@@ -12,6 +12,7 @@ export interface DashboardStats {
 
 export const dashboardService = {
     getStats: async (): Promise<DashboardStats> => {
-        return api.get('/dashboard/stats');
+        const { data } = await api.get('/dashboard/stats');
+        return data;
     }
 };

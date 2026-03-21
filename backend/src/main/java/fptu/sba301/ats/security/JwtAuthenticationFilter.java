@@ -30,7 +30,6 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     ) throws ServletException, IOException {
         final String authHeader = request.getHeader("Authorization");
         final String jwt;
-        final String userId;
         
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
@@ -39,9 +38,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         
         jwt = authHeader.substring(7);
         try {
-            userId = jwtService.extractUsername(jwt);
-            if (userId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                UserDetails userDetails = this.userDetailsService.loadUserById(userId);
+            // JwtService sets email as the JWT Subject → extract it as email
+            String email = jwtService.extractUsername(jwt);
+            if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                UserDetails userDetails = this.userDetailsService.loadUserByUsername(email);
                 
                 // For now, assume token is valid if it can be parsed
                 UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(

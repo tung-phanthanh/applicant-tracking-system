@@ -11,6 +11,8 @@ import lombok.RequiredArgsConstructor;
 import fptu.sba301.ats.annotation.LogAudit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.http.HttpStatus;
+import fptu.sba301.ats.exception.BusinessException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +39,10 @@ public class RoleServiceImpl implements RoleService {
     @Transactional
     @LogAudit(action = "CREATE", resource = "Role")
     public RoleResponseDTO createRole(RoleRequestDTO request) {
+        if (roleRepository.existsByName(request.getName())) {
+            throw new BusinessException("Role name already exists", HttpStatus.BAD_REQUEST);
+        }
+
         Role role = new Role();
         role.setName(request.getName());
         role.setDescription(request.getDescription());
@@ -56,10 +62,14 @@ public class RoleServiceImpl implements RoleService {
     @LogAudit(action = "UPDATE", resource = "Role")
     public RoleResponseDTO updateRole(UUID id, RoleRequestDTO request) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new BusinessException("Role not found", HttpStatus.NOT_FOUND));
 
         if (role.isSystemRole()) {
-            throw new RuntimeException("Cannot modify system roles");
+            throw new BusinessException("Cannot modify system roles", HttpStatus.FORBIDDEN);
+        }
+
+        if (!role.getName().equals(request.getName()) && roleRepository.existsByName(request.getName())) {
+            throw new BusinessException("Role name already exists", HttpStatus.BAD_REQUEST);
         }
 
         role.setName(request.getName());
@@ -79,10 +89,10 @@ public class RoleServiceImpl implements RoleService {
     @LogAudit(action = "DELETE", resource = "Role")
     public void deleteRole(UUID id) {
         Role role = roleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Role not found"));
+                .orElseThrow(() -> new BusinessException("Role not found", HttpStatus.NOT_FOUND));
 
         if (role.isSystemRole()) {
-            throw new RuntimeException("Cannot delete system roles");
+            throw new BusinessException("Cannot delete system roles", HttpStatus.FORBIDDEN);
         }
 
         roleRepository.delete(role);

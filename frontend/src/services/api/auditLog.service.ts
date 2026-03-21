@@ -1,11 +1,13 @@
-import api from '@/lib/axios';
+import api from '@/lib/api';
 import type { AuditLog } from '@/types';
 
 export const auditLogService = {
     getLogs: async (action?: string): Promise<AuditLog[]> => {
         if (action) {
-            return api.get('/audit-logs/action', { params: { action } });
+            const { data } = await api.get('/audit-logs/action', { params: { action } });
+            return data;
         }
-        return api.get('/audit-logs');
+        const { data } = await api.get('/audit-logs');
+        return data;
     }
 };

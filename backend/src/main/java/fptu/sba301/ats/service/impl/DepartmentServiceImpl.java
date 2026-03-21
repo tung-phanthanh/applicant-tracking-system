@@ -8,6 +8,8 @@ import fptu.sba301.ats.repository.DepartmentRepository;
 import fptu.sba301.ats.service.DepartmentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import fptu.sba301.ats.exception.BusinessException;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -31,13 +33,16 @@ public class DepartmentServiceImpl implements DepartmentService {
     @Override
     public DepartmentResponseDTO getDepartmentById(UUID id) {
         Department dept = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found: " + id));
+                .orElseThrow(() -> new BusinessException("Department not found", HttpStatus.NOT_FOUND));
         return toDTO(dept);
     }
 
     @Override
     @LogAudit(action = "CREATE", resource = "Department")
     public DepartmentResponseDTO createDepartment(DepartmentRequestDTO req) {
+        if (departmentRepository.existsByName(req.getName())) {
+            throw new BusinessException("Department name already exists", HttpStatus.BAD_REQUEST);
+        }
         Department dept = Department.builder()
                 .name(req.getName())
                 .description(req.getDescription())
@@ -49,7 +54,11 @@ public class DepartmentServiceImpl implements DepartmentService {
     @LogAudit(action = "UPDATE", resource = "Department")
     public DepartmentResponseDTO updateDepartment(UUID id, DepartmentRequestDTO req) {
         Department dept = departmentRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Department not found: " + id));
+                .orElseThrow(() -> new BusinessException("Department not found", HttpStatus.NOT_FOUND));
+        
+        if (!dept.getName().equals(req.getName()) && departmentRepository.existsByName(req.getName())) {
+            throw new BusinessException("Department name already exists", HttpStatus.BAD_REQUEST);
+        }
         dept.setName(req.getName());
         dept.setDescription(req.getDescription());
         return toDTO(departmentRepository.save(dept));

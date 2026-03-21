@@ -16,7 +16,7 @@ export default function NotificationsPage() {
             const data = await notificationService.getNotifications();
             setNotifications(data);
             setError(null);
-        } catch (err: any) {
+        } catch (err: unknown) {
             console.error("Failed to load notifications:", err);
             setError("Could not load notifications. Please try again.");
         } finally {

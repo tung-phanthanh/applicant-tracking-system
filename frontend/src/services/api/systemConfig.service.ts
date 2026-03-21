@@ -1,4 +1,4 @@
-import api from '@/lib/axios';
+import api from '@/lib/api';
 
 
 // The backend expects/returns a plain Map<String, String> for now in the `update` endpoint.
@@ -8,7 +8,7 @@ import api from '@/lib/axios';
 
 export const systemConfigService = {
     getAllConfigs: async (): Promise<{ configKey: string, configValue: string }[]> => {
-        const data = await api.get('/system-config');
+        const { data } = await api.get('/system-config');
         // data from backend is Map<String, String> like { key: "value" }
         return Object.entries(data).map(([key, value]) => ({
             configKey: key,
@@ -17,6 +17,6 @@ export const systemConfigService = {
     },
 
     updateConfigs: async (configs: Record<string, string>): Promise<void> => {
-        return api.put('/system-config', configs);
+        await api.put('/system-config', configs);
     }
 };
