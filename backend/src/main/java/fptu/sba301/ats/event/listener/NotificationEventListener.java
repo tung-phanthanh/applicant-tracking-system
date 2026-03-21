@@ -42,7 +42,8 @@ public class NotificationEventListener {
                     .link(event.getLink())
                     .isRead(false)
                     .build();
-            notificationRepository.save(notification);
+            notificationRepository.save(java.util.Objects.requireNonNull(notification));
+
         }
 
         log.info("Notifications dispatched for SystemEvent");

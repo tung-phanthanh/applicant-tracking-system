@@ -13,7 +13,6 @@ import { useAuth } from "@/hooks/useAuth";
 const recruiterItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
-    { to: "/candidates", icon: Users, label: "Candidates" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
 ];
 
@@ -37,6 +36,7 @@ const adminNavItems = [
 export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
+    const isHr = user?.role === "HR";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -71,6 +71,25 @@ export default function Sidebar() {
                             </NavLink>
                         </li>
                     ))}
+
+                    {isHr && (
+                        <li>
+                            <NavLink
+                                to="/candidates"
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        isActive
+                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    )
+                                }
+                            >
+                                <Users className="h-4 w-4 shrink-0" />
+                                Candidates
+                            </NavLink>
+                        </li>
+                    )}
 
                     {/* Admin section */}
                     {isAdmin && (

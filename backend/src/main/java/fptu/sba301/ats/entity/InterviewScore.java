@@ -1,58 +1,55 @@
 package fptu.sba301.ats.entity;
-
+import fptu.sba301.ats.entity.BaseEntity;
+import fptu.sba301.ats.entity.Interview;
+import fptu.sba301.ats.entity.InterviewParticipant;
+import fptu.sba301.ats.entity.ScorecardCriterion;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+import java.util.UUID;
 
 @Entity
-@Table(name = "interview_scores", uniqueConstraints = @UniqueConstraint(name = "uq_interview_interviewer_criterion", columnNames = {
-        "interview_id", "interviewer_id", "criterion_id" }))
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class InterviewScore {
+@Table(
+        name = "interview_scores",
+        uniqueConstraints = @UniqueConstraint(
+                columnNames = {"interview_id", "user_id", "criterion_id"}
+        )
+)
+public class InterviewScore extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private UUID id;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "interview_id", nullable = false)
+    private Interview interview;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+            @JoinColumn(name = "interview_id", referencedColumnName = "interview_id", insertable = false, updatable = false),
+            @JoinColumn(name = "user_id", referencedColumnName = "user_id")
+    })
+    private InterviewParticipant participant;
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "criterion_id", nullable = false)
+    private ScorecardCriterion criterion;
 
-    @Column(name = "interview_id", nullable = false)
-    private Long interviewId;
-
-    @Column(name = "interviewer_id", nullable = false)
-    private Long interviewerId;
-
-    @Column(name = "criterion_id", nullable = false)
-    private Long criterionId;
-
-    @Column(name = "score", nullable = false)
+    @Column(name = "score")
     private Integer score;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
-
-    @Column(name = "overall_comment", columnDefinition = "TEXT")
-    private String overallComment;
-
-    @Column(name = "strengths", columnDefinition = "TEXT")
-    private String strengths;
-
-    @Column(name = "weaknesses", columnDefinition = "TEXT")
-    private String weaknesses;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "recommendation", length = 50)
-    private fptu.sba301.ats.enums.Recommendation recommendation;
-
-    @Column(name = "submitted_at", nullable = false, updatable = false)
-    private Instant submittedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.submittedAt = Instant.now();
-    }
 }

@@ -2,6 +2,7 @@ import { Navigate, BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminRoute from "@/routes/AdminRoute";
+import HrRoute from "@/routes/HrRoute";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -10,10 +11,8 @@ import SetPasswordPage from "@/pages/auth/SetPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
-import JobsPage from "@/pages/recruiter/JobsPage";
-import CreateJobPage from "@/pages/recruiter/CreateJobPage";
-import EditJobPage from "@/pages/recruiter/EditJobPage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
+import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
@@ -99,8 +98,26 @@ function App() {
               {/* 8. Onboarding Checklist */}
               <Route path="/onboarding/:applicationId" element={<OnboardingChecklistPage />} />
 
-              {/* Placeholder routes for future pages */}
+              {/* Jobs */}
               <Route path="/jobs" element={<JobsPage />} />
+
+              {/* HR-only route */}
+              <Route element={<HrRoute />}>
+                <Route path="/hr/candidates" element={<CandidateListPage />} />
+              </Route>
+
+              {/* Admin-only routes — SYSTEM_ADMIN only */}
+              <Route element={<AdminRoute />}>
+                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+                <Route path="/admin/users" element={<AdminUsersPage />} />
+                <Route path="/admin/users/create" element={<AdminCreateUserPage />} />
+                <Route path="/admin/users/:id/edit" element={<AdminEditUserPage />} />
+                <Route path="/admin/roles" element={<RolesPage />} />
+                <Route path="/admin/departments" element={<DepartmentsPage />} />
+                <Route path="/admin/system-config" element={<SystemConfigPage />} />
+                <Route path="/admin/audit-log" element={<AuditLogPage />} />
+                <Route path="/admin/notifications" element={<NotificationsPage />} />
+              </Route>
             </Route>
           </Route>
 
@@ -109,14 +126,6 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-  );
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="flex h-64 items-center justify-center text-muted-foreground">
-      <p className="text-lg font-medium">{title} — Coming Soon</p>
-    </div>
   );
 }
 

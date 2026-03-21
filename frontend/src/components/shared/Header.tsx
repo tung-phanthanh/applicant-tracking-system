@@ -28,6 +28,15 @@ export default function Header() {
     const [open, setOpen] = useState(false);
 
     const pageTitle = PAGE_TITLES[location.pathname] ?? "Enterprise ATS";
+    const displayName =
+        user?.fullName?.trim() || user?.email?.split("@")[0] || "User";
+    const initials = displayName
+        .split(" ")
+        .filter(Boolean)
+        .map((n) => n[0])
+        .slice(0, 2)
+        .join("")
+        .toUpperCase();
 
     const handleLogout = async () => {
         await logout();
@@ -87,14 +96,10 @@ export default function Header() {
                             className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-accent"
                         >
                             <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
-                                {user.fullName
-                                    .split(" ")
-                                    .map((n) => n[0])
-                                    .slice(0, 2)
-                                    .join("")}
+                                {initials}
                             </div>
                             <span className="text-sm font-medium text-foreground">
-                                {user.fullName}
+                                {displayName}
                             </span>
                         </Button>
                     </DropdownMenuTrigger>

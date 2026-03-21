@@ -1,9 +1,9 @@
 package fptu.sba301.ats.enums;
 
-public enum OfferStatus {
+public enum JobStatus {
     DRAFT,
     PENDING_APPROVAL,
     APPROVED,
     REJECTED,
-    SENT
+    CLOSED
 }

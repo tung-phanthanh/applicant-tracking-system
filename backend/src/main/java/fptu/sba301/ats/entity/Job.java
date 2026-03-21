@@ -1,56 +1,49 @@
 package fptu.sba301.ats.entity;
 
+import fptu.sba301.ats.enums.JobStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
 
-@Entity
-@Table(name = "jobs")
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
 
-import java.time.Instant;
-
-/**
- * Represents a job posting within the ATS.
- */
 @Entity
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "jobs")
 public class Job extends BaseEntity {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @UuidGenerator
+    @Column(name = "id", updatable = false, nullable = false)
+    private java.util.UUID id;
 
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "department")
-    private String department;
-
-    @Column(name = "location")
-    private String location;
-
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "status")
-    private String status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_id")
+    private Department department;
 
-    @Column(name = "posted_date")
-    private Instant postedDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "hiring_manager_id")
+    private User hiringManager;
+
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Builder.Default
+    private JobStatus status = JobStatus.DRAFT;
+
+    @Column(name = "headcount")
+    @Builder.Default
+    private Integer headcount = 1;
+
 }

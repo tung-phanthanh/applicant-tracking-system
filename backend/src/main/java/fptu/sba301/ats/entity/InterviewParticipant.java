@@ -1,29 +1,55 @@
 package fptu.sba301.ats.entity;
 
+import fptu.sba301.ats.enums.ParticipantRole;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.io.Serializable;
+import java.util.UUID;
 
 @Entity
-@Table(name = "interview_participants")
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "interview_participants")
 public class InterviewParticipant {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
-    private Long id;
+    @EmbeddedId
+    private InterviewParticipantId id;
 
-    @Column(name = "interview_id", nullable = false)
-    private Long interviewId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("interviewId")
+    @JoinColumn(name = "interview_id")
+    private Interview interview;
 
-    @Column(name = "user_id", nullable = false)
-    private Long userId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @MapsId("userId")
+    @JoinColumn(name = "user_id")
+    private User user;
 
-    @Column(name = "role", length = 50)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
+    private ParticipantRole role;
+    
+    @Column(name = "feedback", columnDefinition = "TEXT")
+    private String feedback;
+    
+    @Column(name = "overall_score")
+    private Integer overallScore;
+
+    @Embeddable
+    @Getter
+    @Setter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @EqualsAndHashCode
+    public static class InterviewParticipantId implements Serializable {
+        @Column(name = "interview_id")
+        private UUID interviewId;
+
+        @Column(name = "user_id")
+        private UUID userId;
+    }
 }
