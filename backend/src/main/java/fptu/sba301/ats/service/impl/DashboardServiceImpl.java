@@ -7,32 +7,44 @@ import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Map;
+import fptu.sba301.ats.repository.JobRepository;
+import fptu.sba301.ats.repository.CandidateRepository;
+import fptu.sba301.ats.repository.InterviewRepository;
+import fptu.sba301.ats.repository.OfferRepository;
+import fptu.sba301.ats.repository.ApplicationRepository;
 
 @Service
 @RequiredArgsConstructor
 public class DashboardServiceImpl implements DashboardService {
-
-    // Repositories (JobRepository, ApplicationRepository, InterviewRepository,
-    // OfferRepository)
-    // would be injected here. For the scope of this implementation, we will mock
-    // the return
-    // to prove the structural implementation since those domain modules are not
-    // fully fleshed out
-    // in the backend code provided yet.
-
+ 
+    private final JobRepository jobRepository;
+    private final CandidateRepository candidateRepository;
+    private final InterviewRepository interviewRepository;
+    private final OfferRepository offerRepository;
+    private final ApplicationRepository applicationRepository;
+ 
     @Override
     public DashboardStatsDTO getDashboardStats() {
+        long activeJobs = jobRepository.countByStatus(fptu.sba301.ats.enums.JobStatus.APPROVED);
+        long newCandidates = candidateRepository.count();
+        
+        java.time.Instant startOfDay = java.time.LocalDate.now().atStartOfDay(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toInstant();
+        java.time.Instant endOfDay = java.time.LocalDate.now().plusDays(1).atStartOfDay(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toInstant();
+        long interviewsToday = interviewRepository.countByScheduledAtBetween(startOfDay, endOfDay);
+
+        long offersSent = offerRepository.countByStatus(fptu.sba301.ats.enums.OfferStatus.PENDING_APPROVAL);
+
+        Map<String, Long> pipeline = new java.util.HashMap<>();
+        for (fptu.sba301.ats.enums.ApplicationStage stage : fptu.sba301.ats.enums.ApplicationStage.values()) {
+            pipeline.put(stage.name(), applicationRepository.countByStage(stage));
+        }
+
         return DashboardStatsDTO.builder()
-                .activeJobs(15) // Example mocked count
-                .newCandidates(42)
-                .interviewsToday(5)
-                .offersSent(3)
-                .hiringPipeline(Map.of(
-                        "APPLIED", 150L,
-                        "SCREENING", 45L,
-                        "INTERVIEW", 15L,
-                        "OFFER", 5L,
-                        "HIRED", 2L))
+                .activeJobs((int) activeJobs)
+                .newCandidates((int) newCandidates)
+                .interviewsToday((int) interviewsToday)
+                .offersSent((int) offersSent)
+                .hiringPipeline(pipeline)
                 .recentApplications(Collections.emptyList())
                 .todaysInterviews(Collections.emptyList())
                 .build();

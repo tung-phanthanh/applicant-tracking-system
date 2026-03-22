@@ -28,7 +28,7 @@ public class OfferController {
     private final OfferService offerService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_DRAFT')")
     public ResponseEntity<OfferResponse> create(
             @Valid @RequestBody CreateOfferRequest request) {
         String email = SecurityUtils.getCurrentUserEmail();
@@ -37,13 +37,13 @@ public class OfferController {
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_VIEW')")
     public ResponseEntity<OfferResponse> getById(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(offerService.getById(id));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_DRAFT')")
     public ResponseEntity<OfferResponse> update(
             @PathVariable java.util.UUID id,
             @Valid @RequestBody UpdateOfferRequest request) {
@@ -52,7 +52,7 @@ public class OfferController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_VIEW')")
     public ResponseEntity<Page<OfferResponse>> getAll(
             @RequestParam(required = false) OfferStatus status,
             Pageable pageable) {
@@ -60,7 +60,7 @@ public class OfferController {
     }
 
     @PostMapping("/{offerId}/submit")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_DRAFT')")
     public ResponseEntity<Void> submit(@PathVariable java.util.UUID offerId) {
         String email = SecurityUtils.getCurrentUserEmail();
         offerService.submitForApproval(offerId, email);
@@ -68,7 +68,7 @@ public class OfferController {
     }
 
     @PostMapping("/{offerId}/approve")
-    @PreAuthorize("hasAnyRole('HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_APPROVE')")
     public ResponseEntity<Void> approve(
             @PathVariable java.util.UUID offerId,
             @Valid @RequestBody ApprovalDecisionRequest request) {
@@ -78,7 +78,7 @@ public class OfferController {
     }
 
     @PostMapping("/{offerId}/reject")
-    @PreAuthorize("hasAnyRole('HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_APPROVE')")
     public ResponseEntity<Void> reject(
             @PathVariable java.util.UUID offerId,
             @Valid @RequestBody ApprovalDecisionRequest request) {
@@ -107,11 +107,11 @@ public class OfferController {
     }
 
     @GetMapping("/{offerId}/preview")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('OFFER_PDF_PREVIEW')")
     public ResponseEntity<byte[]> preview(@PathVariable java.util.UUID offerId) {
         byte[] pdf = offerService.generatePdf(offerId);
         return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
+                .contentType(java.util.Objects.requireNonNull(MediaType.APPLICATION_PDF))
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "inline; filename=\"offer-" + offerId + ".pdf\"")
                 .body(pdf);

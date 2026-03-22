@@ -21,4 +21,8 @@ public interface ScorecardTemplateMapper {
     ScorecardTemplateResponse toResponse(ScorecardTemplate template);
 
     ScorecardCriterionResponse toResponse(ScorecardCriterion criterion);
+
+    default java.time.Instant map(java.time.LocalDateTime value) {
+        return value == null ? null : value.atZone(java.time.ZoneId.of("Asia/Ho_Chi_Minh")).toInstant();
+    }
 }

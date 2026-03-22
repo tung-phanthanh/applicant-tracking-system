@@ -22,7 +22,7 @@ public class OnboardingController {
     private final OnboardingService onboardingService;
 
     @PostMapping("/{applicationId}/checklist")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('ONBOARDING_MANAGE')")
     public ResponseEntity<OnboardingChecklistResponse> create(
             @PathVariable java.util.UUID applicationId,
             @Valid @RequestBody CreateOnboardingChecklistRequest request) {
@@ -31,13 +31,13 @@ public class OnboardingController {
     }
 
     @GetMapping("/{applicationId}/checklist")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('ONBOARDING_MANAGE')")
     public ResponseEntity<OnboardingChecklistResponse> get(@PathVariable java.util.UUID applicationId) {
         return ResponseEntity.ok(onboardingService.getChecklist(applicationId));
     }
 
     @PutMapping("/items/{itemId}")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('ONBOARDING_MANAGE')")
     public ResponseEntity<OnboardingItemResponse> updateItem(
             @PathVariable java.util.UUID itemId,
             @Valid @RequestBody UpdateOnboardingItemRequest request) {

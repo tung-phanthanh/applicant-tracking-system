@@ -62,7 +62,7 @@ public class ApplicationServiceImpl implements ApplicationService {
                 .stage(application.getStage())
                 .status(application.getStatus())
                 .appliedAt(application.getAppliedAt())
-                .updatedAt(application.getLastModifiedDate())
+                // .updatedAt(application.getLastModifiedDate())
                 .candidateName(candidateName)
                 .jobTitle(jobTitle)
                 .build();

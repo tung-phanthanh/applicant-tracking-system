@@ -19,7 +19,7 @@ public class ScorecardCriterionController {
     private final ScorecardTemplateService templateService;
 
     @PutMapping("/{criterionId}")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardCriterionResponse> update(
             @PathVariable java.util.UUID criterionId,
             @Valid @RequestBody CreateScorecardCriterionRequest request) {
@@ -27,7 +27,7 @@ public class ScorecardCriterionController {
     }
 
     @DeleteMapping("/{criterionId}")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<Void> delete(@PathVariable java.util.UUID criterionId) {
         templateService.deleteCriterion(criterionId);
         return ResponseEntity.noContent().build();

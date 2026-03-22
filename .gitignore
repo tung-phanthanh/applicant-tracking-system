@@ -1,15 +1,32 @@
+# --- Basic Ignores ---
 .agent/
 .agents/
-frontend/.agents/
-frontend/.agent/
-backend/.agents/
-backend/.agent/
 .gemini/
-
-# Ignore specific file extensions globally
-*.md
+.idea/
+.vscode/
 *.log
 *.txt
+*.tmp
 
-# Ignore specific root folders
-docs/
+# --- Backend Ignores ---
+backend/target/
+backend/.mvn/
+backend/mvnw
+backend/mvnw.cmd
+backend/*.log
+backend/src/main/resources/application.properties
+
+# --- Frontend Ignores ---
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.*
+!frontend/.env.example
+frontend/*.log
+
+# --- Project Specific ---
+*.sql
+sample-db.txt
+backend_run.txt
+seed_ats_data.sql
+sample_data.sql

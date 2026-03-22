@@ -32,10 +32,6 @@ public class Role extends BaseEntity {
     private boolean systemRole;
 
     @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(
-        name = "role_permissions",
-        joinColumns = @JoinColumn(name = "role_id"),
-        inverseJoinColumns = @JoinColumn(name = "permission_key")
-    )
+    @JoinTable(name = "role_permissions", joinColumns = @JoinColumn(name = "role_id"), inverseJoinColumns = @JoinColumn(name = "permission_key"))
     private Set<Permission> permissions;
 }

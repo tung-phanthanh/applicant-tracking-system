@@ -21,5 +21,6 @@ public interface OfferRepository extends JpaRepository<Offer, java.util.UUID> {
 
     Page<Offer> findByStatus(OfferStatus status, Pageable pageable);
 
-    Page<Offer> findAll(Pageable pageable);
+    Page<Offer> findAll(@org.springframework.lang.NonNull Pageable pageable);
+    long countByStatus(OfferStatus status);
 }

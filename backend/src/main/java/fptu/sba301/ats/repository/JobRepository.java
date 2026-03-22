@@ -6,5 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, java.util.UUID> {
-    // Additional query methods can be added later (search, filtering, etc.)
+    long countByStatus(fptu.sba301.ats.enums.JobStatus status);
 }

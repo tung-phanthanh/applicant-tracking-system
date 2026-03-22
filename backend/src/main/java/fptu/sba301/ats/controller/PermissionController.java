@@ -20,7 +20,7 @@ public class PermissionController {
     private final RoleService roleService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<List<Permission>> getAllPermissions() {
         return ResponseEntity.ok(roleService.getAllPermissions());
     }

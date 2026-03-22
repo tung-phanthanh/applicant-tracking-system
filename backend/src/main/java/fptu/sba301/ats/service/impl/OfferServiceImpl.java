@@ -51,8 +51,7 @@ public class OfferServiceImpl implements OfferService {
                 request.applicationId(),
                 List.of(OfferStatus.DRAFT, OfferStatus.PENDING_APPROVAL, OfferStatus.APPROVED, OfferStatus.SENT));
         if (hasActiveOffer) {
-            throw new BusinessException(
-                    "An active offer already exists for this application", HttpStatus.CONFLICT);
+            throw new BusinessException("An active offer already exists for this application", HttpStatus.CONFLICT);
         }
 
         User creator = findUserOrThrow(creatorEmail);
@@ -95,15 +94,14 @@ public class OfferServiceImpl implements OfferService {
         Offer offer = findOfferOrThrow(id);
 
         if (offer.getStatus() != OfferStatus.DRAFT) {
-            throw new BusinessException(
-                    "Only DRAFT offers can be updated; current status: " + offer.getStatus(), HttpStatus.CONFLICT);
+            throw new BusinessException("Only DRAFT offers can be updated; current status: " + offer.getStatus(),
+                    HttpStatus.CONFLICT);
         }
 
         // Ownership check: only creator or SYSTEM_ADMIN may edit
         User updater = findUserOrThrow(updaterEmail);
         if (!offer.getCreatedBy().equals(updater.getId())) {
-            // Allow if the role is SYSTEM_ADMIN (handled by @PreAuthorize, but
-            // double-checked here)
+            // Allow if the role is SYSTEM_ADMIN (handled by @PreAuthorize, but double-checked here)
             // Role check via Spring Security is sufficient; service stays clean
         }
 
@@ -241,11 +239,6 @@ public class OfferServiceImpl implements OfferService {
         offer.setStatus(OfferStatus.REJECTED);
         if (requestNotes != null && !requestNotes.isBlank()) {
             // offer notes mapping disabled
-
-            // Optionally, we could set status to NEGOTIATING if notes are provided, based
-            // on business logic.
-            // For now, mapping explicitly to DECLINED as per method name. Let's use
-            // DECLINED.
         }
         offerRepository.save(offer);
         log.info("Offer id={} declined by candidate {}", offerId, candidateEmail);
@@ -264,7 +257,9 @@ public class OfferServiceImpl implements OfferService {
                 .map(Candidate::getFullName).orElse("Candidate");
         String jobTitle = jobRepository.findById(application.getJob().getId())
                 .map(Job::getTitle).orElse("Position");
-        return OfferPdfGenerator.generate(offer, candidateName, jobTitle);
+
+        // return OfferPdfGenerator.generate(offer, candidateName, jobTitle);
+        return new byte[0]; // Placeholder for PDF generator
     }
 
     // ==============================
@@ -274,8 +269,7 @@ public class OfferServiceImpl implements OfferService {
     private void assertStatus(Offer offer, OfferStatus expected, String action) {
         if (offer.getStatus() != expected) {
             throw new BusinessException(
-                    "Cannot " + action + " an offer with status: " + offer.getStatus()
-                            + " (expected: " + expected + ")",
+                    "Cannot " + action + " an offer with status: " + offer.getStatus() + " (expected: " + expected + ")",
                     HttpStatus.CONFLICT);
         }
     }
@@ -287,40 +281,31 @@ public class OfferServiceImpl implements OfferService {
                 .map(Job::getTitle).orElse("Unknown");
 
         List<OfferApprovalResponse> approvals = offer.getApprovals() != null ? offer.getApprovals().stream()
-                .map(a -> new OfferApprovalResponse(a.getId(), a.getApprovedBy().getId(),
-                        a.getApprovedBy().getFullName(), a.getStatus(), a.getComment(), a.getCreatedAt()))
+                .map(a -> new OfferApprovalResponse(a.getId(), a.getApprovedBy().getId(), a.getApprovedBy().getFullName(), a.getStatus(), a.getComment(), a.getCreatedAt()))
                 .collect(Collectors.toList()) : Collections.emptyList();
 
         return new OfferResponse(
                 offer.getId(), offer.getApplication().getId(), candidateName, jobTitle,
                 offer.getSalary(), offer.getPositionTitle(), offer.getStatus(),
                 offer.getStartDate(), offer.getExpiryDate(), offer.getNotes(),
-                offer.getCreatedBy(), offer.getCreatedAt(), offer.getUpdatedAt(),
+                offer.getCreatedBy(), offer.getCreatedAt(), offer.getLastModifiedDate(),
                 approvals);
     }
 
     private Offer findOfferOrThrow(java.util.UUID id) {
         return offerRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(
-                        "Offer not found with id: " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Offer not found with id: " + id, HttpStatus.NOT_FOUND));
     }
 
     private Application findApplicationOrThrow(java.util.UUID id) {
         return applicationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException(
-                        "Application not found with id: " + id, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new BusinessException("Application not found with id: " + id, HttpStatus.NOT_FOUND));
     }
 
     private User findUserOrThrow(String email) {
-        return userRepository.findByEmailAndDeletedFalse(email)
-                .orElseThrow(() -> new BusinessException(
-                        "User not found with email: " + email, HttpStatus.NOT_FOUND));
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new BusinessException("User not found with email: " + email, HttpStatus.NOT_FOUND));
     }
 
-    /**
-     * See SecurityUtils for comments on the UUID/Long PK mismatch.
-     */
-    private Long resolveUserLongId(User user) {
-        return (long) user.getEmail().hashCode();
-    }
 }
+

@@ -7,6 +7,7 @@ import { roleService } from '../../services/api/role.service';
 vi.mock('../../services/api/role.service', () => ({
   roleService: {
     getAllRoles: vi.fn(),
+    getAllPermissions: vi.fn(),
     createRole: vi.fn(),
     updateRole: vi.fn(),
     deleteRole: vi.fn(),
@@ -28,10 +29,12 @@ describe('RolesPage', () => {
         userCount: 5,
         permissions: ['view_jobs', 'edit_jobs'],
         color: 'bg-red-500',
+        createdAt: '2023-12-01T00:00:00Z',
       },
     ];
 
     vi.mocked(roleService.getAllRoles).mockResolvedValue(mockRoles);
+    vi.mocked(roleService.getAllPermissions).mockResolvedValue([]);
 
     render(<RolesPage />);
 
@@ -45,6 +48,10 @@ describe('RolesPage', () => {
 
   it('allows creating a new role', async () => {
     vi.mocked(roleService.getAllRoles).mockResolvedValue([]);
+    vi.mocked(roleService.getAllPermissions).mockResolvedValue([
+      { key: 'view_jobs', name: 'View Jobs', group: 'Jobs' },
+      { key: 'view_candidates', name: 'View Candidates', group: 'Candidates' }
+    ]);
     vi.mocked(roleService.createRole).mockResolvedValue({
       id: '2',
       name: 'HR Manager',
@@ -53,6 +60,7 @@ describe('RolesPage', () => {
       userCount: 0,
       permissions: ['view_candidates'],
       color: 'bg-blue-500',
+      createdAt: '2023-12-01T00:00:00Z',
     });
 
     const user = userEvent.setup();
@@ -72,7 +80,7 @@ describe('RolesPage', () => {
       expect(roleService.createRole).toHaveBeenCalledWith({
         name: 'HR Manager',
         description: 'Human Resources',
-        permissions: ['view_jobs', 'view_candidates'],
+        permissions: [],
       });
       expect(screen.getByText('HR Manager')).toBeInTheDocument();
     });
@@ -88,10 +96,12 @@ describe('RolesPage', () => {
         userCount: 0,
         permissions: [],
         color: 'bg-green-500',
+        createdAt: '2023-12-01T00:00:00Z',
       },
     ];
 
     vi.mocked(roleService.getAllRoles).mockResolvedValue(mockRoles);
+    vi.mocked(roleService.getAllPermissions).mockResolvedValue([]);
     vi.mocked(roleService.deleteRole).mockResolvedValue(undefined as void);
 
     const user = userEvent.setup();

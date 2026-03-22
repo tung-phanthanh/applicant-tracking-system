@@ -27,19 +27,19 @@ public class ScorecardTemplateController {
     private final ScorecardTemplateService templateService;
 
     @GetMapping
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<Page<ScorecardTemplateResponse>> getAll(Pageable pageable) {
         return ResponseEntity.ok(templateService.getAll(pageable));
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardTemplateResponse> getById(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(templateService.getById(id));
     }
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardTemplateResponse> create(
             @Valid @RequestBody CreateScorecardTemplateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -47,7 +47,7 @@ public class ScorecardTemplateController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardTemplateResponse> update(
             @PathVariable java.util.UUID id,
             @Valid @RequestBody UpdateScorecardTemplateRequest request) {
@@ -55,7 +55,7 @@ public class ScorecardTemplateController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<Void> delete(@PathVariable java.util.UUID id) {
         templateService.delete(id);
         return ResponseEntity.noContent().build();
@@ -66,13 +66,13 @@ public class ScorecardTemplateController {
     // ------------------------------------------
 
     @PatchMapping("/{id}/archive")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardTemplateResponse> archive(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(templateService.archive(id));
     }
 
     @PatchMapping("/{id}/unarchive")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardTemplateResponse> unarchive(@PathVariable java.util.UUID id) {
         return ResponseEntity.ok(templateService.unarchive(id));
     }
@@ -82,7 +82,7 @@ public class ScorecardTemplateController {
     // ------------------------------------------
 
     @PostMapping("/{templateId}/criteria")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<ScorecardCriterionResponse> addCriterion(
             @PathVariable java.util.UUID templateId,
             @Valid @RequestBody CreateScorecardCriterionRequest request) {
@@ -96,7 +96,7 @@ public class ScorecardTemplateController {
      * present).
      */
     @PutMapping("/{templateId}/criteria/reorder")
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('SCORECARD_MANAGE')")
     public ResponseEntity<Void> reorderCriteria(
             @PathVariable java.util.UUID templateId,
             @RequestBody List<java.util.UUID> orderedCriterionIds) {

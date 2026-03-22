@@ -15,4 +15,6 @@ public interface InterviewRepository extends JpaRepository<Interview, java.util.
     List<Interview> findByApplicationIdAndStatus(java.util.UUID applicationId, InterviewStatus status);
 
     List<Interview> findByApplicationIdIn(List<java.util.UUID> applicationIds);
+
+    long countByScheduledAtBetween(java.time.Instant start, java.time.Instant end);
 }

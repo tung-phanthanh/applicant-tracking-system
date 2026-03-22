@@ -30,9 +30,9 @@ public class JobServiceImpl implements JobService {
 
     @Override
     public Job save(Job job) {
-        if (job.getCreatedAt() == null) {
-            job.setCreatedAt(Instant.now());
-        }
+        // if (job.getCreatedAt() == null) {
+        //     job.setCreatedAt(Instant.now());
+        // }
         return jobRepository.save(job);
     }
 
@@ -85,8 +85,8 @@ public class JobServiceImpl implements JobService {
                 .hiringManagerId((job.getHiringManager() != null ? job.getHiringManager().getId() : null))
                 .status(job.getStatus().name())
                 .headcount(job.getHeadcount())
-                .createdAt(job.getCreatedAt())
-                .updatedAt(job.getLastModifiedDate())
+                // .createdAt(job.getCreatedAt())
+                // .updatedAt(job.getLastModifiedDate())
                 .build();
     }
 }

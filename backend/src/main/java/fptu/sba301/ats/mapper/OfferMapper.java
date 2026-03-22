@@ -12,9 +12,12 @@ public interface OfferMapper {
 
     @Mapping(target = "candidateName", ignore = true)
     @Mapping(target = "jobTitle", ignore = true)
+    @Mapping(target = "applicationId", source = "application.id")
+    @Mapping(target = "updatedAt", source = "lastModifiedDate")
     OfferResponse toResponse(Offer offer);
 
     @Mapping(target = "approverName", ignore = true)
     @Mapping(target = "approvedBy", source = "approvedBy.id")
+    @Mapping(target = "approvedAt", source = "lastModifiedDate")
     OfferApprovalResponse toResponse(OfferApproval approval);
 }

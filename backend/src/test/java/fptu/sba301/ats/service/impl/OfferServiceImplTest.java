@@ -17,8 +17,6 @@ import org.springframework.http.HttpStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -49,10 +47,15 @@ class OfferServiceImplTest {
     @InjectMocks
     private OfferServiceImpl service;
 
+    @org.springframework.lang.NonNull
     private final UUID appId = UUID.randomUUID();
+    @org.springframework.lang.NonNull
     private final UUID offerId = UUID.randomUUID();
+    @org.springframework.lang.NonNull
     private final UUID userId = UUID.randomUUID();
+    @org.springframework.lang.NonNull
     private final UUID candidateId = UUID.randomUUID();
+    @org.springframework.lang.NonNull
     private final UUID jobId = UUID.randomUUID();
 
     @Test

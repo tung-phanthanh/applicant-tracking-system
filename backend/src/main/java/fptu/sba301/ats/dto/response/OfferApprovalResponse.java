@@ -2,7 +2,7 @@ package fptu.sba301.ats.dto.response;
 
 import fptu.sba301.ats.enums.ApprovalStatus;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 
 import java.util.UUID;
 
@@ -12,5 +12,5 @@ public record OfferApprovalResponse(
         String approverName,
         ApprovalStatus status,
         String comment,
-        Instant approvedAt) {
+        LocalDateTime approvedAt) {
 }

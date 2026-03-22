@@ -20,27 +20,33 @@ public class RoleController {
     private final RoleService roleService;
 
     @GetMapping
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<List<RoleResponseDTO>> getAllRoles() {
         return ResponseEntity.ok(roleService.getAllRoles());
     }
 
-    @PostMapping
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<RoleResponseDTO> createRole(@RequestBody RoleRequestDTO request) {
-        return ResponseEntity.ok(roleService.createRole(request));
+    @GetMapping("/permissions")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
+    public ResponseEntity<List<fptu.sba301.ats.entity.Permission>> getAllPermissions() {
+        return ResponseEntity.ok(roleService.getAllPermissions());
     }
 
+    // @PostMapping
+    // @PreAuthorize("hasAuthority('USER_MANAGE')")
+    // public ResponseEntity<RoleResponseDTO> createRole(@RequestBody RoleRequestDTO request) {
+    //     return ResponseEntity.ok(roleService.createRole(request));
+    // }
+
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasAuthority('USER_MANAGE')")
     public ResponseEntity<RoleResponseDTO> updateRole(@PathVariable UUID id, @RequestBody RoleRequestDTO request) {
         return ResponseEntity.ok(roleService.updateRole(id, request));
     }
 
-    @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
-    public ResponseEntity<Void> deleteRole(@PathVariable UUID id) {
-        roleService.deleteRole(id);
-        return ResponseEntity.noContent().build();
-    }
+    // @DeleteMapping("/{id}")
+    // @PreAuthorize("hasAuthority('USER_MANAGE')")
+    // public ResponseEntity<Void> deleteRole(@PathVariable UUID id) {
+    //     roleService.deleteRole(id);
+    //     return ResponseEntity.noContent().build();
+    // }
 }

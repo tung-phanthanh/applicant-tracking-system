@@ -50,8 +50,4 @@ public class Offer extends BaseEntity {
     @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private java.util.List<OfferApproval> approvals;
 
-    public java.time.Instant getUpdatedAt() {
-        return getLastModifiedDate();
-    }
-
 }

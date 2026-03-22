@@ -29,19 +29,19 @@ public class CandidateController {
     private final CandidateService candidateService;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAuthority('CANDIDATE_VIEW')")
     public ResponseEntity<List<CandidateListResponse>> getCandidateList() {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
     @GetMapping("/{candidateId}")
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAuthority('CANDIDATE_VIEW')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateDetail(candidateId));
     }
 
     @PatchMapping("/{candidateId}/stage")
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAuthority('CANDIDATE_MANAGE')")
     public ResponseEntity<CandidateDetailResponse> updateCandidateStage(
             @PathVariable UUID candidateId,
             @Valid @RequestBody CandidateStageUpdateRequest request
