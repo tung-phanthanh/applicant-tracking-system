@@ -13,6 +13,7 @@ import DashboardPage from "@/pages/recruiter/DashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
 import CandidateListPage from "@/pages/recruiter/CandidateListPage";
+import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
@@ -46,6 +47,7 @@ function App() {
               {/* HR-only route */}
               <Route element={<HrRoute />}>
                 <Route path="/candidates" element={<CandidateListPage />} />
+                <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
               </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}
