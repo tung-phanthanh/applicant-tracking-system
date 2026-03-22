@@ -16,6 +16,8 @@ import java.util.UUID;
 @Repository
 public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
 
+    boolean existsByEmail(String email);
+
     @Query(value = """
         SELECT
             BIN_TO_UUID(c.id) AS candidateId,

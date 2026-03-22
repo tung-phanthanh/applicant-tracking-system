@@ -1,5 +1,5 @@
 import api from "@/lib/api";
-import type { CandidateDetailItem, CandidateListItem, CandidateStage } from "@/types/candidate";
+import type { CandidateDetailItem, CandidateListItem, CandidateStage, BulkImportResult } from "@/types/candidate";
 
 export const candidateService = {
   async getCandidates(): Promise<CandidateListItem[]> {
@@ -16,4 +16,19 @@ export const candidateService = {
     const { data } = await api.patch<CandidateDetailItem>(`/candidates/${candidateId}/stage`, { stage });
     return data;
   },
+
+  async createCandidate(formData: FormData): Promise<CandidateDetailItem> {
+    const { data } = await api.post<CandidateDetailItem>("/candidates", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
+
+  async importCandidates(formData: FormData): Promise<BulkImportResult> {
+    const { data } = await api.post<BulkImportResult>("/candidates/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
 };
+

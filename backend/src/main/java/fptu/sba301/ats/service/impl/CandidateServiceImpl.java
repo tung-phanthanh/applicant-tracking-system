@@ -1,24 +1,45 @@
 package fptu.sba301.ats.service.impl;
 
+import com.opencsv.bean.CsvToBean;
+import com.opencsv.bean.CsvToBeanBuilder;
+import fptu.sba301.ats.dto.request.CreateCandidateRequest;
+import fptu.sba301.ats.dto.request.CsvCandidateRow;
+import fptu.sba301.ats.dto.response.BulkImportResponse;
 import fptu.sba301.ats.dto.response.CandidateDetailResponse;
 import fptu.sba301.ats.dto.response.CandidateDocumentResponse;
 import fptu.sba301.ats.dto.response.CandidateListResponse;
 import fptu.sba301.ats.entity.Application;
+import fptu.sba301.ats.entity.Candidate;
+import fptu.sba301.ats.entity.CandidateDocument;
 import fptu.sba301.ats.entity.CandidateStageHistory;
+import fptu.sba301.ats.entity.Job;
 import fptu.sba301.ats.enums.ApplicationStage;
 import fptu.sba301.ats.enums.ApplicationStatus;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.ApplicationRepository;
+import fptu.sba301.ats.repository.CandidateDocumentRepository;
 import fptu.sba301.ats.repository.CandidateRepository;
 import fptu.sba301.ats.repository.CandidateStageHistoryRepository;
+import fptu.sba301.ats.repository.JobRepository;
 import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
 import fptu.sba301.ats.service.CandidateService;
+import fptu.sba301.ats.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.Reader;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -27,9 +48,17 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class CandidateServiceImpl implements CandidateService {
 
+    private static final String CLOUDINARY_FOLDER = "candidate_documents";
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+
     private final CandidateRepository candidateRepository;
-        private final ApplicationRepository applicationRepository;
-        private final CandidateStageHistoryRepository candidateStageHistoryRepository;
+    private final ApplicationRepository applicationRepository;
+    private final CandidateStageHistoryRepository candidateStageHistoryRepository;
+    private final CandidateDocumentRepository candidateDocumentRepository;
+    private final JobRepository jobRepository;
+    private final CloudinaryService cloudinaryService;
+
+    // ─────────────────────────── Existing methods ───────────────────────────
 
     @Override
     public List<CandidateListResponse> getCandidateList() {
@@ -48,38 +77,248 @@ public class CandidateServiceImpl implements CandidateService {
     }
 
     @Override
-        @Transactional
+    @Transactional
     public CandidateDetailResponse getCandidateDetail(UUID candidateId) {
-                Optional<Application> latestActiveApplication = applicationRepository
-                                .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE);
+        Optional<Application> latestActiveApplication = applicationRepository
+                .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE);
 
-                if (latestActiveApplication.isPresent() && latestActiveApplication.get().getStage() == ApplicationStage.APPLIED) {
-                        transitionStage(latestActiveApplication.get(), ApplicationStage.SCREENING);
-                }
-
-                return buildCandidateDetailResponse(candidateId);
+        if (latestActiveApplication.isPresent() && latestActiveApplication.get().getStage() == ApplicationStage.APPLIED) {
+            transitionStage(latestActiveApplication.get(), ApplicationStage.SCREENING);
         }
 
-        @Override
-        @Transactional
-        public CandidateDetailResponse updateCandidateStage(UUID candidateId, ApplicationStage targetStage) {
-                Application application = findLatestActiveApplication(candidateId);
+        return buildCandidateDetailResponse(candidateId);
+    }
 
-                if (application.getStage() != ApplicationStage.SCREENING) {
-                        throw new BusinessException("Only candidates in SCREENING can be moved to INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
-                }
+    @Override
+    @Transactional
+    public CandidateDetailResponse updateCandidateStage(UUID candidateId, ApplicationStage targetStage) {
+        Application application = findLatestActiveApplication(candidateId);
 
-                if (targetStage != ApplicationStage.INTERVIEW && targetStage != ApplicationStage.REJECTED) {
-                        throw new BusinessException("Target stage must be INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
-                }
-
-                transitionStage(application, targetStage);
-                return buildCandidateDetailResponse(candidateId);
+        if (application.getStage() != ApplicationStage.SCREENING) {
+            throw new BusinessException("Only candidates in SCREENING can be moved to INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
         }
 
-        private CandidateDetailResponse buildCandidateDetailResponse(UUID candidateId) {
-                CandidateDetailProjection detail = candidateRepository.findCandidateDetailById(candidateId.toString())
-                                .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
+        if (targetStage != ApplicationStage.INTERVIEW && targetStage != ApplicationStage.REJECTED) {
+            throw new BusinessException("Target stage must be INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
+        }
+
+        transitionStage(application, targetStage);
+        return buildCandidateDetailResponse(candidateId);
+    }
+
+    // ─────────────────────────── New: Single Candidate Add ───────────────────────────
+
+    @Override
+    @Transactional
+    public CandidateDetailResponse createCandidate(CreateCandidateRequest request, List<MultipartFile> documents) {
+        // 1. Validate duplicate email
+        if (StringUtils.hasText(request.getEmail()) && candidateRepository.existsByEmail(request.getEmail())) {
+            throw new BusinessException(
+                    "Email '" + request.getEmail() + "' already exists", HttpStatus.BAD_REQUEST);
+        }
+
+        // 2. Save candidate
+        Candidate candidate = Candidate.builder()
+                .fullName(request.getFullName())
+                .email(request.getEmail())
+                .phone(request.getPhone())
+                .currentCompany(request.getCurrentCompany())
+                .source(request.getSource())
+                .location(request.getLocation())
+                .experienceYears(request.getExperienceYears())
+                .summary(request.getSummary())
+                .build();
+        candidate = candidateRepository.save(candidate);
+
+        // 3. Link to job (create Application) if jobId provided
+        if (request.getJobId() != null) {
+            Job job = jobRepository.findById(request.getJobId())
+                    .orElseThrow(() -> new BusinessException(
+                            "Job not found: " + request.getJobId(), HttpStatus.NOT_FOUND));
+            applicationRepository.save(Application.builder()
+                    .candidate(candidate)
+                    .job(job)
+                    .build());
+        }
+
+        // 4. Upload documents to Cloudinary
+        List<CandidateDocumentResponse> documentResponses = new ArrayList<>();
+        if (documents != null && !documents.isEmpty()) {
+            uploadAndSaveDocuments(candidate, documents);
+            // Reload the saved documents for the response
+            documentResponses = candidateRepository
+                    .findDocumentsByCandidateId(candidate.getId().toString())
+                    .stream()
+                    .map(d -> CandidateDocumentResponse.builder()
+                            .documentId(UUID.fromString(d.getDocumentId()))
+                            .fileName(d.getFileName())
+                            .fileUrl(d.getFileUrl())
+                            .fileType(d.getFileType())
+                            .fileSizeBytes(d.getFileSizeBytes())
+                            .uploadedAt(d.getUploadedAt())
+                            .build())
+                    .collect(Collectors.toList());
+        }
+
+        // 5. If a job was linked, use the SQL-backed builder (includes jobTitle, stage etc.)
+        //    Otherwise build directly from the saved entity to avoid JOIN failure.
+        if (request.getJobId() != null) {
+            return buildCandidateDetailResponse(candidate.getId());
+        }
+
+        return CandidateDetailResponse.builder()
+                .candidateId(candidate.getId())
+                .fullName(candidate.getFullName())
+                .email(candidate.getEmail())
+                .phone(candidate.getPhone())
+                .currentCompany(candidate.getCurrentCompany())
+                .source(candidate.getSource())
+                .location(candidate.getLocation())
+                .experienceYears(candidate.getExperienceYears())
+                .summary(candidate.getSummary())
+                .documents(documentResponses)
+                .build();
+    }
+
+
+    // ─────────────────────────── New: CSV Bulk Import ───────────────────────────
+
+    @Override
+    @Transactional
+    public BulkImportResponse importCandidatesFromCsv(MultipartFile csvFile, List<MultipartFile> cvFiles) {
+        // 1. Build map: filename → MultipartFile for quick lookup
+        Map<String, MultipartFile> cvFileMap = new HashMap<>();
+        if (cvFiles != null) {
+            for (MultipartFile f : cvFiles) {
+                if (f != null && StringUtils.hasText(f.getOriginalFilename())) {
+                    cvFileMap.put(f.getOriginalFilename(), f);
+                }
+            }
+        }
+
+        // 2. Parse CSV
+        List<CsvCandidateRow> rows;
+        try (Reader reader = new BufferedReader(new InputStreamReader(csvFile.getInputStream()))) {
+            CsvToBean<CsvCandidateRow> csvToBean = new CsvToBeanBuilder<CsvCandidateRow>(reader)
+                    .withType(CsvCandidateRow.class)
+                    .withIgnoreLeadingWhiteSpace(true)
+                    .withIgnoreEmptyLine(true)
+                    .build();
+            rows = csvToBean.parse();
+        } catch (Exception e) {
+            throw new BusinessException("Failed to parse CSV file: " + e.getMessage(), HttpStatus.BAD_REQUEST);
+        }
+
+        // 3. Process rows
+        int successCount = 0;
+        int failCount = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (int i = 0; i < rows.size(); i++) {
+            int rowNumber = i + 2; // 1-indexed + header row
+            CsvCandidateRow row = rows.get(i);
+            try {
+                processCsvRow(row, rowNumber, cvFileMap, errors);
+                successCount++;
+            } catch (Exception e) {
+                failCount++;
+                errors.add("Row " + rowNumber + ": " + e.getMessage());
+            }
+        }
+
+        return BulkImportResponse.builder()
+                .totalRows(rows.size())
+                .successCount(successCount)
+                .failCount(failCount)
+                .errors(errors)
+                .build();
+    }
+
+    /** Process a single CSV row inside a try-catch; warnings (missing CV) are added to errors list but do not throw. */
+    private void processCsvRow(CsvCandidateRow row, int rowNumber,
+                               Map<String, MultipartFile> cvFileMap,
+                               List<String> errors) {
+        // Validate fullName
+        if (!StringUtils.hasText(row.getFullName())) {
+            throw new BusinessException("fullName is required", HttpStatus.BAD_REQUEST);
+        }
+
+        // Validate email uniqueness
+        if (StringUtils.hasText(row.getEmail()) && candidateRepository.existsByEmail(row.getEmail())) {
+            throw new BusinessException("email '" + row.getEmail() + "' already exists", HttpStatus.BAD_REQUEST);
+        }
+
+        // Save candidate
+        Candidate candidate = Candidate.builder()
+                .fullName(row.getFullName())
+                .email(StringUtils.hasText(row.getEmail()) ? row.getEmail() : null)
+                .phone(StringUtils.hasText(row.getPhone()) ? row.getPhone() : null)
+                .currentCompany(StringUtils.hasText(row.getCurrentCompany()) ? row.getCurrentCompany() : null)
+                .source(StringUtils.hasText(row.getSource()) ? row.getSource() : null)
+                .location(StringUtils.hasText(row.getLocation()) ? row.getLocation() : null)
+                .experienceYears(row.getExperienceYears())
+                .summary(StringUtils.hasText(row.getSummary()) ? row.getSummary() : null)
+                .build();
+        candidate = candidateRepository.save(candidate);
+
+        // Create Application if jobId provided
+        if (StringUtils.hasText(row.getJobId())) {
+            try {
+                UUID jobUuid = UUID.fromString(row.getJobId().trim());
+                Job job = jobRepository.findById(jobUuid)
+                        .orElseThrow(() -> new RuntimeException("Job not found: " + row.getJobId()));
+                Application application = Application.builder()
+                        .candidate(candidate)
+                        .job(job)
+                        .build();
+                applicationRepository.save(application);
+            } catch (IllegalArgumentException e) {
+                errors.add("Row " + rowNumber + ": [WARNING] invalid jobId '" + row.getJobId() + "' – skipped");
+            }
+        }
+
+        // Upload CV if filename is specified
+        if (StringUtils.hasText(row.getCvFileName())) {
+            MultipartFile cvFile = cvFileMap.get(row.getCvFileName().trim());
+            if (cvFile == null) {
+                // Warning only – candidate is still created
+                errors.add("Row " + rowNumber + ": [WARNING] missing CV file '" + row.getCvFileName()
+                        + "' – candidate created without CV");
+            } else {
+                uploadAndSaveDocuments(candidate, List.of(cvFile));
+            }
+        }
+    }
+
+    // ─────────────────────────── Private helpers ───────────────────────────
+
+    private void uploadAndSaveDocuments(Candidate candidate, List<MultipartFile> files) {
+        List<CandidateDocument> docs = new ArrayList<>();
+        for (MultipartFile file : files) {
+            if (file == null || file.isEmpty()) continue;
+            Map<String, Object> result = cloudinaryService.uploadFile(file, CLOUDINARY_FOLDER);
+
+            String fileUrl = (String) result.get("secure_url");
+            String format = (String) result.get("format");
+            Object bytesObj = result.get("bytes");
+            Long fileSizeBytes = bytesObj != null ? Long.parseLong(bytesObj.toString()) : null;
+            String originalFilename = file.getOriginalFilename();
+
+            docs.add(CandidateDocument.builder()
+                    .candidate(candidate)
+                    .fileName(originalFilename != null ? originalFilename : "document")
+                    .fileUrl(fileUrl)
+                    .fileType(format)
+                    .fileSizeBytes(fileSizeBytes)
+                    .uploadedAt(LocalDateTime.now(APP_ZONE))
+                    .build());
+        }
+        candidateDocumentRepository.saveAll(docs);
+    }
+
+    private CandidateDetailResponse buildCandidateDetailResponse(UUID candidateId) {
+        CandidateDetailProjection detail = candidateRepository.findCandidateDetailById(candidateId.toString())
+                .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
 
         List<CandidateDocumentResponse> documents = candidateRepository.findDocumentsByCandidateId(candidateId.toString())
                 .stream()
