@@ -21,8 +21,9 @@ public class Role extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "name", unique = true, nullable = false, length = 100)
-    private String name;
+    private fptu.sba301.ats.enums.Role name;
 
     @Column(name = "description", length = 255)
     private String description;
@@ -34,7 +35,7 @@ public class Role extends BaseEntity {
     @JoinTable(
         name = "role_permissions",
         joinColumns = @JoinColumn(name = "role_id"),
-        inverseJoinColumns = @JoinColumn(name = "permission_id")
+        inverseJoinColumns = @JoinColumn(name = "permission_key")
     )
     private Set<Permission> permissions;
 }

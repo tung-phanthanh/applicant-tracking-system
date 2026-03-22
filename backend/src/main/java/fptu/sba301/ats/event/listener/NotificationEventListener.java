@@ -35,7 +35,7 @@ public class NotificationEventListener {
 
         for (User user : users) {
             Notification notification = Notification.builder()
-                    .userId((long) user.getEmail().hashCode())
+                    .userId(user.getId())
                     .title(event.getTitle())
                     .message(event.getContent())
                     .type(parseNotificationType(event.getType()))

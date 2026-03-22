@@ -61,15 +61,17 @@ export default function NotificationsPage() {
                     <p className="text-muted-foreground mt-1">Stay updated with the latest system activities.</p>
                 </div>
 
-                <Button 
-                    variant="outline" 
-                    onClick={handleMarkAllAsRead}
-                    disabled={notifications.every(n => n.read) || loading}
-                    className="shrink-0"
-                >
-                    <CheckCircle2 className="mr-2 h-4 w-4" />
-                    Mark all as read
-                </Button>
+                <div className="flex gap-2">
+                    <Button 
+                        variant="outline" 
+                        onClick={handleMarkAllAsRead}
+                        disabled={notifications.every(n => n.read) || loading}
+                        className="shrink-0"
+                    >
+                        <CheckCircle2 className="mr-2 h-4 w-4" />
+                        Mark all as read
+                    </Button>
+                </div>
             </div>
 
             {error && (

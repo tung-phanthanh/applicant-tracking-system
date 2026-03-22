@@ -1,35 +1,40 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell } from "lucide-react";
+import { notificationService } from "@/services/api/notification.service";
+import type { Notification } from "@/types";
+import { useNavigate } from "react-router-dom";
 
 export function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
+    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const navigate = useNavigate();
 
-    // Hardcode demo notifications for layout purposes
-    const notifications = [
-        {
-            id: 1,
-            title: "New Application Received",
-            description: "John Doe applied for Frontend Developer",
-            time: "5m ago",
-            read: false,
-        },
-        {
-            id: 2,
-            title: "Offer Accepted",
-            description: "Sarah Smith accepted the Senior Designer offer",
-            time: "2h ago",
-            read: true,
-        },
-        {
-            id: 3,
-            title: "Interview Scheduled",
-            description: "System Design interview with Mike Johnson",
-            time: "1d ago",
-            read: true,
-        },
-    ];
+    const fetchNotifications = async () => {
+        try {
+            const data = await notificationService.getNotifications();
+            setNotifications(data);
+        } catch (error) {
+            console.error("Failed to load notifications", error);
+        }
+    };
+
+    useEffect(() => {
+        fetchNotifications();
+        // Optional: Polling could be added here
+        const interval = setInterval(fetchNotifications, 60000);
+        return () => clearInterval(interval);
+    }, []);
 
     const unreadCount = notifications.filter((n) => !n.read).length;
+
+    const handleMarkAllAsRead = async () => {
+        try {
+            await notificationService.markAllAsRead();
+            await fetchNotifications();
+        } catch (error) {
+            console.error(error);
+        }
+    };
 
     return (
         <div className="relative">
@@ -48,7 +53,10 @@ export function NotificationBell() {
                     <div className="flex items-center justify-between border-b border-slate-100 px-4 py-3">
                         <h3 className="text-sm font-semibold text-slate-800">Notifications</h3>
                         {unreadCount > 0 && (
-                            <button className="text-xs text-indigo-600 hover:text-indigo-700 font-medium">
+                            <button 
+                                onClick={handleMarkAllAsRead}
+                                className="text-xs text-indigo-600 hover:text-indigo-700 font-medium"
+                            >
                                 Mark all as read
                             </button>
                         )}
@@ -60,7 +68,7 @@ export function NotificationBell() {
                             </div>
                         ) : (
                             <ul className="divide-y divide-slate-100">
-                                {notifications.map((notification) => (
+                                {notifications.slice(0, 5).map((notification) => (
                                     <li
                                         key={notification.id}
                                         className={`flex items-start gap-3 p-4 transition-colors hover:bg-slate-50 ${!notification.read ? "bg-indigo-50/30" : ""
@@ -79,10 +87,10 @@ export function NotificationBell() {
                                                 {notification.title}
                                             </p>
                                             <p className="text-xs text-slate-500">
-                                                {notification.description}
+                                                {notification.message}
                                             </p>
                                             <p className="text-xs text-slate-400">
-                                                {notification.time}
+                                                {new Date(notification.createdAt).toLocaleString()}
                                             </p>
                                         </div>
                                     </li>
@@ -90,6 +98,17 @@ export function NotificationBell() {
                             </ul>
                         )}
                     </div>
+                    {notifications.length > 5 && (
+                        <div 
+                            className="border-t border-slate-100 p-2 text-center text-xs text-indigo-600 hover:bg-slate-50 cursor-pointer font-medium"
+                            onClick={() => {
+                                setIsOpen(false);
+                                navigate('/notifications');
+                            }}
+                        >
+                            View all notifications
+                        </div>
+                    )}
                 </div>
             )}
         </div>

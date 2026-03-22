@@ -9,7 +9,7 @@ import java.util.List;
 @Repository
 public interface OfferApprovalRepository extends JpaRepository<OfferApproval, java.util.UUID> {
 
-    List<OfferApproval> findByOfferIdOrderByApprovedAtDesc(Long offerId);
+    List<OfferApproval> findByOfferIdOrderByCreatedAtDesc(java.util.UUID offerId);
 
-    boolean existsByOfferIdAndApprovedBy(Long offerId, Long approvedBy);
+    boolean existsByOfferIdAndApprovedById(java.util.UUID offerId, java.util.UUID approvedById);
 }

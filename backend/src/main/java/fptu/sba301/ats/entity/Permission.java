@@ -12,7 +12,7 @@ import lombok.*;
 @Table(name = "permissions")
 public class Permission {
     @Id
-    @Column(name = "key", length = 100, nullable = false)
+    @Column(name = "permission_key", length = 100, nullable = false)
     private String key;
 
     @Column(name = "label", length = 255, nullable = false)

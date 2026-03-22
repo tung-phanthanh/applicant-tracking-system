@@ -62,10 +62,8 @@ public class InterviewParticipant {
     @AllArgsConstructor
     @EqualsAndHashCode
     public static class InterviewParticipantId implements Serializable {
-        @Column(name = "interview_id")
         private UUID interviewId;
 
-        @Column(name = "user_id")
         private UUID userId;
     }
 }

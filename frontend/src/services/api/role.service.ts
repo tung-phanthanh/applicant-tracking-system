@@ -15,6 +15,11 @@ const mapRoleDTO = (dto: RoleDTO): Role => ({
 });
 
 export const roleService = {
+    getAllPermissions: async (): Promise<Permission[]> => {
+        const { data } = await api.get('/permissions');
+        return data as Permission[];
+    },
+
     getAllRoles: async (): Promise<Role[]> => {
         const { data } = await api.get('/roles');
         return (data as unknown as RoleDTO[]).map(mapRoleDTO);

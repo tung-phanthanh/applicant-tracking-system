@@ -105,7 +105,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 .userId(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .role(user.getRole())
+                .role(user.getRole().getName())
                 .build();
     }
 

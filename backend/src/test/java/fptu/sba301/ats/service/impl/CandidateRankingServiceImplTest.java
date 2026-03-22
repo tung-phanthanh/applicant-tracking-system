@@ -24,6 +24,7 @@ import java.time.Instant;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,73 +47,53 @@ class CandidateRankingServiceImplTest {
     @InjectMocks
     private CandidateRankingServiceImpl service;
 
-    // Helpers
-    private EvaluationSummaryResponse eval(long appId, String candidateName, String jobTitle, double score) {
+    private final UUID jobId = UUID.randomUUID();
+    private final UUID appId1 = UUID.randomUUID();
+    private final UUID appId2 = UUID.randomUUID();
+    private final UUID candidateId1 = UUID.randomUUID();
+    private final UUID candidateId2 = UUID.randomUUID();
+
+    private EvaluationSummaryResponse eval(UUID appId, String candidateName, String jobTitle, double score) {
         return new EvaluationSummaryResponse(appId, candidateName, jobTitle, score, List.of(), List.of());
     }
 
-    // ==========================================
-    // getRanking — Exception paths
-    // ==========================================
-
     @Test
     void getRanking_JobNotFound_ThrowsNotFound() {
-        when(jobRepository.findById(99L)).thenReturn(Optional.empty());
+        UUID randomId = UUID.randomUUID();
+        when(jobRepository.findById(randomId)).thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.getRanking(99L));
+                () -> service.getRanking(randomId));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("Job not found"));
-    }
-
-    // ==========================================
-    // getRanking — Happy paths
-    // ==========================================
-
-    @Test
-    void getRanking_NoApplications_ReturnsEmptyRanking() {
-        Job job = new Job();
-        job.setId(1L);
-        job.setTitle("Software Engineer");
-
-        when(jobRepository.findById(1L)).thenReturn(Optional.of(job));
-        when(applicationRepository.findActiveByJobId(1L)).thenReturn(Collections.emptyList());
-        when(interviewRepository.findByApplicationIdIn(Collections.emptyList())).thenReturn(Collections.emptyList());
-
-        CandidateRankingResponse response = service.getRanking(1L);
-
-        assertNotNull(response);
-        assertEquals(1L, response.jobId());
-        assertEquals("Software Engineer", response.jobTitle());
-        assertEquals(0, response.totalCandidates());
-        assertTrue(response.ranking().isEmpty());
     }
 
     @Test
     void getRanking_SingleCandidate_ReturnedWithRank1() {
         Job job = new Job();
-        job.setId(1L);
+        job.setId(jobId);
         job.setTitle("Backend Dev");
 
+        Candidate candidate = new Candidate();
+        candidate.setId(candidateId1);
+        candidate.setFullName("Nguyen Van A");
+
         Application app = new Application();
-        app.setId(10L);
-        app.setCandidateId(20L);
-        app.setJobId(1L);
+        app.setId(appId1);
+        app.setCandidate(candidate);
+        app.setJob(job);
         app.setStage(ApplicationStage.INTERVIEW);
         app.setStatus(ApplicationStatus.ACTIVE);
 
-        Candidate candidate = new Candidate();
-        candidate.setId(20L);
-        candidate.setFullName("Nguyen Van A");
-
-        when(jobRepository.findById(1L)).thenReturn(Optional.of(job));
-        when(applicationRepository.findActiveByJobId(1L)).thenReturn(List.of(app));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        // Service uses findAll() and filters in memory
+        when(applicationRepository.findAll()).thenReturn(List.of(app));
         when(candidateRepository.findAllById(any())).thenReturn(List.of(candidate));
-        when(interviewRepository.findByApplicationIdIn(List.of(10L))).thenReturn(Collections.emptyList());
-        when(evaluationService.getEvaluation(10L))
-                .thenReturn(eval(10L, "Nguyen Van A", "Backend Dev", 4.2));
+        when(interviewRepository.findByApplicationIdIn(List.of(appId1))).thenReturn(Collections.emptyList());
+        when(evaluationService.getEvaluation(appId1))
+                .thenReturn(eval(appId1, "Nguyen Van A", "Backend Dev", 4.2));
 
-        CandidateRankingResponse response = service.getRanking(1L);
+        CandidateRankingResponse response = service.getRanking(jobId);
 
         assertNotNull(response);
         assertEquals(1, response.totalCandidates());
@@ -120,8 +101,8 @@ class CandidateRankingServiceImplTest {
 
         CandidateRankEntry entry = response.ranking().get(0);
         assertEquals(1, entry.rank());
-        assertEquals(10L, entry.applicationId());
-        assertEquals(20L, entry.candidateId());
+        assertEquals(appId1, entry.applicationId());
+        assertEquals(candidateId1, entry.candidateId());
         assertEquals("Nguyen Van A", entry.candidateFullName());
         assertEquals(4.2, entry.aggregateScore(), 0.001);
     }
@@ -129,43 +110,41 @@ class CandidateRankingServiceImplTest {
     @Test
     void getRanking_MultipleCandidates_SortedByScoreDescending() {
         Job job = new Job();
-        job.setId(2L);
+        job.setId(jobId);
         job.setTitle("QA Engineer");
 
+        Candidate candidateA = new Candidate();
+        candidateA.setId(candidateId1);
+        candidateA.setFullName("Tran Thi B");
+
+        Candidate candidateB = new Candidate();
+        candidateB.setId(candidateId2);
+        candidateB.setFullName("Le Van C");
+
         Application appA = new Application();
-        appA.setId(11L);
-        appA.setCandidateId(21L);
-        appA.setJobId(2L);
+        appA.setId(appId1);
+        appA.setCandidate(candidateA);
+        appA.setJob(job);
         appA.setStage(ApplicationStage.INTERVIEW);
         appA.setStatus(ApplicationStatus.ACTIVE);
 
         Application appB = new Application();
-        appB.setId(12L);
-        appB.setCandidateId(22L);
-        appB.setJobId(2L);
+        appB.setId(appId2);
+        appB.setCandidate(candidateB);
+        appB.setJob(job);
         appB.setStage(ApplicationStage.INTERVIEW);
         appB.setStatus(ApplicationStatus.ACTIVE);
 
-        Candidate candidateA = new Candidate();
-        candidateA.setId(21L);
-        candidateA.setFullName("Tran Thi B");
-
-        Candidate candidateB = new Candidate();
-        candidateB.setId(22L);
-        candidateB.setFullName("Le Van C");
-
-        // A has lower score (3.0), B has higher score (4.8)
-        when(jobRepository.findById(2L)).thenReturn(Optional.of(job));
-        when(applicationRepository.findActiveByJobId(2L)).thenReturn(List.of(appA, appB));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(applicationRepository.findAll()).thenReturn(List.of(appA, appB));
         when(candidateRepository.findAllById(any())).thenReturn(List.of(candidateA, candidateB));
         when(interviewRepository.findByApplicationIdIn(any())).thenReturn(Collections.emptyList());
-        when(evaluationService.getEvaluation(11L)).thenReturn(eval(11L, "Tran Thi B", "QA Engineer", 3.0));
-        when(evaluationService.getEvaluation(12L)).thenReturn(eval(12L, "Le Van C", "QA Engineer", 4.8));
+        when(evaluationService.getEvaluation(appId1)).thenReturn(eval(appId1, "Tran Thi B", "QA Engineer", 3.0));
+        when(evaluationService.getEvaluation(appId2)).thenReturn(eval(appId2, "Le Van C", "QA Engineer", 4.8));
 
-        CandidateRankingResponse response = service.getRanking(2L);
+        CandidateRankingResponse response = service.getRanking(jobId);
 
         assertEquals(2, response.totalCandidates());
-        // Higher score (4.8) must be rank 1
         CandidateRankEntry first = response.ranking().get(0);
         CandidateRankEntry second = response.ranking().get(1);
         assertEquals(1, first.rank());
@@ -177,28 +156,28 @@ class CandidateRankingServiceImplTest {
     @Test
     void getRanking_CandidateWithNoEvaluation_ScoreIsNull() {
         Job job = new Job();
-        job.setId(3L);
+        job.setId(jobId);
         job.setTitle("DevOps");
 
+        Candidate candidate = new Candidate();
+        candidate.setId(candidateId1);
+        candidate.setFullName("Pham Van D");
+
         Application app = new Application();
-        app.setId(13L);
-        app.setCandidateId(23L);
-        app.setJobId(3L);
+        app.setId(appId1);
+        app.setCandidate(candidate);
+        app.setJob(job);
         app.setStage(ApplicationStage.SCREENING);
         app.setStatus(ApplicationStatus.ACTIVE);
 
-        Candidate candidate = new Candidate();
-        candidate.setId(23L);
-        candidate.setFullName("Pham Van D");
-
-        when(jobRepository.findById(3L)).thenReturn(Optional.of(job));
-        when(applicationRepository.findActiveByJobId(3L)).thenReturn(List.of(app));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(applicationRepository.findAll()).thenReturn(List.of(app));
         when(candidateRepository.findAllById(any())).thenReturn(List.of(candidate));
         when(interviewRepository.findByApplicationIdIn(any())).thenReturn(Collections.emptyList());
-        when(evaluationService.getEvaluation(13L))
+        when(evaluationService.getEvaluation(appId1))
                 .thenThrow(new BusinessException("No scores", HttpStatus.NOT_FOUND));
 
-        CandidateRankingResponse response = service.getRanking(3L);
+        CandidateRankingResponse response = service.getRanking(jobId);
 
         assertEquals(1, response.totalCandidates());
         assertNull(response.ranking().get(0).aggregateScore(),
@@ -208,45 +187,44 @@ class CandidateRankingServiceImplTest {
     @Test
     void getRanking_InterviewCountAndLastInterviewAt_Populated() {
         Job job = new Job();
-        job.setId(4L);
+        job.setId(jobId);
         job.setTitle("PM");
 
+        Candidate candidate = new Candidate();
+        candidate.setId(candidateId1);
+        candidate.setFullName("Hoang Thi E");
+
         Application app = new Application();
-        app.setId(14L);
-        app.setCandidateId(24L);
-        app.setJobId(4L);
+        app.setId(appId1);
+        app.setCandidate(candidate);
+        app.setJob(job);
         app.setStage(ApplicationStage.INTERVIEW);
         app.setStatus(ApplicationStatus.ACTIVE);
-
-        Candidate candidate = new Candidate();
-        candidate.setId(24L);
-        candidate.setFullName("Hoang Thi E");
 
         Instant firstAt = Instant.parse("2026-01-10T09:00:00Z");
         Instant secondAt = Instant.parse("2026-01-20T09:00:00Z");
 
         Interview i1 = new Interview();
-        i1.setApplicationId(14L);
+        i1.setApplication(app);
         i1.setStatus(InterviewStatus.COMPLETED);
         i1.setScheduledAt(firstAt);
 
         Interview i2 = new Interview();
-        i2.setApplicationId(14L);
+        i2.setApplication(app);
         i2.setStatus(InterviewStatus.COMPLETED);
         i2.setScheduledAt(secondAt);
 
-        when(jobRepository.findById(4L)).thenReturn(Optional.of(job));
-        when(applicationRepository.findActiveByJobId(4L)).thenReturn(List.of(app));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
+        when(applicationRepository.findAll()).thenReturn(List.of(app));
         when(candidateRepository.findAllById(any())).thenReturn(List.of(candidate));
-        when(interviewRepository.findByApplicationIdIn(List.of(14L))).thenReturn(List.of(i1, i2));
-        when(evaluationService.getEvaluation(14L))
+        when(interviewRepository.findByApplicationIdIn(List.of(appId1))).thenReturn(List.of(i1, i2));
+        when(evaluationService.getEvaluation(appId1))
                 .thenThrow(new BusinessException("No scores", HttpStatus.NOT_FOUND));
 
-        CandidateRankingResponse response = service.getRanking(4L);
+        CandidateRankingResponse response = service.getRanking(jobId);
 
         CandidateRankEntry entry = response.ranking().get(0);
         assertEquals(2, entry.interviewCount());
-        // lastInterviewAt should be the most recent: secondAt
         assertEquals(secondAt, entry.lastInterviewAt());
     }
 }

@@ -10,7 +10,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping(AppConstant.BASE_URL + "/notifications")
@@ -23,21 +22,45 @@ public class NotificationController {
     public ResponseEntity<List<NotificationResponseDTO>> getUserNotifications(
             @AuthenticationPrincipal UserPrincipal principal,
             @RequestParam(required = false) Boolean unreadOnly) {
-        return ResponseEntity.ok(List.of());
+        List<NotificationResponseDTO> responses = notificationService.getAllMyNotifications(principal.getEmail(), unreadOnly)
+                .stream()
+                .map(n -> NotificationResponseDTO.builder()
+                        .id(n.getId().toString())
+                        .title(n.getTitle())
+                        .message(n.getMessage())
+                        .read(n.isRead())
+                        .createdAt(n.getCreatedAt())
+                        .build())
+                .toList();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/unread-count")
     public ResponseEntity<Long> getUnreadCount(@AuthenticationPrincipal UserPrincipal principal) {
-        return ResponseEntity.ok(0L);
+        return ResponseEntity.ok(notificationService.getUnreadCount(principal.getEmail()));
     }
 
     @PatchMapping("/{id}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable UUID id) {
+    public ResponseEntity<Void> markAsRead(@PathVariable String id, @AuthenticationPrincipal UserPrincipal principal) {
+        notificationService.markAsRead(Long.valueOf(id), principal.getEmail());
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/read-all")
     public ResponseEntity<Void> markAllAsRead(@AuthenticationPrincipal UserPrincipal principal) {
+        notificationService.markAllAsRead(principal.getEmail());
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/test-data")
+    public ResponseEntity<Void> createTestNotification(@AuthenticationPrincipal UserPrincipal principal) {
+        notificationService.createNotification(
+                principal.getId(),
+                fptu.sba301.ats.enums.NotificationType.INTERVIEW_PENDING,
+                "Welcome to ATS",
+                "This is a test notification to verify the feature is working properly.",
+                null
+        );
         return ResponseEntity.ok().build();
     }
 }

@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface CandidateNoteRepository extends JpaRepository<CandidateNote, java.util.UUID> {
 
-    List<CandidateNote> findByApplicationIdOrderByCreatedAtDesc(Long applicationId);
+    List<CandidateNote> findByApplicationIdOrderByCreatedAtDesc(java.util.UUID applicationId);
 }

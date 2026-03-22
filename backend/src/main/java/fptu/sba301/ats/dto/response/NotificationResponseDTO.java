@@ -8,11 +8,9 @@ import java.util.UUID;
 @Data
 @Builder
 public class NotificationResponseDTO {
-    private UUID id;
+    private String id;
     private String title;
-    private String content;
-    private String type;
-    private String link;
-    private boolean isRead;
+    private String message;
+    private boolean read;
     private Instant createdAt;
 }

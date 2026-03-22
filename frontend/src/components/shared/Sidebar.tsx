@@ -6,22 +6,19 @@ import {
     User,
     Users,
     ShieldCheck,
+    Shield,
+    Building2,
+    Settings,
+    History,
+    Bell,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
-const recruiterItems = [
+const primaryNavItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
-];
-
-const adminItems = [
-    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
-    { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
-    { to: "/admin/departments", icon: Building2, label: "Departments" },
-    { to: "/admin/system-config", icon: Settings, label: "System Config" },
-    { to: "/admin/audit-logs", icon: History, label: "Audit Logs" },
 ];
 
 const commonItems = [
@@ -30,7 +27,12 @@ const commonItems = [
 ];
 
 const adminNavItems = [
+    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
     { to: "/admin/users", icon: ShieldCheck, label: "Manage Users" },
+    { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
+    { to: "/admin/departments", icon: Building2, label: "Departments" },
+    { to: "/admin/system-config", icon: Settings, label: "System Config" },
+    { to: "/admin/audit-logs", icon: History, label: "Audit Logs" },
 ];
 
 export default function Sidebar() {

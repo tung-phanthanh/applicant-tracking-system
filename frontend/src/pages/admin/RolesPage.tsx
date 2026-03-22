@@ -14,14 +14,12 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
-import { ALL_PERMISSIONS } from "@/data/mockRoles";
-import type { PermissionKey, Role } from "@/types/index";
+import type { PermissionKey, Role, Permission } from "@/types/index";
 import { roleService } from "@/services/api/role.service";
-
-const CATEGORY_ORDER = ["Recruitment", "Administration", "Reports"] as const;
 
 export default function RolesPage() {
     const [roles, setRoles] = useState<Role[]>([]);
+    const [allPerms, setAllPerms] = useState<Permission[]>([]);
     const [expandedRoleId, setExpandedRoleId] = useState<string | null>(null);
     const [creating, setCreating] = useState(false);
     const [newRoleName, setNewRoleName] = useState("");
@@ -29,10 +27,12 @@ export default function RolesPage() {
     const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
     useEffect(() => {
-        roleService.getAllRoles().then(data => {
-            setRoles(data);
-            if (data.length > 0) setExpandedRoleId(data[0].id);
-        }).catch(console.error);
+        Promise.all([roleService.getAllRoles(), roleService.getAllPermissions()])
+            .then(([rolesData, permsData]) => {
+                setRoles(rolesData);
+                setAllPerms(permsData);
+                if (rolesData.length > 0) setExpandedRoleId(rolesData[0].id);
+            }).catch(console.error);
     }, []);
 
     const togglePermission = async (roleId: string, perm: PermissionKey) => {
@@ -59,7 +59,7 @@ export default function RolesPage() {
             const newRole = await roleService.createRole({
                 name: newRoleName.trim(),
                 description: newRoleDesc.trim() || undefined,
-                permissions: ["view_jobs", "view_candidates"] // defaults
+                permissions: [] // start empty or defaults
             });
             setRoles((prev) => [...prev, newRole]);
             setExpandedRoleId(newRole.id);
@@ -80,9 +80,10 @@ export default function RolesPage() {
         }
     };
 
-    const grouped = CATEGORY_ORDER.map((cat) => ({
+    const categories = Array.from(new Set(allPerms.map(p => p.category)));
+    const grouped = categories.map((cat) => ({
         category: cat,
-        perms: ALL_PERMISSIONS.filter((p) => p.category === cat),
+        perms: allPerms.filter((p) => p.category === cat),
     }));
 
     return (

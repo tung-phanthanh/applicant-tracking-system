@@ -36,6 +36,11 @@ public class RoleServiceImpl implements RoleService {
     }
 
     @Override
+    public List<Permission> getAllPermissions() {
+        return permissionRepository.findAll();
+    }
+
+    @Override
     @Transactional
     @LogAudit(action = "CREATE", resource = "Role")
     public RoleResponseDTO createRole(RoleRequestDTO request) {
@@ -68,7 +73,7 @@ public class RoleServiceImpl implements RoleService {
             throw new BusinessException("Cannot modify system roles", HttpStatus.FORBIDDEN);
         }
 
-        if (!role.getName().equals(request.getName()) && roleRepository.existsByName(request.getName())) {
+        if (role.getName() != request.getName() && roleRepository.existsByName(request.getName())) {
             throw new BusinessException("Role name already exists", HttpStatus.BAD_REQUEST);
         }
 
@@ -101,7 +106,7 @@ public class RoleServiceImpl implements RoleService {
     private RoleResponseDTO mapToDTO(Role role) {
         return RoleResponseDTO.builder()
                 .id(role.getId())
-                .name(role.getName())
+                .name(role.getName().name())
                 .description(role.getDescription())
                 .isSystemRole(role.isSystemRole())
                 .permissions(role.getPermissions())

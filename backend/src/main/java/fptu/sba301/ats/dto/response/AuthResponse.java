@@ -1,13 +1,10 @@
 package fptu.sba301.ats.dto.response;
 
 import fptu.sba301.ats.enums.Role;
-import lombok.AllArgsConstructor;
 import lombok.Builder;
-import lombok.Data;
-import java.util.UUID;
+import lombok.Getter;
 
 import java.util.UUID;
-import lombok.Getter;
 
 @Getter
 @Builder

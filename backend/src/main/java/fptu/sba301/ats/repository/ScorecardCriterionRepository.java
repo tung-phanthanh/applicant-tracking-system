@@ -12,12 +12,12 @@ import java.util.List;
 @Repository
 public interface ScorecardCriterionRepository extends JpaRepository<ScorecardCriterion, java.util.UUID> {
 
-    List<ScorecardCriterion> findByTemplateId(Long templateId);
+    List<ScorecardCriterion> findByTemplateId(java.util.UUID templateId);
 
     @Query("SELECT COALESCE(SUM(c.weight), 0) FROM ScorecardCriterion c WHERE c.template.id = :templateId")
-    BigDecimal sumWeightByTemplateId(@Param("templateId") Long templateId);
+    BigDecimal sumWeightByTemplateId(@Param("templateId") java.util.UUID templateId);
 
     @Query("SELECT COALESCE(SUM(c.weight), 0) FROM ScorecardCriterion c WHERE c.template.id = :templateId AND c.id <> :excludeId")
-    BigDecimal sumWeightByTemplateIdExcluding(@Param("templateId") Long templateId,
-            @Param("excludeId") Long excludeId);
+    BigDecimal sumWeightByTemplateIdExcluding(@Param("templateId") java.util.UUID templateId,
+            @Param("excludeId") java.util.UUID excludeId);
 }

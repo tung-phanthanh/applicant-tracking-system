@@ -36,12 +36,11 @@ public class InterviewScore extends BaseEntity {
     @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "interview_id", referencedColumnName = "interview_id", insertable = false, updatable = false),
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    })
+    @Transient
     private InterviewParticipant participant;
+
+    @Column(name = "user_id")
+    private UUID userId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criterion_id", nullable = false)

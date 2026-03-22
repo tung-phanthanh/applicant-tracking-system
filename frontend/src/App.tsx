@@ -73,6 +73,7 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
+              <Route path="/notifications" element={<NotificationsPage />} />
 
               {/* 1. Scorecard Templates */}
               <Route path="/scorecards" element={<ScorecardTemplateListPage />} />
@@ -115,8 +116,7 @@ function App() {
                 <Route path="/admin/roles" element={<RolesPage />} />
                 <Route path="/admin/departments" element={<DepartmentsPage />} />
                 <Route path="/admin/system-config" element={<SystemConfigPage />} />
-                <Route path="/admin/audit-log" element={<AuditLogPage />} />
-                <Route path="/admin/notifications" element={<NotificationsPage />} />
+                <Route path="/admin/audit-logs" element={<AuditLogPage />} />
               </Route>
             </Route>
           </Route>

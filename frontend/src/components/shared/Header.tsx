@@ -57,10 +57,10 @@ export default function Header() {
                                 className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-accent"
                             >
                                 <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
-                                    {user.initials}
+                                    {initials}
                                 </div>
                                 <span className="text-sm font-medium text-foreground">
-                                    {user.name}
+                                    {displayName}
                                 </span>
                             </Button>
                         </DropdownMenuTrigger>
@@ -89,44 +89,6 @@ export default function Header() {
                         </DropdownMenuContent>
                     </DropdownMenu>
                 </div>
-                <DropdownMenu open={open} onOpenChange={setOpen}>
-                    <DropdownMenuTrigger asChild>
-                        <Button
-                            variant="ghost"
-                            className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-accent"
-                        >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
-                                {initials}
-                            </div>
-                            <span className="text-sm font-medium text-foreground">
-                                {displayName}
-                            </span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuLabel className="text-xs text-muted-foreground">
-                            {user.email}
-                        </DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={() => {
-                                setOpen(false);
-                                navigate("/profile");
-                            }}
-                        >
-                            <User className="mr-2 h-4 w-4" />
-                            Profile
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem
-                            onClick={handleLogout}
-                            className="text-destructive focus:text-destructive"
-                        >
-                            <LogOut className="mr-2 h-4 w-4" />
-                            Logout
-                        </DropdownMenuItem>
-                    </DropdownMenuContent>
-                </DropdownMenu>
             )}
         </header>
     );

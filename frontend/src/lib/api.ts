@@ -121,3 +121,18 @@ function clearSession() {
 }
 
 export default api;
+
+export async function apiFetch<T>(
+    endpoint: string,
+    options?: { method?: string; body?: any; headers?: Record<string, string>; params?: any }
+): Promise<T> {
+    const config = {
+        method: options?.method || "GET",
+        url: endpoint,
+        data: options?.body,
+        headers: options?.headers,
+        params: options?.params,
+    };
+    const response = await api.request<T>(config);
+    return response.data;
+}

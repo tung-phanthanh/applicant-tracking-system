@@ -31,10 +31,10 @@ public class AuditLog {
     @Column(name = "entity_id")
     private String entityId;
 
-    @Column(name = "old_value", columnDefinition = "jsonb")
+    @Column(name = "old_value", columnDefinition = "TEXT")
     private String oldValue;
 
-    @Column(name = "new_value", columnDefinition = "jsonb")
+    @Column(name = "new_value", columnDefinition = "TEXT")
     private String newValue;
 
     @Column(name = "ip_address")

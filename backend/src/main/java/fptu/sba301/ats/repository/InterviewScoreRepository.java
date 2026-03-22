@@ -15,14 +15,14 @@ public interface InterviewScoreRepository extends JpaRepository<InterviewScore, 
 
     List<InterviewScore> findByInterviewId(UUID interviewId);
 
-    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.participant.user.id = :interviewerId")
+    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.userId = :interviewerId")
     List<InterviewScore> findByInterviewIdAndInterviewerId(@Param("interviewId") UUID interviewId, @Param("interviewerId") UUID interviewerId);
 
-    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.participant.user.id = :userId AND s.criterion.id = :criterionId")
+    @Query("SELECT s FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.userId = :userId AND s.criterion.id = :criterionId")
     Optional<InterviewScore> findByInterviewIdAndParticipantKeyAndCriterionId(
             @Param("interviewId") UUID interviewId, @Param("userId") UUID userId, @Param("criterionId") UUID criterionId);
 
-    @Query("SELECT count(s) > 0 FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.participant.user.id = :interviewerId AND s.criterion.id = :criterionId")
+    @Query("SELECT count(s) > 0 FROM InterviewScore s WHERE s.interview.id = :interviewId AND s.userId = :interviewerId AND s.criterion.id = :criterionId")
     boolean existsByInterviewIdAndInterviewerIdAndCriterionId(
             @Param("interviewId") UUID interviewId, @Param("interviewerId") UUID interviewerId, @Param("criterionId") UUID criterionId);
 

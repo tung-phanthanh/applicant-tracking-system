@@ -16,6 +16,7 @@ import org.springframework.http.HttpStatus;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,17 +38,17 @@ class InterviewScoreServiceImplTest {
     @InjectMocks
     private InterviewScoreServiceImpl service;
 
-    // ==========================================
-    // submitScores — Exception paths
-    // ==========================================
+    private final UUID interviewId = UUID.randomUUID();
+    private final UUID userId = UUID.randomUUID();
 
     @Test
     void submitScores_InterviewNotFound_ThrowsNotFound() {
-        when(interviewRepository.findById(99L)).thenReturn(Optional.empty());
+        UUID randomId = UUID.randomUUID();
+        when(interviewRepository.findById(randomId)).thenReturn(Optional.empty());
 
         SubmitInterviewScoresRequest req = new SubmitInterviewScoresRequest(List.of(), null, null, null, null);
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.submitScores(99L, req, "user@test.com"));
+                () -> service.submitScores(randomId, req, "user@test.com"));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("Interview not found"));
     }
@@ -55,14 +56,14 @@ class InterviewScoreServiceImplTest {
     @Test
     void submitScores_InterviewNotCompleted_ThrowsConflict() {
         Interview interview = new Interview();
-        interview.setId(1L);
+        interview.setId(interviewId);
         interview.setStatus(InterviewStatus.SCHEDULED);
 
-        when(interviewRepository.findById(1L)).thenReturn(Optional.of(interview));
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
 
         SubmitInterviewScoresRequest req = new SubmitInterviewScoresRequest(List.of(), null, null, null, null);
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.submitScores(1L, req, "user@test.com"));
+                () -> service.submitScores(interviewId, req, "user@test.com"));
         assertEquals(HttpStatus.CONFLICT, ex.getStatus());
         assertTrue(ex.getMessage().contains("COMPLETED"));
     }
@@ -70,43 +71,36 @@ class InterviewScoreServiceImplTest {
     @Test
     void submitScores_InterviewerNotFound_ThrowsNotFound() {
         Interview interview = new Interview();
-        interview.setId(1L);
+        interview.setId(interviewId);
         interview.setStatus(InterviewStatus.COMPLETED);
 
-        when(interviewRepository.findById(1L)).thenReturn(Optional.of(interview));
+        when(interviewRepository.findById(interviewId)).thenReturn(Optional.of(interview));
         when(userRepository.findByEmailAndDeletedFalse("missing@test.com")).thenReturn(Optional.empty());
 
         SubmitInterviewScoresRequest req = new SubmitInterviewScoresRequest(List.of(), null, null, null, null);
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.submitScores(1L, req, "missing@test.com"));
+                () -> service.submitScores(interviewId, req, "missing@test.com"));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("Interviewer not found"));
     }
 
-    // ==========================================
-    // getAllScores — Exception paths
-    // ==========================================
-
     @Test
     void getAllScores_InterviewNotFound_ThrowsNotFound() {
-        when(interviewRepository.existsById(42L)).thenReturn(false);
+        UUID randomId = UUID.randomUUID();
+        when(interviewRepository.existsById(randomId)).thenReturn(false);
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.getAllScores(42L));
+                () -> service.getAllScores(randomId));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("Interview not found"));
     }
-
-    // ==========================================
-    // getMyScores — Exception paths
-    // ==========================================
 
     @Test
     void getMyScores_InterviewerNotFound_ThrowsNotFound() {
         when(userRepository.findByEmailAndDeletedFalse("ghost@test.com")).thenReturn(Optional.empty());
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.getMyScores(1L, "ghost@test.com"));
+                () -> service.getMyScores(interviewId, "ghost@test.com"));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("Interviewer not found"));
     }
@@ -114,16 +108,16 @@ class InterviewScoreServiceImplTest {
     @Test
     void getMyScores_NoScoresFound_ThrowsNotFound() {
         User user = new User();
+        user.setId(userId);
         user.setEmail("user@test.com");
         user.setFullName("Test User");
 
         when(userRepository.findByEmailAndDeletedFalse("user@test.com")).thenReturn(Optional.of(user));
-        // scoreRepository returns empty list → no scores submitted
-        when(scoreRepository.findByInterviewIdAndInterviewerId(anyLong(), anyLong()))
-                .thenReturn(Collections.emptyList());
+        // scoreRepository.findAll() returns empty → filter gives empty
+        when(scoreRepository.findAll()).thenReturn(Collections.emptyList());
 
         BusinessException ex = assertThrows(BusinessException.class,
-                () -> service.getMyScores(5L, "user@test.com"));
+                () -> service.getMyScores(interviewId, "user@test.com"));
         assertEquals(HttpStatus.NOT_FOUND, ex.getStatus());
         assertTrue(ex.getMessage().contains("No scores found"));
     }

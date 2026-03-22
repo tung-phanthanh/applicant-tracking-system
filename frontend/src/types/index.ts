@@ -6,25 +6,13 @@ export type { User, UserRole, LoginCredentials, AuthContextType } from "@/types/
 // ─────────────────────────────────────────────
 // Role & Permission
 // ─────────────────────────────────────────────
-export type PermissionKey =
-    | "view_jobs"
-    | "manage_jobs"
-    | "view_candidates"
-    | "manage_candidates"
-    | "view_interviews"
-    | "manage_interviews"
-    | "view_reports"
-    | "manage_users"
-    | "manage_roles"
-    | "manage_departments"
-    | "view_audit_log"
-    | "manage_system_config";
+export type PermissionKey = string;
 
 export interface Permission {
     key: PermissionKey;
     label: string;
     description: string;
-    category: "Recruitment" | "Administration" | "Reports";
+    category: string;
 }
 
 export interface Role {

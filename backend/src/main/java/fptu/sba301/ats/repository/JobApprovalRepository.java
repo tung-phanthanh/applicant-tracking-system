@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface JobApprovalRepository extends JpaRepository<JobApproval, java.util.UUID> {
 
-    List<JobApproval> findByJobIdOrderByApprovedAtDesc(Long jobId);
+    List<JobApproval> findByJobIdOrderByCreatedAtDesc(java.util.UUID jobId);
 }

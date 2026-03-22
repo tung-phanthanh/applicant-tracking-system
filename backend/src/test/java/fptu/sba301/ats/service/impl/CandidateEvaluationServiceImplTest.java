@@ -14,6 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -37,35 +38,62 @@ class CandidateEvaluationServiceImplTest {
     @InjectMocks
     private CandidateEvaluationServiceImpl service;
 
+    private final UUID appId = UUID.randomUUID();
+    private final UUID candidateId = UUID.randomUUID();
+    private final UUID jobId = UUID.randomUUID();
+    private final UUID interviewId = UUID.randomUUID();
+    private final UUID criterionId1 = UUID.randomUUID();
+    private final UUID criterionId2 = UUID.randomUUID();
+    private final UUID interviewerId1 = UUID.randomUUID();
+    private final UUID interviewerId2 = UUID.randomUUID();
+
     @Test
     void getEvaluation_CalculatesWeightedScoreCorrectly() {
-        Long appId = 100L;
+        Candidate candidate = new Candidate();
+        candidate.setId(candidateId);
+        candidate.setFullName("Test Candidate");
+
+        Job job = new Job();
+        job.setId(jobId);
+        job.setTitle("Test Job");
+
         Application app = new Application();
         app.setId(appId);
-        app.setCandidateId(10L);
-        app.setJobId(20L);
+        app.setCandidate(candidate);
+        app.setJob(job);
 
         when(applicationRepository.findById(appId)).thenReturn(Optional.of(app));
-        when(candidateRepository.findById(10L)).thenReturn(Optional.of(new Candidate()));
-        when(jobRepository.findById(20L)).thenReturn(Optional.of(new Job()));
+        when(candidateRepository.findById(candidateId)).thenReturn(Optional.of(candidate));
+        when(jobRepository.findById(jobId)).thenReturn(Optional.of(job));
 
         // 1 Completed interview
         Interview intv = new Interview();
-        intv.setId(1L);
+        intv.setId(interviewId);
         when(interviewRepository.findByApplicationIdAndStatus(appId, InterviewStatus.COMPLETED))
                 .thenReturn(List.of(intv));
 
-        // 2 scores for Criterion A (Weight 0.6), 1 score for Criterion B (Weight 0.4)
-        InterviewScore s1 = InterviewScore.builder().criterionId(1L).score(4).interviewerId(1L).build();
-        InterviewScore s2 = InterviewScore.builder().criterionId(1L).score(5).interviewerId(2L).build();
-        InterviewScore s3 = InterviewScore.builder().criterionId(2L).score(3).interviewerId(1L).build();
-        when(scoreRepository.findByInterviewIdIn(List.of(1L))).thenReturn(List.of(s1, s2, s3));
+        // Build Users for participants
+        User u1 = new User();
+        u1.setId(interviewerId1);
+        User u2 = new User();
+        u2.setId(interviewerId2);
+
+        // Build InterviewParticipants with users set
+        InterviewParticipant p1 = InterviewParticipant.builder().user(u1).build();
+        InterviewParticipant p2 = InterviewParticipant.builder().user(u2).build();
 
         ScorecardCriterion c1 = ScorecardCriterion.builder().name("Coding").weight(new BigDecimal("0.6")).build();
-        c1.setId(1L);
+        c1.setId(criterionId1);
         ScorecardCriterion c2 = ScorecardCriterion.builder().name("System Design").weight(new BigDecimal("0.4"))
                 .build();
-        c2.setId(2L);
+        c2.setId(criterionId2);
+
+        // 2 scores for Criterion 1, 1 score for Criterion 2
+        InterviewScore s1 = InterviewScore.builder().interview(intv).criterion(c1).score(4).participant(p1).build();
+        InterviewScore s2 = InterviewScore.builder().interview(intv).criterion(c1).score(5).participant(p2).build();
+        InterviewScore s3 = InterviewScore.builder().interview(intv).criterion(c2).score(3).participant(p1).build();
+        when(scoreRepository.findByInterviewIdIn(List.of(interviewId))).thenReturn(List.of(s1, s2, s3));
+
         when(criterionRepository.findAllById(any())).thenReturn(List.of(c1, c2));
 
         EvaluationSummaryResponse result = service.getEvaluation(appId);
@@ -83,10 +111,10 @@ class CandidateEvaluationServiceImplTest {
 
         // Assert individual breakdown
         for (CriterionScoreSummary c : result.criteria()) {
-            if (c.criterionId().equals(1L)) {
+            if (c.criterionId().equals(criterionId1)) {
                 assertEquals(4.5, c.averageScore(), 0.001);
                 assertEquals(2.7, c.weightedScore(), 0.001);
-            } else if (c.criterionId().equals(2L)) {
+            } else if (c.criterionId().equals(criterionId2)) {
                 assertEquals(3.0, c.averageScore(), 0.001);
                 assertEquals(1.2, c.weightedScore(), 0.001);
             }

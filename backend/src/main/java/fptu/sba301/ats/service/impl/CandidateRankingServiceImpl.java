@@ -105,8 +105,7 @@ public class CandidateRankingServiceImpl implements CandidateRankingService {
         entries.sort(Comparator
                 .comparingDouble((CandidateRankEntry e) -> e.aggregateScore() == null ? -1.0 : e.aggregateScore())
                 .reversed()
-                .thenComparingInt((CandidateRankEntry e) -> ApplicationStage.valueOf(e.currentStage()).ordinal())
-                .reversed()
+                .thenComparing(Comparator.comparingInt((CandidateRankEntry e) -> ApplicationStage.valueOf(e.currentStage()).ordinal()).reversed())
                 .thenComparing(Comparator.comparing(
                         CandidateRankEntry::lastInterviewAt,
                         Comparator.nullsLast(Comparator.reverseOrder()))));
