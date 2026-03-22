@@ -4,11 +4,14 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 @EnableAspectJAutoProxy(proxyTargetClass = true)
 public class AtsApplication {
 
 	public static void main(String[] args) {
+		TimeZone.setDefault(TimeZone.getTimeZone("Asia/Ho_Chi_Minh"));
 		SpringApplication.run(AtsApplication.class, args);
 	}
 
