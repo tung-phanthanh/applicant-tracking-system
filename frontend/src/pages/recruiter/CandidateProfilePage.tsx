@@ -30,6 +30,34 @@ function documentLabel(document: CandidateDocumentItem): string {
   return document.fileName || document.fileType || "Document";
 }
 
+function isPdfDocument(document: CandidateDocumentItem | null): boolean {
+  if (!document) return false;
+  const byType = (document.fileType || "").toLowerCase().includes("pdf");
+  const byName = (document.fileName || "").toLowerCase().endsWith(".pdf");
+  const byUrl = (document.fileUrl || "").toLowerCase().includes(".pdf");
+  return byType || byName || byUrl;
+}
+
+function toDownloadUrl(url: string): string {
+  if (url.includes("res.cloudinary.com") && url.includes("/upload/")) {
+    return url.replace("/upload/", "/upload/fl_attachment/");
+  }
+  return url;
+}
+
+function triggerDownload(url: string, fileName?: string): void {
+  const anchor = document.createElement("a");
+  anchor.href = toDownloadUrl(url);
+  anchor.target = "_blank";
+  anchor.rel = "noreferrer";
+  if (fileName) {
+    anchor.setAttribute("download", fileName);
+  }
+  document.body.appendChild(anchor);
+  anchor.click();
+  document.body.removeChild(anchor);
+}
+
 export default function CandidateProfilePage() {
   const { candidateId } = useParams<{ candidateId: string }>();
   const navigate = useNavigate();
@@ -64,7 +92,10 @@ export default function CandidateProfilePage() {
     void loadDetail();
   }, [candidateId]);
 
-  const mainDocument = useMemo(() => candidate?.documents?.[0] ?? null, [candidate]);
+  const mainDocument = useMemo(() => {
+    if (!candidate?.documents?.length) return null;
+    return candidate.documents.find((d) => isPdfDocument(d)) ?? candidate.documents[0];
+  }, [candidate]);
 
   const handleStageUpdate = async (stage: CandidateStage) => {
     if (!candidateId || updatingStage) return;
@@ -171,23 +202,30 @@ export default function CandidateProfilePage() {
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-2xl font-semibold">CV Preview</h2>
               {mainDocument && (
-                <a
-                  href={mainDocument.fileUrl}
-                  target="_blank"
-                  rel="noreferrer"
+                <button
+                  type="button"
+                  onClick={() => triggerDownload(mainDocument.fileUrl, mainDocument.fileName)}
                   className="inline-flex items-center gap-1 text-sm font-medium text-primary"
                 >
                   <Download className="h-4 w-4" />
                   Download PDF
-                </a>
+                </button>
               )}
             </div>
 
-            <div className="flex h-72 flex-col items-center justify-center rounded-md border border-border bg-muted/20 text-center text-muted-foreground">
-              <FileText className="mb-3 h-12 w-12" />
-              <p className="text-base font-medium">PDF Viewer Placeholder</p>
-              <p className="text-sm">{mainDocument?.fileName || "No document uploaded"}</p>
-            </div>
+            {mainDocument && isPdfDocument(mainDocument) ? (
+              <iframe
+                title="CV Preview"
+                src={mainDocument.fileUrl}
+                className="h-72 w-full rounded-md border border-border"
+              />
+            ) : (
+              <div className="flex h-72 flex-col items-center justify-center rounded-md border border-border bg-muted/20 text-center text-muted-foreground">
+                <FileText className="mb-3 h-12 w-12" />
+                <p className="text-base font-medium">Preview is available for PDF files</p>
+                <p className="text-sm">{mainDocument?.fileName || "No document uploaded"}</p>
+              </div>
+            )}
           </div>
 
           <div className="rounded-lg border border-border bg-card p-5">
@@ -230,11 +268,10 @@ export default function CandidateProfilePage() {
                 <p className="text-sm text-muted-foreground">No documents.</p>
               ) : (
                 candidate.documents.map((document) => (
-                  <a
+                  <button
+                    type="button"
                     key={document.documentId}
-                    href={document.fileUrl}
-                    target="_blank"
-                    rel="noreferrer"
+                    onClick={() => triggerDownload(document.fileUrl, document.fileName)}
                     className="flex items-center justify-between rounded-md border border-border px-3 py-2 hover:bg-muted/20"
                   >
                     <div>
@@ -242,7 +279,7 @@ export default function CandidateProfilePage() {
                       <p className="text-xs text-muted-foreground">{formatFileSize(document.fileSizeBytes)}</p>
                     </div>
                     <Download className="h-4 w-4 text-muted-foreground" />
-                  </a>
+                  </button>
                 ))
               )}
             </div>

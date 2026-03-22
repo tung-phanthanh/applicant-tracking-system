@@ -1,11 +1,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, Plus, Star, MoreHorizontal } from "lucide-react";
+import { Search, Plus, Star, MoreHorizontal, Upload } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { candidateService } from "@/services/candidateService";
 import type { CandidateListItem, CandidateStage } from "@/types/candidate";
+import AddCandidateDialog from "@/components/shared/AddCandidateDialog";
+import ImportCandidatesDialog from "@/components/shared/ImportCandidatesDialog";
 
 const STAGES: CandidateStage[] = [
   "APPLIED",
@@ -21,7 +23,9 @@ function stageLabel(stage: CandidateStage): string {
 }
 
 function formatRelativeDate(isoDate: string): string {
-  const appliedTime = new Date(isoDate).getTime();
+  const hasTimezone = /Z$|[+-]\d{2}:\d{2}$/.test(isoDate);
+  const normalized = hasTimezone ? isoDate : `${isoDate}+07:00`;
+  const appliedTime = new Date(normalized).getTime();
   if (Number.isNaN(appliedTime)) return "-";
 
   const diffMs = Date.now() - appliedTime;
@@ -60,21 +64,23 @@ export default function CandidateListPage() {
   const [search, setSearch] = useState("");
   const [jobFilter, setJobFilter] = useState("ALL");
   const [stageFilter, setStageFilter] = useState<"ALL" | CandidateStage>("ALL");
+  const [addOpen, setAddOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+
+  const loadCandidates = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const data = await candidateService.getCandidates();
+      setCandidates(data);
+    } catch {
+      setError("Failed to load candidates.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const loadCandidates = async () => {
-      setLoading(true);
-      setError("");
-      try {
-        const data = await candidateService.getCandidates();
-        setCandidates(data);
-      } catch {
-        setError("Failed to load candidates.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
     void loadCandidates();
   }, []);
 
@@ -153,7 +159,11 @@ export default function CandidateListPage() {
                 </option>
               ))}
             </select>
-            <Button size="sm" className="h-9">
+            <Button size="sm" className="h-9" variant="outline" onClick={() => setImportOpen(true)}>
+              <Upload className="h-4 w-4" />
+              Import CSV
+            </Button>
+            <Button size="sm" className="h-9" onClick={() => setAddOpen(true)}>
               <Plus className="h-4 w-4" />
               Add Candidate
             </Button>
@@ -230,6 +240,17 @@ export default function CandidateListPage() {
           </div>
         )}
       </section>
+
+      <AddCandidateDialog
+        open={addOpen}
+        onOpenChange={setAddOpen}
+        onSuccess={() => void loadCandidates()}
+      />
+      <ImportCandidatesDialog
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onSuccess={() => void loadCandidates()}
+      />
     </div>
   );
 }
