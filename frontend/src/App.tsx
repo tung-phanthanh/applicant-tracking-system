@@ -17,6 +17,13 @@ import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
+import ScorecardTemplatesPage from "@/pages/recruiter/ScorecardTemplatesPage";
+import InterviewScorecardPage from "@/pages/recruiter/InterviewScorecardPage";
+import CandidateRankingPage from "@/pages/recruiter/CandidateRankingPage";
+import OffersListPage from "@/pages/recruiter/OffersListPage";
+import OfferFormPage from "@/pages/recruiter/OfferFormPage";
+import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
+import OnboardingPage from "@/pages/recruiter/OnboardingPage";
 
 function App() {
   return (
@@ -44,10 +51,21 @@ function App() {
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
 
-              {/* HR-only route */}
+              {/* Interview scorecard — accessible to any authenticated user */}
+              <Route path="/interviews/:interviewId/scores" element={<InterviewScorecardPage />} />
+
+              {/* HR-only routes */}
               <Route element={<HrRoute />}>
                 <Route path="/candidates" element={<CandidateListPage />} />
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
+                <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
+                <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
+                <Route path="/offers" element={<OffersListPage />} />
+                <Route path="/offers/new" element={<OfferFormPage />} />
+                <Route path="/offers/:id" element={<OfferDetailPage />} />
+                <Route path="/offers/:id/edit" element={<OfferFormPage />} />
+                <Route path="/onboarding/:id" element={<OnboardingPage />} />
+                <Route path="/onboarding/application/:applicationId" element={<OnboardingPage />} />
               </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}
