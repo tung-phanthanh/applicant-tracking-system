@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Search, Plus, Star, MoreHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -52,6 +53,7 @@ function initials(name: string): string {
 }
 
 export default function CandidateListPage() {
+  const navigate = useNavigate();
   const [candidates, setCandidates] = useState<CandidateListItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -188,7 +190,11 @@ export default function CandidateListPage() {
                   </tr>
                 ) : (
                   filteredCandidates.map((item) => (
-                    <tr key={`${item.candidateId}-${item.jobTitle}`} className="bg-background">
+                    <tr
+                      key={`${item.candidateId}-${item.jobTitle}`}
+                      className="cursor-pointer bg-background hover:bg-muted/20"
+                      onClick={() => navigate(`/candidates/${item.candidateId}`)}
+                    >
                       <td className="px-5 py-4">
                         <div className="flex items-center gap-3">
                           <span className="inline-flex h-9 w-9 items-center justify-center rounded-full bg-muted font-semibold text-primary">

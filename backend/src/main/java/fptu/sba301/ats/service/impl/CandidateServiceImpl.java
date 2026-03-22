@@ -11,6 +11,7 @@ import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.ApplicationRepository;
 import fptu.sba301.ats.repository.CandidateRepository;
 import fptu.sba301.ats.repository.CandidateStageHistoryRepository;
+import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
 import fptu.sba301.ats.service.CandidateService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -48,12 +50,35 @@ public class CandidateServiceImpl implements CandidateService {
     @Override
         @Transactional
     public CandidateDetailResponse getCandidateDetail(UUID candidateId) {
-                Application application = findLatestActiveApplication(candidateId);
-                if (application.getStage() == ApplicationStage.APPLIED) {
-                        transitionStage(application, ApplicationStage.SCREENING);
+                Optional<Application> latestActiveApplication = applicationRepository
+                                .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE);
+
+                if (latestActiveApplication.isPresent() && latestActiveApplication.get().getStage() == ApplicationStage.APPLIED) {
+                        transitionStage(latestActiveApplication.get(), ApplicationStage.SCREENING);
                 }
 
-                var detail = candidateRepository.findCandidateDetailById(candidateId.toString())
+                return buildCandidateDetailResponse(candidateId);
+        }
+
+        @Override
+        @Transactional
+        public CandidateDetailResponse updateCandidateStage(UUID candidateId, ApplicationStage targetStage) {
+                Application application = findLatestActiveApplication(candidateId);
+
+                if (application.getStage() != ApplicationStage.SCREENING) {
+                        throw new BusinessException("Only candidates in SCREENING can be moved to INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
+                }
+
+                if (targetStage != ApplicationStage.INTERVIEW && targetStage != ApplicationStage.REJECTED) {
+                        throw new BusinessException("Target stage must be INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
+                }
+
+                transitionStage(application, targetStage);
+                return buildCandidateDetailResponse(candidateId);
+        }
+
+        private CandidateDetailResponse buildCandidateDetailResponse(UUID candidateId) {
+                CandidateDetailProjection detail = candidateRepository.findCandidateDetailById(candidateId.toString())
                                 .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
 
         List<CandidateDocumentResponse> documents = candidateRepository.findDocumentsByCandidateId(candidateId.toString())
@@ -87,44 +112,24 @@ public class CandidateServiceImpl implements CandidateService {
                 .build();
     }
 
-        @Override
-        @Transactional
-        public CandidateDetailResponse updateCandidateStage(UUID candidateId, ApplicationStage targetStage) {
-                Application application = findLatestActiveApplication(candidateId);
+    private Application findLatestActiveApplication(UUID candidateId) {
+        return applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessException("Active application not found", HttpStatus.NOT_FOUND));
+    }
 
-                if (application.getStage() != ApplicationStage.SCREENING) {
-                        throw new BusinessException("Only candidates in SCREENING can be moved to INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
-                }
-
-                if (targetStage != ApplicationStage.INTERVIEW && targetStage != ApplicationStage.REJECTED) {
-                        throw new BusinessException("Target stage must be INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
-                }
-
-                transitionStage(application, targetStage);
-                return getCandidateDetail(candidateId);
+    private void transitionStage(Application application, ApplicationStage toStage) {
+        ApplicationStage fromStage = application.getStage();
+        if (fromStage == toStage) {
+            return;
         }
 
-        private Application findLatestActiveApplication(UUID candidateId) {
-                return applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE)
-                                .orElseThrow(() -> new BusinessException("Active application not found", HttpStatus.NOT_FOUND));
-        }
+        application.setStage(toStage);
+        applicationRepository.save(application);
 
-        private void transitionStage(Application application, ApplicationStage toStage) {
-                ApplicationStage fromStage = application.getStage();
-                if (fromStage == toStage) {
-                        return;
-                }
-
-                application.setStage(toStage);
-                if (toStage == ApplicationStage.REJECTED) {
-                        application.setStatus(ApplicationStatus.REJECTED);
-                }
-                applicationRepository.save(application);
-
-                candidateStageHistoryRepository.save(CandidateStageHistory.builder()
-                                .application(application)
-                                .fromStage(fromStage)
-                                .toStage(toStage)
-                                .build());
-        }
+        candidateStageHistoryRepository.save(CandidateStageHistory.builder()
+                .application(application)
+                .fromStage(fromStage)
+                .toStage(toStage)
+                .build());
+    }
 }

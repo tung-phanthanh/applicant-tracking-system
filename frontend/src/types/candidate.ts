@@ -6,6 +6,8 @@ export type CandidateStage =
   | "HIRED"
   | "REJECTED";
 
+export type CandidateApplicationStatus = "ACTIVE" | "WITHDRAWN" | "REJECTED";
+
 export interface CandidateListItem {
   candidateId: string;
   fullName: string;
@@ -14,4 +16,31 @@ export interface CandidateListItem {
   stage: CandidateStage;
   rating: number | null;
   appliedAt: string;
+}
+
+export interface CandidateDocumentItem {
+  documentId: string;
+  fileName: string;
+  fileUrl: string;
+  fileType: string;
+  fileSizeBytes: number | null;
+  uploadedAt: string;
+}
+
+export interface CandidateDetailItem {
+  candidateId: string;
+  fullName: string;
+  email: string;
+  phone: string;
+  currentCompany: string;
+  jobTitle: string;
+  stage: CandidateStage;
+  status: CandidateApplicationStatus;
+  rating: number | null;
+  appliedAt: string;
+  source: string;
+  location: string;
+  experienceYears: number | null;
+  summary: string;
+  documents: CandidateDocumentItem[];
 }
