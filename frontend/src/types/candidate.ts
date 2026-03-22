@@ -44,3 +44,10 @@ export interface CandidateDetailItem {
   summary: string;
   documents: CandidateDocumentItem[];
 }
+
+export interface BulkImportResult {
+  totalRows: number;
+  successCount: number;
+  failCount: number;
+  errors: string[];
+}

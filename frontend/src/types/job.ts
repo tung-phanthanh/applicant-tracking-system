@@ -1,17 +1,7 @@
-export interface Job {
-  id: number;
-  title: string;
-  department?: string;
-  location?: string;
-  description?: string;
-  status?: string;
-  postedDate?: string;
-}
+export type JobStatus = "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "CLOSED";
 
-export interface JobRequest {
+export interface JobOption {
+  jobId: string;
   title: string;
-  department?: string;
-  location?: string;
-  description?: string;
-  status?: string;
+  status: JobStatus;
 }
