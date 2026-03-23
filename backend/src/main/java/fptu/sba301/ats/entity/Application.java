@@ -7,7 +7,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 
 @Entity
@@ -20,6 +21,8 @@ import java.time.Instant;
         @UniqueConstraint(columnNames = { "candidate_id", "job_id" })
 })
 public class Application extends BaseEntity {
+
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Id
     @UuidGenerator
@@ -45,12 +48,12 @@ public class Application extends BaseEntity {
     private ApplicationStatus status = ApplicationStatus.ACTIVE;
 
     @Column(name = "applied_at")
-    private Instant appliedAt;
+    private LocalDateTime appliedAt;
 
     @PrePersist
     protected void setAppliedAtIfMissing() {
         if (appliedAt == null) {
-            appliedAt = Instant.now();
+            appliedAt = LocalDateTime.now(APP_ZONE);
         }
     }
 

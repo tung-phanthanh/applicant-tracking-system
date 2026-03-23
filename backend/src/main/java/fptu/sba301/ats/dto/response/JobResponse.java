@@ -1,20 +1,15 @@
 package fptu.sba301.ats.dto.response;
 
+import fptu.sba301.ats.enums.JobStatus;
 import lombok.Builder;
-import lombok.Data;
+import lombok.Getter;
 
-import java.time.Instant;
+import java.util.UUID;
 
-@Data
+@Getter
 @Builder
 public class JobResponse {
-    private java.util.UUID id;
+    private UUID jobId;
     private String title;
-    private String description;
-    private java.util.UUID departmentId;
-    private java.util.UUID hiringManagerId;
-    private String status;
-    private Integer headcount;
-    private Instant createdAt;
-    private Instant updatedAt;
+    private JobStatus status;
 }
