@@ -31,7 +31,8 @@ import RolesPage from "@/pages/admin/RolesPage";
 import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 import SystemConfigPage from "@/pages/admin/SystemConfigPage";
 import AuditLogPage from "@/pages/admin/AuditLogPage";
-import NotificationsPage from "@/pages/admin/NotificationsPage"
+//import NotificationsPage from "@/pages/admin/NotificationsPage";
+
 function App() {
   return (
     <BrowserRouter>

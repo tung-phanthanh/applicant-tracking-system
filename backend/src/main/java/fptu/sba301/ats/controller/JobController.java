@@ -26,6 +26,7 @@ public class JobController {
         return ResponseEntity.ok(jobService.getAllJobs());
     }
 
+    /*
     @GetMapping("/{id}")
     @PreAuthorize("hasAuthority('JOB_VIEW')")
     public ResponseEntity<JobResponse> getJobById(@PathVariable java.util.UUID id) {
@@ -76,4 +77,5 @@ public class JobController {
         jobService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    */
 }

@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AdminConstants;
 import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.service.SystemConfigService;
 import lombok.RequiredArgsConstructor;
@@ -9,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 
 @RestController
-@RequestMapping(AppConstant.BASE_URL + "/system-config")
+@RequestMapping(AppConstant.BASE_URL + AdminConstants.SYSTEM_CONFIG_URL)
 @RequiredArgsConstructor
 public class SystemConfigController {
 

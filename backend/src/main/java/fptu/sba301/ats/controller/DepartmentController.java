@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AdminConstants;
 import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.request.DepartmentRequestDTO;
 import fptu.sba301.ats.dto.response.DepartmentResponseDTO;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping(AppConstant.BASE_URL + "/departments")
+@RequestMapping(AppConstant.BASE_URL + AdminConstants.DEPARTMENT_URL)
 @RequiredArgsConstructor
 public class DepartmentController {
 

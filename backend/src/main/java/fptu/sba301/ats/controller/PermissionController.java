@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.constant.AdminConstants;
 import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.entity.Permission;
 import fptu.sba301.ats.service.RoleService;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping(AppConstant.BASE_URL + "/permissions")
+@RequestMapping(AppConstant.BASE_URL + AdminConstants.PERMISSION_URL)
 @RequiredArgsConstructor
 public class PermissionController {
 
