@@ -62,7 +62,7 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
         LEFT JOIN interview_scores isc ON i.id = isc.interview_id
         WHERE c.id = UUID_TO_BIN(:candidateId)
           AND a.status = 'ACTIVE'
-        GROUP BY c.id, c.full_name, c.email, c.phone, c.current_company,
+        GROUP BY c.id, a.id, c.full_name, c.email, c.phone, c.current_company,
                  j.title, a.stage, a.status, a.applied_at,
                  c.source, c.location, c.experience_years, c.summary
         ORDER BY a.applied_at DESC
