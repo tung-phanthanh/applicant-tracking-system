@@ -1,0 +1,38 @@
+spring:
+  application:
+    name: ats-test
+  datasource:
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  h2:
+    console:
+      enabled: true
+  security:
+    user:
+      name: test
+      password: test
+server:
+  port: 8080
+jwt:
+  secret: testSecretKeyForJWTTokenGenerationThatIsAtLeast256BitsLong12345
+  expiration: 86400000
+  refresh-expiration: 604800000
+mail:
+  host: localhost
+  port: 25
+  username: test
+  password: test
+cloudinary:
+  cloud-name: test
+  api-key: test
+  api-secret: test
