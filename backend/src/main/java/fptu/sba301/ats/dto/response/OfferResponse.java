@@ -1,27 +1,30 @@
 package fptu.sba301.ats.dto.response;
 
 import fptu.sba301.ats.enums.OfferStatus;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.time.LocalDate;
-import java.util.List;
-
+import java.time.LocalDateTime;
 import java.util.UUID;
 
-public record OfferResponse(
-                UUID id,
-                UUID applicationId,
-                String candidateName,
-                String jobTitle,
-                BigDecimal salary,
-                String positionTitle,
-                OfferStatus status,
-                LocalDate startDate,
-                LocalDate expiryDate,
-                String notes,
-                UUID createdBy,
-                LocalDateTime createdAt,
-                LocalDateTime updatedAt,
-                List<OfferApprovalResponse> approvals) {
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class OfferResponse {
+    private UUID id;
+    private UUID applicationId;
+    private String candidateName;
+    private String jobTitle;
+    private BigDecimal salary;
+    private String positionTitle;
+    private LocalDate startDate;
+    private String benefits;
+    private String notes;
+    private OfferStatus status;
+    private LocalDateTime createdAt;
 }

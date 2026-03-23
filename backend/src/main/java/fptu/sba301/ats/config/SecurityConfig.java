@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(BASE_URL + AUTH_CONTROLLER_URL + "/**").permitAll()
+                        .requestMatchers("/api/v1/seed-admin").permitAll()
+                        .requestMatchers("/api/v1/seed-demo-data").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

@@ -1,311 +1,258 @@
 package fptu.sba301.ats.service.impl;
 
-import fptu.sba301.ats.dto.request.ApprovalDecisionRequest;
+import com.lowagie.text.*;
+import com.lowagie.text.pdf.PdfWriter;
 import fptu.sba301.ats.dto.request.CreateOfferRequest;
-import fptu.sba301.ats.dto.request.UpdateOfferRequest;
+import fptu.sba301.ats.dto.request.OfferApprovalRequest;
 import fptu.sba301.ats.dto.response.OfferApprovalResponse;
 import fptu.sba301.ats.dto.response.OfferResponse;
-import fptu.sba301.ats.entity.*;
+import fptu.sba301.ats.entity.Application;
+import fptu.sba301.ats.entity.Offer;
+import fptu.sba301.ats.entity.OfferApproval;
+import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.enums.ApprovalStatus;
+import fptu.sba301.ats.enums.ApplicationStatus;
 import fptu.sba301.ats.enums.OfferStatus;
 import fptu.sba301.ats.exception.BusinessException;
-import fptu.sba301.ats.mapper.OfferMapper;
-import fptu.sba301.ats.repository.*;
+import fptu.sba301.ats.repository.ApplicationRepository;
+import fptu.sba301.ats.repository.OfferApprovalRepository;
+import fptu.sba301.ats.repository.OfferRepository;
+import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.service.OfferService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.io.ByteArrayOutputStream;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class OfferServiceImpl implements OfferService {
 
     private final OfferRepository offerRepository;
     private final OfferApprovalRepository approvalRepository;
     private final ApplicationRepository applicationRepository;
-    private final CandidateRepository candidateRepository;
-    private final JobRepository jobRepository;
     private final UserRepository userRepository;
-    private final OfferMapper offerMapper;
-
-    // ==============================
-    // CREATE OFFER
-    // ==============================
 
     @Override
     @Transactional
-    public OfferResponse create(CreateOfferRequest request, String creatorEmail) {
-        Application application = findApplicationOrThrow(request.applicationId());
-
-        // Guard: only one active offer per application
-        boolean hasActiveOffer = offerRepository.existsByApplicationIdAndStatusIn(
-                request.applicationId(),
-                List.of(OfferStatus.DRAFT, OfferStatus.PENDING_APPROVAL, OfferStatus.APPROVED, OfferStatus.SENT));
-        if (hasActiveOffer) {
-            throw new BusinessException("An active offer already exists for this application", HttpStatus.CONFLICT);
-        }
-
-        User creator = findUserOrThrow(creatorEmail);
+    public OfferResponse createDraft(CreateOfferRequest request) {
+        Application application = applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(
+                request.getCandidateId(), ApplicationStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessException("Active application not found for this candidate", HttpStatus.BAD_REQUEST));
 
         Offer offer = Offer.builder()
                 .application(application)
-                .salary(request.salary())
-                .positionTitle(request.positionTitle())
-                .startDate(request.startDate())
-                .expiryDate(request.expiryDate())
-                .notes(request.notes())
+                .salary(request.getSalary())
+                .positionTitle(request.getPositionTitle())
+                .startDate(request.getStartDate())
+                .benefits(request.getBenefits())
+                .notes(request.getNotes())
                 .status(OfferStatus.DRAFT)
-                .createdBy(creator.getId())
                 .build();
 
         offer = offerRepository.save(offer);
-        log.info("Created offer id={} for applicationId={}", offer.getId(), request.applicationId());
-        return enrichOfferResponse(offer, application);
+        return toResponse(offer);
     }
-
-    // ==============================
-    // GET BY ID
-    // ==============================
-
-    @Override
-    @Transactional(readOnly = true)
-    public OfferResponse getById(java.util.UUID id) {
-        Offer offer = findOfferOrThrow(id);
-        Application application = findApplicationOrThrow(offer.getApplication().getId());
-        return enrichOfferResponse(offer, application);
-    }
-
-    // ==============================
-    // UPDATE OFFER
-    // ==============================
 
     @Override
     @Transactional
-    public OfferResponse update(java.util.UUID id, UpdateOfferRequest request, String updaterEmail) {
-        Offer offer = findOfferOrThrow(id);
+    public OfferResponse updateDraft(UUID id, CreateOfferRequest request) {
+        Offer offer = offerRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Offer not found", HttpStatus.NOT_FOUND));
 
         if (offer.getStatus() != OfferStatus.DRAFT) {
-            throw new BusinessException("Only DRAFT offers can be updated; current status: " + offer.getStatus(),
-                    HttpStatus.CONFLICT);
+            throw new BusinessException("Can only update offers in DRAFT status", HttpStatus.BAD_REQUEST);
         }
 
-        // Ownership check: only creator or SYSTEM_ADMIN may edit
-        User updater = findUserOrThrow(updaterEmail);
-        if (!offer.getCreatedBy().equals(updater.getId())) {
-            // Allow if the role is SYSTEM_ADMIN (handled by @PreAuthorize, but double-checked here)
-            // Role check via Spring Security is sufficient; service stays clean
-        }
-
-        if (request.salary() != null)
-            offer.setSalary(request.salary());
-        if (request.positionTitle() != null)
-            offer.setPositionTitle(request.positionTitle());
-        if (request.startDate() != null)
-            offer.setStartDate(request.startDate());
-        if (request.expiryDate() != null)
-            offer.setExpiryDate(request.expiryDate());
-        if (request.notes() != null)
-            offer.setNotes(request.notes());
+        offer.setSalary(request.getSalary());
+        offer.setPositionTitle(request.getPositionTitle());
+        offer.setStartDate(request.getStartDate());
+        offer.setBenefits(request.getBenefits());
+        offer.setNotes(request.getNotes());
 
         offer = offerRepository.save(offer);
-        return enrichOfferResponse(offer, findApplicationOrThrow(offer.getApplication().getId()));
+        return toResponse(offer);
     }
-
-    // ==============================
-    // LIST OFFERS
-    // ==============================
 
     @Override
-    @Transactional(readOnly = true)
-    public Page<OfferResponse> getAll(OfferStatus status, Pageable pageable) {
-        Page<Offer> page = (status != null)
-                ? offerRepository.findByStatus(status, pageable)
-                : offerRepository.findAll(pageable);
-
-        return page.map(offer -> {
-            Application application = findApplicationOrThrow(offer.getApplication().getId());
-            return enrichOfferResponse(offer, application);
-        });
+    public OfferResponse getOffer(UUID id) {
+        Offer offer = offerRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Offer not found", HttpStatus.NOT_FOUND));
+        return toResponse(offer);
     }
 
-    // ==============================
-    // OFFER WORKFLOW
-    // ==============================
+    @Override
+    public List<OfferResponse> getAllOffers() {
+        return offerRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
 
     @Override
     @Transactional
-    public void submitForApproval(java.util.UUID offerId, String submitterEmail) {
-        Offer offer = findOfferOrThrow(offerId);
-        assertStatus(offer, OfferStatus.DRAFT, "submit for approval");
+    public OfferResponse submitForApproval(UUID id) {
+        Offer offer = offerRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Offer not found", HttpStatus.NOT_FOUND));
+
+        if (offer.getStatus() != OfferStatus.DRAFT) {
+            throw new BusinessException("Can only submit offers in DRAFT status", HttpStatus.BAD_REQUEST);
+        }
+
         offer.setStatus(OfferStatus.PENDING_APPROVAL);
-        offerRepository.save(offer);
-        log.info("Offer id={} submitted for approval by {}", offerId, submitterEmail);
+        offer = offerRepository.save(offer);
+        return toResponse(offer);
     }
 
     @Override
     @Transactional
-    public void approve(java.util.UUID offerId, ApprovalDecisionRequest request, String approverEmail) {
-        Offer offer = findOfferOrThrow(offerId);
-        assertStatus(offer, OfferStatus.PENDING_APPROVAL, "approve");
-        User approver = findUserOrThrow(approverEmail);
+    public OfferApprovalResponse approveOrReject(UUID offerId, OfferApprovalRequest request, String userEmail) {
+        User user = userRepository.findByEmailAndDeletedFalse(userEmail)
+                .orElseThrow(() -> new BusinessException("User not found", HttpStatus.NOT_FOUND));
 
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new BusinessException("Offer not found", HttpStatus.NOT_FOUND));
+
+        if (offer.getStatus() != OfferStatus.PENDING_APPROVAL) {
+            throw new BusinessException("Can only approve/reject offers in PENDING_APPROVAL status", HttpStatus.BAD_REQUEST);
+        }
+
+        // Update offer status
+        if (request.getStatus() == ApprovalStatus.APPROVED) {
+            offer.setStatus(OfferStatus.APPROVED);
+        } else {
+            offer.setStatus(OfferStatus.REJECTED);
+        }
+        offerRepository.save(offer);
+
+        // Create approval record
         OfferApproval approval = OfferApproval.builder()
                 .offer(offer)
-                .approvedBy(approver)
-                .status(ApprovalStatus.APPROVED)
-                .comment(request.comment())
+                .approvedBy(user)
+                .status(request.getStatus())
+                .comment(request.getComment())
                 .build();
-        approvalRepository.save(approval);
+        approval = approvalRepository.save(approval);
 
-        offer.setStatus(OfferStatus.APPROVED);
-        offerRepository.save(offer);
-        log.info("Offer id={} approved by {}", offerId, approverEmail);
+        return toApprovalResponse(approval);
     }
 
     @Override
-    @Transactional
-    public void reject(java.util.UUID offerId, ApprovalDecisionRequest request, String approverEmail) {
-        Offer offer = findOfferOrThrow(offerId);
-        assertStatus(offer, OfferStatus.PENDING_APPROVAL, "reject");
-        User approver = findUserOrThrow(approverEmail);
+    public List<OfferApprovalResponse> getApprovalHistory(UUID offerId) {
+        return approvalRepository.findByOfferIdOrderByCreatedAtDesc(offerId).stream()
+                .map(this::toApprovalResponse)
+                .collect(Collectors.toList());
+    }
 
-        OfferApproval approval = OfferApproval.builder()
-                .offer(offer)
-                .approvedBy(approver)
-                .status(ApprovalStatus.REJECTED)
-                .comment(request.comment())
+    @Override
+    public byte[] generateOfferPdf(UUID offerId) {
+        Offer offer = offerRepository.findById(offerId)
+                .orElseThrow(() -> new BusinessException("Offer not found", HttpStatus.NOT_FOUND));
+
+        try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+            Document document = new Document(PageSize.A4);
+            PdfWriter.getInstance(document, baos);
+            document.open();
+
+            // Title
+            Font titleFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 20);
+            Paragraph title = new Paragraph("OFFER LETTER", titleFont);
+            title.setAlignment(Element.ALIGN_CENTER);
+            title.setSpacingAfter(30);
+            document.add(title);
+
+            // Company header
+            Font headerFont = FontFactory.getFont(FontFactory.HELVETICA_BOLD, 12);
+            Font normalFont = FontFactory.getFont(FontFactory.HELVETICA, 11);
+
+            document.add(new Paragraph("ATS - Applicant Tracking System", headerFont));
+            document.add(new Paragraph(" "));
+
+            // Date
+            String dateStr = offer.getCreatedAt() != null
+                    ? offer.getCreatedAt().format(DateTimeFormatter.ofPattern("MMMM dd, yyyy"))
+                    : "N/A";
+            document.add(new Paragraph("Date: " + dateStr, normalFont));
+            document.add(new Paragraph(" "));
+
+            // Candidate info
+            String candidateName = offer.getApplication() != null && offer.getApplication().getCandidate() != null
+                    ? offer.getApplication().getCandidate().getFullName()
+                    : "N/A";
+            document.add(new Paragraph("Dear " + candidateName + ",", normalFont));
+            document.add(new Paragraph(" "));
+
+            document.add(new Paragraph(
+                    "We are pleased to offer you the position of " + offer.getPositionTitle() + ".",
+                    normalFont));
+            document.add(new Paragraph(" "));
+
+            // Details
+            document.add(new Paragraph("Position: " + offer.getPositionTitle(), normalFont));
+            document.add(new Paragraph("Salary: $" + (offer.getSalary() != null ? offer.getSalary().toString() : "N/A"), normalFont));
+            if (offer.getStartDate() != null) {
+                document.add(new Paragraph("Start Date: " + offer.getStartDate().toString(), normalFont));
+            }
+            document.add(new Paragraph(" "));
+
+            if (offer.getBenefits() != null && !offer.getBenefits().isEmpty()) {
+                document.add(new Paragraph("Benefits:", headerFont));
+                document.add(new Paragraph(offer.getBenefits(), normalFont));
+                document.add(new Paragraph(" "));
+            }
+
+            if (offer.getNotes() != null && !offer.getNotes().isEmpty()) {
+                document.add(new Paragraph("Additional Notes:", headerFont));
+                document.add(new Paragraph(offer.getNotes(), normalFont));
+                document.add(new Paragraph(" "));
+            }
+
+            // Footer
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("We look forward to welcoming you to our team!", normalFont));
+            document.add(new Paragraph(" "));
+            document.add(new Paragraph("Sincerely,", normalFont));
+            document.add(new Paragraph("HR Department", normalFont));
+
+            document.close();
+            return baos.toByteArray();
+
+        } catch (Exception e) {
+            throw new BusinessException("Failed to generate PDF: " + e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    private OfferResponse toResponse(Offer offer) {
+        return OfferResponse.builder()
+                .id(offer.getId())
+                .applicationId(offer.getApplication() != null ? offer.getApplication().getId() : null)
+                .candidateName(offer.getApplication() != null && offer.getApplication().getCandidate() != null
+                        ? offer.getApplication().getCandidate().getFullName() : null)
+                .jobTitle(offer.getApplication() != null && offer.getApplication().getJob() != null
+                        ? offer.getApplication().getJob().getTitle() : null)
+                .salary(offer.getSalary())
+                .positionTitle(offer.getPositionTitle())
+                .startDate(offer.getStartDate())
+                .benefits(offer.getBenefits())
+                .notes(offer.getNotes())
+                .status(offer.getStatus())
+                .createdAt(offer.getCreatedAt())
                 .build();
-        approvalRepository.save(approval);
-
-        offer.setStatus(OfferStatus.REJECTED);
-        offerRepository.save(offer);
-        log.info("Offer id={} rejected by {}", offerId, approverEmail);
     }
 
-    // ==============================
-    // CANDIDATE SELF-SERVICE
-    // ==============================
-
-    @Override
-    @Transactional
-    public void candidateAccept(java.util.UUID offerId, String candidateEmail) {
-        Offer offer = findOfferOrThrow(offerId);
-        // Candidate can only accept an APPROVED or SENT offer
-        if (offer.getStatus() != OfferStatus.APPROVED && offer.getStatus() != OfferStatus.SENT) {
-            throw new BusinessException("Only APPROVED or SENT offers can be accepted.", HttpStatus.CONFLICT);
-        }
-
-        // Verify it belongs to candidate
-        Application app = findApplicationOrThrow(offer.getApplication().getId());
-        Candidate candidate = candidateRepository.findById(app.getCandidate().getId())
-                .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
-
-        if (!candidateEmail.equalsIgnoreCase(candidate.getEmail())) {
-            throw new BusinessException("You are not authorized to respond to this offer", HttpStatus.FORBIDDEN);
-        }
-
-        offer.setStatus(OfferStatus.APPROVED);
-        offerRepository.save(offer);
-        log.info("Offer id={} accepted by candidate {}", offerId, candidateEmail);
+    private OfferApprovalResponse toApprovalResponse(OfferApproval approval) {
+        return OfferApprovalResponse.builder()
+                .id(approval.getId())
+                .offerId(approval.getOffer() != null ? approval.getOffer().getId() : null)
+                .approvedByName(approval.getApprovedBy() != null ? approval.getApprovedBy().getFullName() : null)
+                .status(approval.getStatus())
+                .comment(approval.getComment())
+                .createdAt(approval.getCreatedAt())
+                .build();
     }
-
-    @Override
-    @Transactional
-    public void candidateReject(java.util.UUID offerId, String requestNotes, String candidateEmail) {
-        Offer offer = findOfferOrThrow(offerId);
-        // Candidate can only reject an APPROVED or SENT offer
-        if (offer.getStatus() != OfferStatus.APPROVED && offer.getStatus() != OfferStatus.SENT) {
-            throw new BusinessException("Only APPROVED or SENT offers can be rejected.", HttpStatus.CONFLICT);
-        }
-
-        // Verify it belongs to candidate
-        Application app = findApplicationOrThrow(offer.getApplication().getId());
-        Candidate candidate = candidateRepository.findById(app.getCandidate().getId())
-                .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
-
-        if (!candidateEmail.equalsIgnoreCase(candidate.getEmail())) {
-            throw new BusinessException("You are not authorized to respond to this offer", HttpStatus.FORBIDDEN);
-        }
-
-        offer.setStatus(OfferStatus.REJECTED);
-        if (requestNotes != null && !requestNotes.isBlank()) {
-            // offer notes mapping disabled
-        }
-        offerRepository.save(offer);
-        log.info("Offer id={} declined by candidate {}", offerId, candidateEmail);
-    }
-
-    // ==============================
-    // PDF GENERATION (delegated)
-    // ==============================
-
-    @Override
-    @Transactional(readOnly = true)
-    public byte[] generatePdf(java.util.UUID offerId) {
-        Offer offer = findOfferOrThrow(offerId);
-        Application application = findApplicationOrThrow(offer.getApplication().getId());
-        String candidateName = candidateRepository.findById(application.getCandidate().getId())
-                .map(Candidate::getFullName).orElse("Candidate");
-        String jobTitle = jobRepository.findById(application.getJob().getId())
-                .map(Job::getTitle).orElse("Position");
-
-        // return OfferPdfGenerator.generate(offer, candidateName, jobTitle);
-        return new byte[0]; // Placeholder for PDF generator
-    }
-
-    // ==============================
-    // Helpers
-    // ==============================
-
-    private void assertStatus(Offer offer, OfferStatus expected, String action) {
-        if (offer.getStatus() != expected) {
-            throw new BusinessException(
-                    "Cannot " + action + " an offer with status: " + offer.getStatus() + " (expected: " + expected + ")",
-                    HttpStatus.CONFLICT);
-        }
-    }
-
-    private OfferResponse enrichOfferResponse(Offer offer, Application application) {
-        String candidateName = candidateRepository.findById(application.getCandidate().getId())
-                .map(Candidate::getFullName).orElse("Unknown");
-        String jobTitle = jobRepository.findById(application.getJob().getId())
-                .map(Job::getTitle).orElse("Unknown");
-
-        List<OfferApprovalResponse> approvals = offer.getApprovals() != null ? offer.getApprovals().stream()
-                .map(a -> new OfferApprovalResponse(a.getId(), a.getApprovedBy().getId(), a.getApprovedBy().getFullName(), a.getStatus(), a.getComment(), a.getCreatedAt()))
-                .collect(Collectors.toList()) : Collections.emptyList();
-
-        return new OfferResponse(
-                offer.getId(), offer.getApplication().getId(), candidateName, jobTitle,
-                offer.getSalary(), offer.getPositionTitle(), offer.getStatus(),
-                offer.getStartDate(), offer.getExpiryDate(), offer.getNotes(),
-                offer.getCreatedBy(), offer.getCreatedAt(), offer.getLastModifiedDate(),
-                approvals);
-    }
-
-    private Offer findOfferOrThrow(java.util.UUID id) {
-        return offerRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Offer not found with id: " + id, HttpStatus.NOT_FOUND));
-    }
-
-    private Application findApplicationOrThrow(java.util.UUID id) {
-        return applicationRepository.findById(id)
-                .orElseThrow(() -> new BusinessException("Application not found with id: " + id, HttpStatus.NOT_FOUND));
-    }
-
-    private User findUserOrThrow(String email) {
-        return userRepository.findByEmail(email)
-                .orElseThrow(() -> new BusinessException("User not found with email: " + email, HttpStatus.NOT_FOUND));
-    }
-
 }
-

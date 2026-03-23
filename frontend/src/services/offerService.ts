@@ -1,67 +1,49 @@
-import { apiFetch } from "@/lib/api";
+import api from "@/lib/api";
 import type {
-    OfferResponse,
-    CreateOfferRequest,
-    UpdateOfferRequest,
-    ApprovalDecisionRequest,
-    OfferStatus,
-    Page,
-    PageParams,
-} from "@/types/models";
+  Offer,
+  OfferApproval,
+  CreateOfferRequest,
+  OfferApprovalRequest,
+} from "@/types/offer";
+
+const BASE_URL_API = import.meta.env.VITE_API_BASE_URL || "http://localhost:8386/api/v1";
 
 export const offerService = {
-    getAll(params: PageParams & { status?: OfferStatus } = {}) {
-        const { status, ...rest } = params;
-        return apiFetch<Page<OfferResponse>>("/offers", {
-            params: { page: rest.page ?? 0, size: rest.size ?? 10, status },
-        });
-    },
+  async createDraft(request: CreateOfferRequest): Promise<Offer> {
+    const { data } = await api.post<Offer>("/offers", request);
+    return data;
+  },
 
-    getById(id: number) {
-        return apiFetch<OfferResponse>(`/offers/${id}`);
-    },
+  async updateDraft(id: string, request: CreateOfferRequest): Promise<Offer> {
+    const { data } = await api.put<Offer>(`/offers/${id}`, request);
+    return data;
+  },
 
-    create(body: CreateOfferRequest) {
-        return apiFetch<OfferResponse>("/offers", { method: "POST", body });
-    },
+  async getOffer(id: string): Promise<Offer> {
+    const { data } = await api.get<Offer>(`/offers/${id}`);
+    return data;
+  },
 
-    update(id: number, body: UpdateOfferRequest) {
-        return apiFetch<OfferResponse>(`/offers/${id}`, { method: "PUT", body });
-    },
+  async getAllOffers(): Promise<Offer[]> {
+    const { data } = await api.get<Offer[]>("/offers");
+    return data;
+  },
 
-    submit(offerId: number) {
-        return apiFetch<void>(`/offers/${offerId}/submit`, { method: "POST" });
-    },
+  async submitForApproval(id: string): Promise<Offer> {
+    const { data } = await api.patch<Offer>(`/offers/${id}/submit`);
+    return data;
+  },
 
-    approve(offerId: number, body: ApprovalDecisionRequest) {
-        return apiFetch<void>(`/offers/${offerId}/approve`, {
-            method: "POST",
-            body,
-        });
-    },
+  async approveOrReject(id: string, request: OfferApprovalRequest): Promise<void> {
+    await api.post(`/offers/${id}/approval`, request);
+  },
 
-    reject(offerId: number, body: ApprovalDecisionRequest) {
-        return apiFetch<void>(`/offers/${offerId}/reject`, {
-            method: "POST",
-            body,
-        });
-    },
+  async getApprovalHistory(id: string): Promise<OfferApproval[]> {
+    const { data } = await api.get<OfferApproval[]>(`/offers/${id}/history`);
+    return data;
+  },
 
-    /** Returns PDF as blob URL — used for iframe preview */
-    getPreviewUrl(offerId: number): string {
-        const token = localStorage.getItem("accessToken");
-        // We need to fetch and create object URL
-        return `/api/v1/offers/${offerId}/preview?token=${token ?? ""}`;
-    },
-
-    async getPreviewBlob(offerId: number): Promise<string> {
-        const token = localStorage.getItem("accessToken");
-        const response = await fetch(
-            `${import.meta.env.VITE_API_URL || "http://localhost:8386/api/v1"}/offers/${offerId}/preview`,
-            { headers: { Authorization: `Bearer ${token}` } },
-        );
-        if (!response.ok) throw new Error("Failed to load PDF");
-        const blob = await response.blob();
-        return URL.createObjectURL(blob);
-    },
+  getOfferPdfUrl(id: string): string {
+    return `${BASE_URL_API}/offers/${id}/pdf`;
+  },
 };

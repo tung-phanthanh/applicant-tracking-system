@@ -1,42 +1,41 @@
 package fptu.sba301.ats.entity;
 
+import fptu.sba301.ats.enums.OnboardingStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
-@Table(name = "onboarding_checklists")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OnboardingChecklist {
+@Table(name = "onboarding_checklists")
+public class OnboardingChecklist extends BaseEntity {
 
     @Id
-    @org.hibernate.annotations.UuidGenerator
+    @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private java.util.UUID id;
+    private UUID id;
 
-    @Column(name = "application_id", nullable = false, unique = true)
-    private java.util.UUID applicationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_id")
+    private Application application;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    @Column(name = "title", nullable = false)
+    private String title;
 
-    @Column(name = "assigned_to")
-    private java.util.UUID assignedTo;
-
-    @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @OrderBy("displayOrder ASC, id ASC")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
     @Builder.Default
-    private List<OnboardingItem> items = new ArrayList<>();
+    private OnboardingStatus status = OnboardingStatus.NOT_STARTED;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
-    }
+    @OneToMany(mappedBy = "checklist", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OrderBy("sortOrder ASC")
+    private List<OnboardingTask> tasks;
 }

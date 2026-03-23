@@ -17,42 +17,21 @@ import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
+import ScorecardTemplatesPage from "@/pages/recruiter/ScorecardTemplatesPage";
+import InterviewScorecardPage from "@/pages/recruiter/InterviewScorecardPage";
+import CandidateRankingPage from "@/pages/recruiter/CandidateRankingPage";
+import OffersListPage from "@/pages/recruiter/OffersListPage";
+import OfferFormPage from "@/pages/recruiter/OfferFormPage";
+import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
+import OnboardingPage from "@/pages/recruiter/OnboardingPage";
+import JobsListPage from "@/pages/recruiter/JobsListPage";
 
-// Features
-// 1. Scorecard Templates
-import ScorecardTemplateListPage from "@/pages/recruiter/scorecard/ScorecardTemplateListPage";
-import ScorecardTemplateFormPage from "@/pages/recruiter/scorecard/ScorecardTemplateFormPage";
-import ScorecardTemplateDetailPage from "@/pages/recruiter/scorecard/ScorecardTemplateDetailPage";
-
-// 2. Interview Scorecard
-import InterviewsPage from "@/pages/recruiter/interviews/InterviewsPage";
-import InterviewEvaluationFormPage from "@/pages/recruiter/interviews/InterviewEvaluationFormPage";
-
-// 3. Candidate Evaluation Summary & 4. Candidate Ranking
-import CandidatesPage from "@/pages/recruiter/candidates/CandidatesPage";
-import CandidateEvaluationSummaryPage from "@/pages/recruiter/candidates/CandidateEvaluationSummaryPage";
-import CandidateRankingPage from "@/pages/recruiter/candidates/CandidateRankingPage";
-
-// 5, 6, 7. Offers
-import CreateOfferPage from "@/pages/recruiter/offers/CreateOfferPage";
-import OfferApprovalPage from "@/pages/recruiter/offers/OfferApprovalPage";
-import OfferPdfPreviewPage from "@/pages/recruiter/offers/OfferPdfPreviewPage";
-import SendOfferPage from "@/pages/recruiter/offers/SendOfferPage";
-
-// 8. Onboarding Checklist
-import OnboardingChecklistPage from "@/pages/recruiter/onboarding/OnboardingChecklistPage";
-
-// Jobs
-import JobsPage from "@/pages/recruiter/jobs/JobsPage";
-
-// Admin Pages
 import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import RolesPage from "@/pages/admin/RolesPage";
 import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 import SystemConfigPage from "@/pages/admin/SystemConfigPage";
 import AuditLogPage from "@/pages/admin/AuditLogPage";
-import NotificationsPage from "@/pages/admin/NotificationsPage";
-
+import NotificationsPage from "@/pages/admin/NotificationsPage"
 function App() {
   return (
     <BrowserRouter>
@@ -74,39 +53,26 @@ function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
-              <Route path="/notifications" element={<NotificationsPage />} />
 
-              {/* 1. Scorecard Templates */}
-              <Route path="/scorecards" element={<ScorecardTemplateListPage />} />
-              <Route path="/scorecards/new" element={<ScorecardTemplateFormPage />} />
-              <Route path="/scorecards/:id" element={<ScorecardTemplateDetailPage />} />
-              <Route path="/scorecards/:id/edit" element={<ScorecardTemplateFormPage />} />
+              {/* Placeholder routes */}
+              <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
 
-              {/* 2. Interview Scorecard */}
-              <Route path="/interviews" element={<InterviewsPage />} />
-              <Route path="/interviews/:interviewId/evaluate" element={<InterviewEvaluationFormPage />} />
+              {/* Interview scorecard — accessible to any authenticated user */}
+              <Route path="/interviews/:interviewId/scores" element={<InterviewScorecardPage />} />
 
-              {/* 3 & 4. Candidate Evaluation & Ranking */}
-              <Route path="/candidates" element={<CandidatesPage />} />
-              <Route path="/candidates/:applicationId/evaluation" element={<CandidateEvaluationSummaryPage />} />
-              <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
-
-              {/* 5, 6, 7. Offers */}
-              <Route path="/offers/create/:applicationId" element={<CreateOfferPage />} />
-              <Route path="/offers/:offerId/approve" element={<OfferApprovalPage />} />
-              <Route path="/offers/:offerId/preview" element={<OfferPdfPreviewPage />} />
-              <Route path="/offers/:offerId/send" element={<SendOfferPage />} />
-
-              {/* 8. Onboarding Checklist */}
-              <Route path="/onboarding/:applicationId" element={<OnboardingChecklistPage />} />
-
-              {/* Jobs */}
-              <Route path="/jobs" element={<JobsPage />} />
-
-              {/* HR-only route */}
+              {/* HR-only routes */}
               <Route element={<HrRoute />}>
-                <Route path="/hr/candidates" element={<CandidateListPage />} />
-                <Route path="/hr/candidates/:candidateId" element={<CandidateProfilePage />} />
+                <Route path="/jobs" element={<JobsListPage />} />
+                <Route path="/candidates" element={<CandidateListPage />} />
+                <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
+                <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
+                <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
+                <Route path="/offers" element={<OffersListPage />} />
+                <Route path="/offers/new" element={<OfferFormPage />} />
+                <Route path="/offers/:id" element={<OfferDetailPage />} />
+                <Route path="/offers/:id/edit" element={<OfferFormPage />} />
+                <Route path="/onboarding/:id" element={<OnboardingPage />} />
+                <Route path="/onboarding/application/:applicationId" element={<OnboardingPage />} />
               </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}
@@ -128,6 +94,14 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
+  );
+}
+
+function ComingSoon({ title }: { title: string }) {
+  return (
+    <div className="flex h-64 items-center justify-center text-muted-foreground">
+      <p className="text-lg font-medium">{title} — Coming Soon</p>
+    </div>
   );
 }
 

@@ -5,11 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
-public interface OnboardingChecklistRepository extends JpaRepository<OnboardingChecklist, java.util.UUID> {
-
-    java.util.Optional<OnboardingChecklist> findByApplicationId(java.util.UUID applicationId);
-
-    boolean existsByApplicationId(java.util.UUID applicationId);
+public interface OnboardingChecklistRepository extends JpaRepository<OnboardingChecklist, UUID> {
+    Optional<OnboardingChecklist> findByApplicationId(UUID applicationId);
 }

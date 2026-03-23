@@ -1,38 +1,33 @@
-import { apiFetch } from "@/lib/api";
-import type {
-    OnboardingChecklistResponse,
-    OnboardingItem,
-} from "@/types/models";
-
-export interface CreateChecklistRequest {
-    items: { taskName: string; assignedTo?: string; dueDate?: string }[];
-}
-
-export interface UpdateItemRequest {
-    taskName?: string;
-    assignedTo?: string;
-    dueDate?: string;
-    status?: "PENDING" | "IN_PROGRESS" | "DONE";
-}
+import api from "@/lib/api";
+import type { OnboardingChecklist, CreateOnboardingRequest } from "@/types/onboarding";
 
 export const onboardingService = {
-    getChecklist(applicationId: number) {
-        return apiFetch<OnboardingChecklistResponse>(
-            `/onboarding/${applicationId}/checklist`,
-        );
-    },
+  async create(request: CreateOnboardingRequest): Promise<OnboardingChecklist> {
+    const { data } = await api.post<OnboardingChecklist>("/onboarding", request);
+    return data;
+  },
 
-    createChecklist(applicationId: number, body: CreateChecklistRequest) {
-        return apiFetch<OnboardingChecklistResponse>(
-            `/onboarding/${applicationId}/checklist`,
-            { method: "POST", body },
-        );
-    },
+  async getById(id: string): Promise<OnboardingChecklist> {
+    const { data } = await api.get<OnboardingChecklist>(`/onboarding/${id}`);
+    return data;
+  },
 
-    updateItem(itemId: number, body: UpdateItemRequest) {
-        return apiFetch<OnboardingItem>(`/onboarding/items/${itemId}`, {
-            method: "PUT",
-            body,
-        });
-    },
+  async getByApplicationId(applicationId: string): Promise<OnboardingChecklist> {
+    const { data } = await api.get<OnboardingChecklist>(
+      `/onboarding/application/${applicationId}`,
+    );
+    return data;
+  },
+
+  async update(id: string, request: CreateOnboardingRequest): Promise<OnboardingChecklist> {
+    const { data } = await api.put<OnboardingChecklist>(`/onboarding/${id}`, request);
+    return data;
+  },
+
+  async toggleTask(checklistId: string, taskId: string): Promise<OnboardingChecklist> {
+    const { data } = await api.patch<OnboardingChecklist>(
+      `/onboarding/${checklistId}/tasks/${taskId}`,
+    );
+    return data;
+  },
 };

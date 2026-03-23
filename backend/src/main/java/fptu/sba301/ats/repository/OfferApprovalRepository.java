@@ -5,11 +5,9 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface OfferApprovalRepository extends JpaRepository<OfferApproval, java.util.UUID> {
-
-    List<OfferApproval> findByOfferIdOrderByCreatedAtDesc(java.util.UUID offerId);
-
-    boolean existsByOfferIdAndApprovedById(java.util.UUID offerId, java.util.UUID approvedById);
+public interface OfferApprovalRepository extends JpaRepository<OfferApproval, UUID> {
+    List<OfferApproval> findByOfferIdOrderByCreatedAtDesc(UUID offerId);
 }

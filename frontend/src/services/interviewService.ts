@@ -1,53 +1,18 @@
-import { apiFetch } from "@/lib/api";
-import type {
-    InterviewScoresResponse,
-    InterviewResponse,
-} from "@/types/models";
-
-export interface SubmitScoresBody {
-    recommendation?: string;
-    strengths?: string;
-    weaknesses?: string;
-    generalComment?: string;
-    scores: { criterionId: number; score: number; comment?: string }[];
-}
+import api from "@/lib/api";
+import type { InterviewScorecard, SubmitScoreRequest } from "@/types/interview";
 
 export const interviewService = {
-    getAllInterviews() {
-        return apiFetch<InterviewResponse[]>("/interviews");
-    },
+  async submitScores(interviewId: string, request: SubmitScoreRequest): Promise<void> {
+    await api.post(`/interviews/${interviewId}/scores`, request);
+  },
 
-    getUpcomingInterviews() {
-        return apiFetch<InterviewResponse[]>("/interviews/upcoming");
-    },
+  async getAllScorecards(interviewId: string): Promise<InterviewScorecard[]> {
+    const { data } = await api.get<InterviewScorecard[]>(`/interviews/${interviewId}/scores`);
+    return data;
+  },
 
-    getInterviewById(id: number) {
-        return apiFetch<InterviewResponse>(`/interviews/${id}`);
-    },
-
-    getScores(interviewId: number) {
-        return apiFetch<InterviewScoresResponse[]>(
-            `/interviews/${interviewId}/scores`,
-        );
-    },
-
-    getMyScores(interviewId: number) {
-        return apiFetch<InterviewScoresResponse>(
-            `/interviews/${interviewId}/scores/my`,
-        );
-    },
-
-    submitScores(interviewId: number, body: SubmitScoresBody) {
-        return apiFetch<InterviewScoresResponse>(
-            `/interviews/${interviewId}/scores`,
-            { method: "POST", body },
-        );
-    },
-
-    reschedule(interviewId: number, body: { scheduledAt: string; location?: string; type?: string }) {
-        return apiFetch<InterviewResponse>(
-            `/interviews/${interviewId}/reschedule`,
-            { method: "PUT", body },
-        );
-    },
+  async getMyScorecard(interviewId: string): Promise<InterviewScorecard> {
+    const { data } = await api.get<InterviewScorecard>(`/interviews/${interviewId}/scores/me`);
+    return data;
+  },
 };

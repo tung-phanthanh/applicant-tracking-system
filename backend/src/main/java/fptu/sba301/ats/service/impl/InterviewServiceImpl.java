@@ -1,19 +1,17 @@
 package fptu.sba301.ats.service.impl;
 
-import fptu.sba301.ats.dto.response.InterviewResponse;
-import fptu.sba301.ats.entity.Application;
-import fptu.sba301.ats.entity.Candidate;
-import fptu.sba301.ats.entity.Interview;
-import fptu.sba301.ats.entity.Job;
-import fptu.sba301.ats.repository.ApplicationRepository;
-import fptu.sba301.ats.repository.CandidateRepository;
-import fptu.sba301.ats.repository.InterviewRepository;
-import fptu.sba301.ats.repository.JobRepository;
+import fptu.sba301.ats.dto.request.SubmitInterviewScoreRequest;
+import fptu.sba301.ats.dto.response.InterviewScorecardResponse;
+import fptu.sba301.ats.entity.*;
+import fptu.sba301.ats.exception.BusinessException;
+import fptu.sba301.ats.repository.*;
 import fptu.sba301.ats.service.InterviewService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -21,55 +19,115 @@ import java.util.stream.Collectors;
 public class InterviewServiceImpl implements InterviewService {
 
     private final InterviewRepository interviewRepository;
-    private final ApplicationRepository applicationRepository;
-    private final CandidateRepository candidateRepository;
-    private final JobRepository jobRepository;
+    private final InterviewScoreRepository scoreRepository;
+    private final InterviewParticipantRepository participantRepository;
+    private final ScorecardCriterionRepository criterionRepository;
+    private final UserRepository userRepository;
 
     @Override
-    public List<InterviewResponse> getAllInterviews() {
-        return interviewRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+    @Transactional
+    public void submitScores(UUID interviewId, SubmitInterviewScoreRequest request, String userEmail) {
+        User user = userRepository.findByEmailAndDeletedFalse(userEmail)
+                .orElseThrow(() -> new BusinessException("User not found", HttpStatus.NOT_FOUND));
 
-    @Override
-    public List<InterviewResponse> getUpcomingInterviews() {
-        return interviewRepository.findAll().stream()
-                .map(this::mapToResponse)
-                .collect(Collectors.toList());
-    }
+        Interview interview = interviewRepository.findById(interviewId)
+                .orElseThrow(() -> new BusinessException("Interview not found", HttpStatus.NOT_FOUND));
 
-    @Override
-    public InterviewResponse getInterviewById(java.util.UUID id) {
-        Interview interview = interviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Interview not found: " + id));
-        return mapToResponse(interview);
-    }
+        // Check the user is a participant
+        InterviewParticipant participant = participantRepository
+                .findByIdInterviewIdAndIdUserId(interviewId, user.getId())
+                .orElseThrow(() -> new BusinessException("You are not a participant of this interview", HttpStatus.FORBIDDEN));
 
-    private InterviewResponse mapToResponse(Interview interview) {
-        String candidateName = "Unknown Candidate";
-        String jobTitle = "Unknown Job";
-
-        Application application = applicationRepository.findById(interview.getApplication().getId()).orElse(null);
-        if (application != null) {
-            candidateName = candidateRepository.findById(application.getCandidate().getId())
-                    .map(Candidate::getFullName)
-                    .orElse("Unknown Candidate");
-            jobTitle = jobRepository.findById(application.getJob().getId())
-                    .map(Job::getTitle)
-                    .orElse("Unknown Job");
+        // Check no duplicate submission
+        List<InterviewScore> existingScores = scoreRepository
+                .findByInterviewIdAndUserId(interviewId, user.getId());
+        if (!existingScores.isEmpty()) {
+            throw new BusinessException("You have already submitted scores for this interview", HttpStatus.CONFLICT);
         }
 
-        return InterviewResponse.builder()
-                .id(interview.getId())
-                .applicationId(interview.getApplication().getId())
-                .scheduledAt(interview.getScheduledAt())
-                .location(interview.getLocation())
-                .status(interview.getStatus())
-                .candidateName(candidateName)
-                .jobTitle(jobTitle)
-                .type(interview.getLocation() != null && !interview.getLocation().isEmpty() ? "On-site" : "Online")
-                .participant("Hiring Team")
+        // Save scores
+        List<InterviewScore> scores = request.getScores().stream()
+                .map(entry -> {
+                    ScorecardCriterion criterion = criterionRepository.findById(entry.getCriterionId())
+                            .orElseThrow(() -> new BusinessException(
+                                    "Criterion not found: " + entry.getCriterionId(), HttpStatus.NOT_FOUND));
+
+                    return InterviewScore.builder()
+                            .interview(interview)
+                            .userId(user.getId())
+                            .criterion(criterion)
+                            .score(entry.getScore())
+                            .comment(entry.getComment())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        scoreRepository.saveAll(scores);
+
+        // Compute and save overall score on participant
+        int totalScore = request.getScores().stream()
+                .mapToInt(SubmitInterviewScoreRequest.ScoreEntry::getScore)
+                .sum();
+        int avgScore = totalScore / request.getScores().size();
+        participant.setOverallScore(avgScore);
+        participantRepository.save(participant);
+    }
+
+    @Override
+    public InterviewScorecardResponse getMyScorecard(UUID interviewId, String userEmail) {
+        User user = userRepository.findByEmailAndDeletedFalse(userEmail)
+                .orElseThrow(() -> new BusinessException("User not found", HttpStatus.NOT_FOUND));
+
+        List<InterviewScore> scores = scoreRepository
+                .findByInterviewIdAndUserId(interviewId, user.getId());
+
+        InterviewParticipant participant = participantRepository
+                .findByIdInterviewIdAndIdUserId(interviewId, user.getId())
+                .orElseThrow(() -> new BusinessException("You are not a participant of this interview", HttpStatus.FORBIDDEN));
+
+        return buildScorecardResponse(interviewId, user, participant, scores);
+    }
+
+    @Override
+    public List<InterviewScorecardResponse> getAllScorecards(UUID interviewId) {
+        if (!interviewRepository.existsById(interviewId)) {
+            throw new BusinessException("Interview not found", HttpStatus.NOT_FOUND);
+        }
+
+        List<InterviewParticipant> participants = participantRepository.findByIdInterviewId(interviewId);
+        List<InterviewScore> allScores = scoreRepository.findByInterviewId(interviewId);
+
+        // Group scores by userId
+        Map<UUID, List<InterviewScore>> scoresByUser = allScores.stream()
+                .collect(Collectors.groupingBy(InterviewScore::getUserId));
+
+        return participants.stream()
+                .map(p -> {
+                    List<InterviewScore> userScores = scoresByUser.getOrDefault(
+                            p.getId().getUserId(), Collections.emptyList());
+                    return buildScorecardResponse(interviewId, p.getUser(), p, userScores);
+                })
+                .collect(Collectors.toList());
+    }
+
+    private InterviewScorecardResponse buildScorecardResponse(
+            UUID interviewId, User user, InterviewParticipant participant,
+            List<InterviewScore> scores) {
+        return InterviewScorecardResponse.builder()
+                .interviewId(interviewId)
+                .participantUserId(user.getId())
+                .participantName(user.getFullName())
+                .overallScore(participant.getOverallScore())
+                .feedback(participant.getFeedback())
+                .scores(scores.stream()
+                        .map(s -> InterviewScorecardResponse.ScoreDetail.builder()
+                                .criterionId(s.getCriterion().getId())
+                                .criterionName(s.getCriterion().getName())
+                                .weight(s.getCriterion().getWeight())
+                                .score(s.getScore())
+                                .comment(s.getComment())
+                                .build())
+                        .collect(Collectors.toList()))
                 .build();
     }
 }

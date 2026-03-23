@@ -1,16 +1,14 @@
 package fptu.sba301.ats.service;
 
-import fptu.sba301.ats.dto.request.CreateOnboardingChecklistRequest;
-import fptu.sba301.ats.dto.request.UpdateOnboardingItemRequest;
+import fptu.sba301.ats.dto.request.CreateOnboardingRequest;
 import fptu.sba301.ats.dto.response.OnboardingChecklistResponse;
-import fptu.sba301.ats.dto.response.OnboardingItemResponse;
+
+import java.util.UUID;
 
 public interface OnboardingService {
-
-    OnboardingChecklistResponse createChecklist(java.util.UUID applicationId,
-            CreateOnboardingChecklistRequest request);
-
-    OnboardingChecklistResponse getChecklist(java.util.UUID applicationId);
-
-    OnboardingItemResponse updateItem(java.util.UUID itemId, UpdateOnboardingItemRequest request);
+    OnboardingChecklistResponse create(CreateOnboardingRequest request);
+    OnboardingChecklistResponse getById(UUID id);
+    OnboardingChecklistResponse getByApplicationId(UUID applicationId);
+    OnboardingChecklistResponse update(UUID id, CreateOnboardingRequest request);
+    OnboardingChecklistResponse toggleTask(UUID checklistId, UUID taskId);
 }

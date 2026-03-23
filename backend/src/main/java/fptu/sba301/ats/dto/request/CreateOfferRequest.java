@@ -1,28 +1,32 @@
 package fptu.sba301.ats.dto.request;
 
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.UUID;
 
-public record CreateOfferRequest(
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class CreateOfferRequest {
 
-        @NotNull(message = "Application ID is required") java.util.UUID applicationId,
+    @NotNull(message = "Candidate ID is required")
+    private UUID candidateId;
 
-        @NotNull(message = "Salary is required") @DecimalMin(value = "0", inclusive = true, message = "Salary must be non-negative") BigDecimal salary,
+    @NotNull(message = "Salary is required")
+    private BigDecimal salary;
 
-        @NotBlank(message = "Position title is required") @Size(max = 255, message = "Position title must not exceed 255 characters") String positionTitle,
+    @NotBlank(message = "Position title is required")
+    private String positionTitle;
 
-        @NotNull(message = "Start date is required") @FutureOrPresent(message = "Start date must be today or in the future") LocalDate startDate,
-
-        @Future(message = "Expiry date must be in the future") LocalDate expiryDate,
-
-        @Size(max = 2000, message = "Notes must not exceed 2000 characters") String notes) {
-
-    @AssertTrue(message = "Expiry date must be after start date")
-    public boolean isExpiryAfterStart() {
-        if (expiryDate == null || startDate == null)
-            return true;
-        return expiryDate.isAfter(startDate);
-    }
+    private LocalDate startDate;
+    private String benefits;
+    private String notes;
 }

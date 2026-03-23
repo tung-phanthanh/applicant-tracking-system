@@ -2,7 +2,8 @@ package fptu.sba301.ats.controller;
 
 import fptu.sba301.ats.dto.request.ApprovalDecisionRequest;
 import fptu.sba301.ats.dto.request.CreateOfferRequest;
-import fptu.sba301.ats.dto.request.UpdateOfferRequest;
+import fptu.sba301.ats.dto.request.OfferApprovalRequest;
+import fptu.sba301.ats.dto.response.OfferApprovalResponse;
 import fptu.sba301.ats.dto.response.OfferResponse;
 import fptu.sba301.ats.enums.OfferStatus;
 import fptu.sba301.ats.security.SecurityUtils;
@@ -16,7 +17,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 import static fptu.sba301.ats.constant.AppConstant.BASE_URL;
 
@@ -28,92 +33,61 @@ public class OfferController {
     private final OfferService offerService;
 
     @PostMapping
-    @PreAuthorize("hasAuthority('OFFER_DRAFT')")
-    public ResponseEntity<OfferResponse> create(
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<OfferResponse> createDraft(
             @Valid @RequestBody CreateOfferRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(offerService.create(request, email));
-    }
-
-    @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('OFFER_VIEW')")
-    public ResponseEntity<OfferResponse> getById(@PathVariable java.util.UUID id) {
-        return ResponseEntity.ok(offerService.getById(id));
+                .body(offerService.createDraft(request));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('OFFER_DRAFT')")
-    public ResponseEntity<OfferResponse> update(
-            @PathVariable java.util.UUID id,
-            @Valid @RequestBody UpdateOfferRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        return ResponseEntity.ok(offerService.update(id, request, email));
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<OfferResponse> updateDraft(
+            @PathVariable UUID id,
+            @Valid @RequestBody CreateOfferRequest request) {
+        return ResponseEntity.ok(offerService.updateDraft(id, request));
     }
 
     @GetMapping
-    @PreAuthorize("hasAuthority('OFFER_VIEW')")
-    public ResponseEntity<Page<OfferResponse>> getAll(
-            @RequestParam(required = false) OfferStatus status,
-            Pageable pageable) {
-        return ResponseEntity.ok(offerService.getAll(status, pageable));
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<OfferResponse>> getAllOffers() {
+        return ResponseEntity.ok(offerService.getAllOffers());
     }
 
-    @PostMapping("/{offerId}/submit")
-    @PreAuthorize("hasAuthority('OFFER_DRAFT')")
-    public ResponseEntity<Void> submit(@PathVariable java.util.UUID offerId) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        offerService.submitForApproval(offerId, email);
-        return ResponseEntity.noContent().build();
+    @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<OfferResponse> getOffer(@PathVariable UUID id) {
+        return ResponseEntity.ok(offerService.getOffer(id));
     }
 
-    @PostMapping("/{offerId}/approve")
-    @PreAuthorize("hasAuthority('OFFER_APPROVE')")
-    public ResponseEntity<Void> approve(
-            @PathVariable java.util.UUID offerId,
-            @Valid @RequestBody ApprovalDecisionRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        offerService.approve(offerId, request, email);
-        return ResponseEntity.noContent().build();
+    @PatchMapping("/{id}/submit")
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<OfferResponse> submitForApproval(@PathVariable UUID id) {
+        return ResponseEntity.ok(offerService.submitForApproval(id));
     }
 
-    @PostMapping("/{offerId}/reject")
-    @PreAuthorize("hasAuthority('OFFER_APPROVE')")
-    public ResponseEntity<Void> reject(
-            @PathVariable java.util.UUID offerId,
-            @Valid @RequestBody ApprovalDecisionRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        offerService.reject(offerId, request, email);
-        return ResponseEntity.noContent().build();
+    @PostMapping("/{id}/approval")
+    @PreAuthorize("hasAnyAuthority('HR_MANAGER')")
+    public ResponseEntity<OfferApprovalResponse> approveOrReject(
+            @PathVariable UUID id,
+            @Valid @RequestBody OfferApprovalRequest request,
+            Authentication authentication) {
+        return ResponseEntity.ok(offerService.approveOrReject(id, request, authentication.getName()));
     }
 
-    @PostMapping("/{offerId}/accept")
-    @PreAuthorize("hasAuthority('CANDIDATE')")
-    public ResponseEntity<Void> candidateAccept(@PathVariable java.util.UUID offerId) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        offerService.candidateAccept(offerId, email);
-        return ResponseEntity.noContent().build();
+    @GetMapping({"/{id}/approvals", "/{id}/history"})
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<OfferApprovalResponse>> getApprovalHistory(@PathVariable UUID id) {
+        return ResponseEntity.ok(offerService.getApprovalHistory(id));
     }
 
-    @PostMapping("/{offerId}/decline")
-    @PreAuthorize("hasAuthority('CANDIDATE')")
-    public ResponseEntity<Void> candidateReject(
-            @PathVariable java.util.UUID offerId,
-            @Valid @RequestBody(required = false) fptu.sba301.ats.dto.request.CandidateRejectOfferRequest request) {
-        String email = SecurityUtils.getCurrentUserEmail();
-        String notes = (request != null) ? request.notes() : null;
-        offerService.candidateReject(offerId, notes, email);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/{offerId}/preview")
-    @PreAuthorize("hasAuthority('OFFER_PDF_PREVIEW')")
-    public ResponseEntity<byte[]> preview(@PathVariable java.util.UUID offerId) {
-        byte[] pdf = offerService.generatePdf(offerId);
-        return ResponseEntity.ok()
-                .contentType(java.util.Objects.requireNonNull(MediaType.APPLICATION_PDF))
-                .header(HttpHeaders.CONTENT_DISPOSITION,
-                        "inline; filename=\"offer-" + offerId + ".pdf\"")
-                .body(pdf);
+    @GetMapping("/{id}/pdf")
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<byte[]> getOfferPdf(@PathVariable UUID id) {
+        byte[] pdfBytes = offerService.generateOfferPdf(id);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_PDF);
+        headers.setContentDispositionFormData("inline", "offer-" + id + ".pdf");
+        return new ResponseEntity<>(pdfBytes, headers, HttpStatus.OK);
     }
 }

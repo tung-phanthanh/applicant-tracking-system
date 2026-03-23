@@ -11,11 +11,13 @@ import {
     Settings,
     History,
     Bell,
+    ClipboardList,
+    Gift,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
-const primaryNavItems = [
+const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
@@ -24,6 +26,11 @@ const primaryNavItems = [
 const commonItems = [
     { to: "/notifications", icon: Bell, label: "Notifications" },
     { to: "/profile", icon: User, label: "My Profile" },
+];
+
+const hrNavItems = [
+    { to: "/scorecard-templates", icon: ClipboardList, label: "Scorecards" },
+    { to: "/offers", icon: Gift, label: "Offers" },
 ];
 
 const adminNavItems = [
@@ -39,6 +46,7 @@ export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
     const isHr = user?.role === "HR";
+    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -55,7 +63,7 @@ export default function Sidebar() {
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
                 <ul className="space-y-1">
-                    {primaryNavItems.map(({ to, icon: Icon, label }) => (
+                    {navItems.map(({ to, icon: Icon, label }) => (
                         <li key={to}>
                             <NavLink
                                 to={to}
@@ -74,7 +82,7 @@ export default function Sidebar() {
                         </li>
                     ))}
 
-                    {isHr && (
+                    {(isHr || isHrManager) && (
                         <li>
                             <NavLink
                                 to="/candidates"
@@ -91,6 +99,35 @@ export default function Sidebar() {
                                 Candidates
                             </NavLink>
                         </li>
+                    )}
+
+                    {/* HR Section */}
+                    {(isHr || isHrManager) && (
+                        <>
+                            <li className="pt-3">
+                                <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Recruitment
+                                </p>
+                            </li>
+                            {hrNavItems.map(({ to, icon: Icon, label }) => (
+                                <li key={to}>
+                                    <NavLink
+                                        to={to}
+                                        className={({ isActive }) =>
+                                            cn(
+                                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                                isActive
+                                                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                            )
+                                        }
+                                    >
+                                        <Icon className="h-4 w-4 shrink-0" />
+                                        {label}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </>
                     )}
 
                     {/* Admin section */}
@@ -159,3 +196,4 @@ export default function Sidebar() {
         </aside>
     );
 }
+

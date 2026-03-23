@@ -1,98 +1,35 @@
-import { apiFetch } from "@/lib/api";
-import type {
-    ScorecardTemplate,
-    ScorecardCriterion,
-    Page,
-    PageParams,
-} from "@/types/models";
-
-export interface CreateTemplateRequest {
-    name: string;
-    departmentId?: number;
-    description?: string;
-    criteria?: { name: string; weight: number }[];
-}
-
-export interface UpdateTemplateRequest {
-    name?: string;
-    departmentId?: number;
-    description?: string;
-}
-
-export interface CreateCriterionRequest {
-    name: string;
-    weight: number;
-}
-
-function pageToParams(p: PageParams): Record<string, string | number | boolean | undefined> {
-    return { page: p.page ?? 0, size: p.size ?? 10, sort: p.sort };
-}
+import api from "@/lib/api";
+import type { ScorecardTemplate, CreateScorecardTemplateRequest } from "@/types/scorecard";
 
 export const scorecardService = {
-    getAll(params: PageParams = {}) {
-        return apiFetch<Page<ScorecardTemplate>>("/scorecards/templates", {
-            params: pageToParams(params),
-        });
-    },
+  async getAll(): Promise<ScorecardTemplate[]> {
+    const { data } = await api.get<ScorecardTemplate[]>("/scorecard-templates");
+    return data;
+  },
 
-    getById(id: number) {
-        return apiFetch<ScorecardTemplate>(`/scorecards/templates/${id}`);
-    },
+  async getById(id: string): Promise<ScorecardTemplate> {
+    const { data } = await api.get<ScorecardTemplate>(`/scorecard-templates/${id}`);
+    return data;
+  },
 
-    create(body: CreateTemplateRequest) {
-        return apiFetch<ScorecardTemplate>("/scorecards/templates", {
-            method: "POST",
-            body,
-        });
-    },
+  async getByDepartment(departmentId: string): Promise<ScorecardTemplate[]> {
+    const { data } = await api.get<ScorecardTemplate[]>(
+      `/scorecard-templates/department/${departmentId}`,
+    );
+    return data;
+  },
 
-    update(id: number, body: UpdateTemplateRequest) {
-        return apiFetch<ScorecardTemplate>(`/scorecards/templates/${id}`, {
-            method: "PUT",
-            body,
-        });
-    },
+  async create(request: CreateScorecardTemplateRequest): Promise<ScorecardTemplate> {
+    const { data } = await api.post<ScorecardTemplate>("/scorecard-templates", request);
+    return data;
+  },
 
-    delete(id: number) {
-        return apiFetch<void>(`/scorecards/templates/${id}`, { method: "DELETE" });
-    },
+  async update(id: string, request: CreateScorecardTemplateRequest): Promise<ScorecardTemplate> {
+    const { data } = await api.put<ScorecardTemplate>(`/scorecard-templates/${id}`, request);
+    return data;
+  },
 
-    archive(id: number) {
-        return apiFetch<ScorecardTemplate>(`/scorecards/templates/${id}/archive`, {
-            method: "PATCH",
-        });
-    },
-
-    unarchive(id: number) {
-        return apiFetch<ScorecardTemplate>(`/scorecards/templates/${id}/unarchive`, {
-            method: "PATCH",
-        });
-    },
-
-    addCriterion(templateId: number, body: CreateCriterionRequest) {
-        return apiFetch<ScorecardCriterion>(
-            `/scorecards/templates/${templateId}/criteria`,
-            { method: "POST", body },
-        );
-    },
-
-    updateCriterion(criterionId: number, body: CreateCriterionRequest) {
-        return apiFetch<ScorecardCriterion>(`/scorecards/criteria/${criterionId}`, {
-            method: "PUT",
-            body,
-        });
-    },
-
-    deleteCriterion(criterionId: number) {
-        return apiFetch<void>(`/scorecards/criteria/${criterionId}`, {
-            method: "DELETE",
-        });
-    },
-
-    reorderCriteria(templateId: number, orderedIds: number[]) {
-        return apiFetch<void>(
-            `/scorecards/templates/${templateId}/criteria/reorder`,
-            { method: "PUT", body: orderedIds },
-        );
-    },
+  async remove(id: string): Promise<void> {
+    await api.delete(`/scorecard-templates/${id}`);
+  },
 };

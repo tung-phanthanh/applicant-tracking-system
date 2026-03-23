@@ -1,155 +1,194 @@
 package fptu.sba301.ats.service.impl;
 
-import fptu.sba301.ats.dto.request.CreateOnboardingChecklistRequest;
-import fptu.sba301.ats.dto.request.UpdateOnboardingItemRequest;
+import fptu.sba301.ats.dto.request.CreateOnboardingRequest;
 import fptu.sba301.ats.dto.response.OnboardingChecklistResponse;
-import fptu.sba301.ats.dto.response.OnboardingItemResponse;
-import fptu.sba301.ats.entity.*;
-import fptu.sba301.ats.enums.ApplicationStage;
-import fptu.sba301.ats.enums.ChecklistItemStatus;
+import fptu.sba301.ats.entity.Application;
+import fptu.sba301.ats.entity.OnboardingChecklist;
+import fptu.sba301.ats.entity.OnboardingTask;
+import fptu.sba301.ats.entity.User;
+import fptu.sba301.ats.enums.OnboardingStatus;
 import fptu.sba301.ats.exception.BusinessException;
-import fptu.sba301.ats.mapper.OnboardingMapper;
-import fptu.sba301.ats.repository.*;
+import fptu.sba301.ats.repository.ApplicationRepository;
+import fptu.sba301.ats.repository.OnboardingChecklistRepository;
+import fptu.sba301.ats.repository.OnboardingTaskRepository;
+import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.service.OnboardingService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.log4j.Log4j2;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-@Log4j2
 public class OnboardingServiceImpl implements OnboardingService {
 
     private final OnboardingChecklistRepository checklistRepository;
-    private final OnboardingItemRepository itemRepository;
+    private final OnboardingTaskRepository taskRepository;
     private final ApplicationRepository applicationRepository;
-    private final CandidateRepository candidateRepository;
-    private final OnboardingMapper mapper;
-
-    // ==============================
-    // CREATE CHECKLIST
-    // ==============================
+    private final UserRepository userRepository;
 
     @Override
     @Transactional
-    public OnboardingChecklistResponse createChecklist(java.util.UUID applicationId,
-            CreateOnboardingChecklistRequest request) {
-
-        Application application = applicationRepository.findById(applicationId)
-                .orElseThrow(() -> new BusinessException(
-                        "Application not found with id: " + applicationId, HttpStatus.NOT_FOUND));
-
-        // Guard: candidate must be HIRED
-        if (application.getStage() != ApplicationStage.HIRED) {
-            throw new BusinessException(
-                    "Onboarding checklist can only be created for HIRED candidates (current stage: "
-                            + application.getStage() + ")", HttpStatus.CONFLICT);
-        }
-
-        // Guard: checklist already exists
-        if (checklistRepository.existsByApplicationId(applicationId)) {
-            throw new BusinessException(
-                    "Onboarding checklist already exists for application " + applicationId, HttpStatus.CONFLICT);
-        }
+    public OnboardingChecklistResponse create(CreateOnboardingRequest request) {
+        Application application = applicationRepository.findById(request.getApplicationId())
+                .orElseThrow(() -> new BusinessException("Application not found", HttpStatus.NOT_FOUND));
 
         OnboardingChecklist checklist = OnboardingChecklist.builder()
-                .applicationId(applicationId)
+                .application(application)
+                .title(request.getTitle())
+                .status(OnboardingStatus.NOT_STARTED)
+                .tasks(new ArrayList<>())
                 .build();
         checklist = checklistRepository.save(checklist);
 
-        // Build items with auto-incremented order if not supplied
-        final OnboardingChecklist savedChecklist = checklist;
-        AtomicInteger order = new AtomicInteger(1);
-        List<OnboardingItem> items = request.items().stream().map(req -> {
-            OnboardingItem item = mapper.toEntity(req);
-            item.setChecklist(savedChecklist);
-            item.setStatus(ChecklistItemStatus.PENDING);
-            if (item.getDisplayOrder() == null)
-                item.setDisplayOrder(order.getAndIncrement());
-            return item;
-        }).collect(Collectors.toList());
+        if (request.getTasks() != null && !request.getTasks().isEmpty()) {
+            OnboardingChecklist savedChecklist = checklist;
+            List<OnboardingTask> tasks = request.getTasks().stream()
+                    .map(entry -> {
+                        User assignedTo = null;
+                        if (entry.getAssignedToUserId() != null) {
+                            assignedTo = userRepository.findById(entry.getAssignedToUserId()).orElse(null);
+                        }
+                        return OnboardingTask.builder()
+                                .checklist(savedChecklist)
+                                .title(entry.getTitle())
+                                .description(entry.getDescription())
+                                .sortOrder(entry.getSortOrder() != null ? entry.getSortOrder() : 0)
+                                .dueDate(entry.getDueDate())
+                                .assignedTo(assignedTo)
+                                .completed(false)
+                                .build();
+                    })
+                    .collect(Collectors.toList());
+            taskRepository.saveAll(tasks);
+            checklist.setTasks(tasks);
+        }
 
-        itemRepository.saveAll(items);
-        checklist.setItems(items);
-
-        log.info("Created onboarding checklist for applicationId={}", applicationId);
-        return buildChecklistResponse(checklist, application);
+        return toResponse(checklist);
     }
-
-    // ==============================
-    // GET CHECKLIST
-    // ==============================
 
     @Override
-    @Transactional(readOnly = true)
-    public OnboardingChecklistResponse getChecklist(java.util.UUID applicationId) {
-        OnboardingChecklist checklist = checklistRepository.findByApplicationId(applicationId)
-                .orElseThrow(() -> new BusinessException(
-                        "Onboarding checklist not found for application " + applicationId, HttpStatus.NOT_FOUND));
-        Application application = applicationRepository.findById(applicationId).orElseThrow();
-        return buildChecklistResponse(checklist, application);
+    public OnboardingChecklistResponse getById(UUID id) {
+        OnboardingChecklist checklist = checklistRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Onboarding checklist not found", HttpStatus.NOT_FOUND));
+        return toResponse(checklist);
     }
 
-    // ==============================
-    // UPDATE ITEM
-    // ==============================
+    @Override
+    public OnboardingChecklistResponse getByApplicationId(UUID applicationId) {
+        OnboardingChecklist checklist = checklistRepository.findByApplicationId(applicationId)
+                .orElseThrow(() -> new BusinessException("Onboarding checklist not found for this application", HttpStatus.NOT_FOUND));
+        return toResponse(checklist);
+    }
 
     @Override
     @Transactional
-    public OnboardingItemResponse updateItem(java.util.UUID itemId, UpdateOnboardingItemRequest request) {
-        OnboardingItem item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new BusinessException(
-                        "Onboarding item not found with id: " + itemId, HttpStatus.NOT_FOUND));
+    public OnboardingChecklistResponse update(UUID id, CreateOnboardingRequest request) {
+        OnboardingChecklist checklist = checklistRepository.findById(id)
+                .orElseThrow(() -> new BusinessException("Onboarding checklist not found", HttpStatus.NOT_FOUND));
 
-        if (request.title() != null)
-            item.setTitle(request.title());
-        if (request.description() != null)
-            item.setDescription(request.description());
-        if (request.assignedTo() != null)
-            item.setAssignedTo(request.assignedTo());
-        if (request.dueDate() != null)
-            item.setDueDate(request.dueDate());
+        checklist.setTitle(request.getTitle());
 
-        if (request.status() != null) {
-            ChecklistItemStatus oldStatus = item.getStatus();
-            item.setStatus(request.status());
-            // Auto-manage completedAt
-            if (request.status() == ChecklistItemStatus.DONE && oldStatus != ChecklistItemStatus.DONE) {
-                item.setCompletedAt(Instant.now());
-            } else if (request.status() != ChecklistItemStatus.DONE) {
-                item.setCompletedAt(null);
+        // Clear and rebuild tasks
+        checklist.getTasks().clear();
+        if (request.getTasks() != null) {
+            for (CreateOnboardingRequest.TaskEntry entry : request.getTasks()) {
+                User assignedTo = null;
+                if (entry.getAssignedToUserId() != null) {
+                    assignedTo = userRepository.findById(entry.getAssignedToUserId()).orElse(null);
+                }
+                OnboardingTask task = OnboardingTask.builder()
+                        .checklist(checklist)
+                        .title(entry.getTitle())
+                        .description(entry.getDescription())
+                        .sortOrder(entry.getSortOrder() != null ? entry.getSortOrder() : 0)
+                        .dueDate(entry.getDueDate())
+                        .assignedTo(assignedTo)
+                        .completed(false)
+                        .build();
+                checklist.getTasks().add(task);
             }
         }
 
-        return mapper.toResponse(itemRepository.save(item));
+        updateChecklistStatus(checklist);
+        checklist = checklistRepository.save(checklist);
+        return toResponse(checklist);
     }
 
-    // ==============================
-    // Helpers
-    // ==============================
+    @Override
+    @Transactional
+    public OnboardingChecklistResponse toggleTask(UUID checklistId, UUID taskId) {
+        OnboardingChecklist checklist = checklistRepository.findById(checklistId)
+                .orElseThrow(() -> new BusinessException("Onboarding checklist not found", HttpStatus.NOT_FOUND));
 
-    private OnboardingChecklistResponse buildChecklistResponse(OnboardingChecklist checklist,
-            Application application) {
-        String candidateName = candidateRepository.findById(application.getCandidate().getId())
-                .map(Candidate::getFullName).orElse("Unknown");
+        OnboardingTask task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new BusinessException("Task not found", HttpStatus.NOT_FOUND));
 
-        List<OnboardingItemResponse> itemResponses = checklist.getItems().stream()
-                .map(mapper::toResponse)
-                .collect(Collectors.toList());
+        if (!task.getChecklist().getId().equals(checklistId)) {
+            throw new BusinessException("Task does not belong to this checklist", HttpStatus.BAD_REQUEST);
+        }
 
-        int total = itemResponses.size();
-        long completed = itemResponses.stream()
-                .filter(i -> i.status() == ChecklistItemStatus.DONE).count();
+        task.setCompleted(!task.isCompleted());
+        taskRepository.save(task);
 
-        return new OnboardingChecklistResponse(
-                checklist.getId(), checklist.getApplicationId(), candidateName,
-                checklist.getCreatedAt(), total, (int) completed, itemResponses);
+        updateChecklistStatus(checklist);
+        checklist = checklistRepository.save(checklist);
+        return toResponse(checklist);
+    }
+
+    private void updateChecklistStatus(OnboardingChecklist checklist) {
+        List<OnboardingTask> tasks = checklist.getTasks();
+        if (tasks == null || tasks.isEmpty()) {
+            checklist.setStatus(OnboardingStatus.NOT_STARTED);
+            return;
+        }
+
+        long completedCount = tasks.stream().filter(OnboardingTask::isCompleted).count();
+        if (completedCount == 0) {
+            checklist.setStatus(OnboardingStatus.NOT_STARTED);
+        } else if (completedCount == tasks.size()) {
+            checklist.setStatus(OnboardingStatus.COMPLETED);
+        } else {
+            checklist.setStatus(OnboardingStatus.IN_PROGRESS);
+        }
+    }
+
+    private OnboardingChecklistResponse toResponse(OnboardingChecklist checklist) {
+        List<OnboardingTask> tasks = checklist.getTasks() != null ? checklist.getTasks() : List.of();
+        int totalTasks = tasks.size();
+        int completedTasks = (int) tasks.stream().filter(OnboardingTask::isCompleted).count();
+        double progressPercent = totalTasks > 0 ? (completedTasks * 100.0) / totalTasks : 0;
+
+        return OnboardingChecklistResponse.builder()
+                .id(checklist.getId())
+                .applicationId(checklist.getApplication() != null ? checklist.getApplication().getId() : null)
+                .candidateName(checklist.getApplication() != null && checklist.getApplication().getCandidate() != null
+                        ? checklist.getApplication().getCandidate().getFullName() : null)
+                .jobTitle(checklist.getApplication() != null && checklist.getApplication().getJob() != null
+                        ? checklist.getApplication().getJob().getTitle() : null)
+                .title(checklist.getTitle())
+                .status(checklist.getStatus())
+                .totalTasks(totalTasks)
+                .completedTasks(completedTasks)
+                .progressPercent(progressPercent)
+                .createdAt(checklist.getCreatedAt())
+                .tasks(tasks.stream()
+                        .map(t -> OnboardingChecklistResponse.TaskResponse.builder()
+                                .id(t.getId())
+                                .title(t.getTitle())
+                                .description(t.getDescription())
+                                .completed(t.isCompleted())
+                                .sortOrder(t.getSortOrder())
+                                .dueDate(t.getDueDate())
+                                .assignedToUserId(t.getAssignedTo() != null ? t.getAssignedTo().getId() : null)
+                                .assignedToName(t.getAssignedTo() != null ? t.getAssignedTo().getFullName() : null)
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
     }
 }
