@@ -5,6 +5,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -18,14 +20,14 @@ public class ScorecardTemplate extends BaseEntity {
 
     @Id
     @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
-    private java.util.UUID id;
+    private UUID id;
 
-    @Column(name = "name", nullable = false)
     private String name;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
-
+    
+    @OneToMany(mappedBy = "template", cascade = CascadeType.ALL)
+    private List<ScorecardCriterion> criteria;
 }

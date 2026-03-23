@@ -7,6 +7,8 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
+import java.util.List;
+import java.util.UUID;
 
 
 @Entity
@@ -16,31 +18,28 @@ import org.hibernate.annotations.UuidGenerator;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "applications", uniqueConstraints = {
-        @UniqueConstraint(columnNames = { "candidate_id", "job_id" })
+        @UniqueConstraint(columnNames = {"candidate_id", "job_id"})
 })
 public class Application extends BaseEntity {
 
     @Id
     @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
-    private java.util.UUID id;
+    private UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "candidate_id")
+    @JoinColumn(name = "candidate_id", nullable = false)
     private Candidate candidate;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "job_id")
+    @JoinColumn(name = "job_id", nullable = false)
     private Job job;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "stage")
-    @Builder.Default
     private ApplicationStage stage = ApplicationStage.APPLIED;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    @Builder.Default
     private ApplicationStatus status = ApplicationStatus.ACTIVE;
-
+    
+    @OneToMany(mappedBy = "application")
+    private List<Interview> interviews;
 }
