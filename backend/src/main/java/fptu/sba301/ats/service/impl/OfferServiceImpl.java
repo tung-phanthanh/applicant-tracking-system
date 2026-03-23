@@ -11,6 +11,7 @@ import fptu.sba301.ats.entity.Offer;
 import fptu.sba301.ats.entity.OfferApproval;
 import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.enums.ApprovalStatus;
+import fptu.sba301.ats.enums.ApplicationStatus;
 import fptu.sba301.ats.enums.OfferStatus;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.ApplicationRepository;
@@ -41,8 +42,9 @@ public class OfferServiceImpl implements OfferService {
     @Override
     @Transactional
     public OfferResponse createDraft(CreateOfferRequest request) {
-        Application application = applicationRepository.findById(request.getApplicationId())
-                .orElseThrow(() -> new BusinessException("Application not found", HttpStatus.NOT_FOUND));
+        Application application = applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(
+                request.getCandidateId(), ApplicationStatus.ACTIVE)
+                .orElseThrow(() -> new BusinessException("Active application not found for this candidate", HttpStatus.BAD_REQUEST));
 
         Offer offer = Offer.builder()
                 .application(application)

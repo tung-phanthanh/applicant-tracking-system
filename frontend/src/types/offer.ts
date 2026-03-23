@@ -3,7 +3,7 @@ export type ApprovalStatus = "APPROVED" | "REJECTED";
 
 export interface Offer {
   id: string;
-  applicationId: string;
+  applicationId?: string;
   candidateName: string;
   jobTitle: string;
   salary: number;
@@ -25,7 +25,7 @@ export interface OfferApproval {
 }
 
 export interface CreateOfferRequest {
-  applicationId: string;
+  candidateId: string;
   salary: number;
   positionTitle: string;
   startDate: string | null;

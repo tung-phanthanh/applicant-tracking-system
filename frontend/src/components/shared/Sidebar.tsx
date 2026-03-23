@@ -68,7 +68,7 @@ export default function Sidebar() {
                         </li>
                     ))}
 
-                    {isHr && (
+                    {(isHr || isHrManager) && (
                         <li>
                             <NavLink
                                 to="/candidates"

@@ -17,8 +17,8 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CreateOfferRequest {
 
-    @NotNull(message = "Application ID is required")
-    private UUID applicationId;
+    @NotNull(message = "Candidate ID is required")
+    private UUID candidateId;
 
     @NotNull(message = "Salary is required")
     private BigDecimal salary;

@@ -60,6 +60,14 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.updateCandidateStage(candidateId, request.getStage()));
     }
 
+    @GetMapping("/{candidateId}/history")
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<fptu.sba301.ats.dto.response.CandidateHistoryResponse>> getStageHistory(
+            @PathVariable UUID candidateId
+    ) {
+        return ResponseEntity.ok(candidateService.getStageHistory(candidateId));
+    }
+
     // ───────────── New: Single Candidate Add ─────────────
 
     /**

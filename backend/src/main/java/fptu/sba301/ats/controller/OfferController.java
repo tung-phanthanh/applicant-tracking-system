@@ -70,7 +70,7 @@ public class OfferController {
         return ResponseEntity.ok(offerService.approveOrReject(id, request, authentication.getName()));
     }
 
-    @GetMapping("/{id}/approvals")
+    @GetMapping({"/{id}/approvals", "/{id}/history"})
     @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
     public ResponseEntity<List<OfferApprovalResponse>> getApprovalHistory(@PathVariable UUID id) {
         return ResponseEntity.ok(offerService.getApprovalHistory(id));

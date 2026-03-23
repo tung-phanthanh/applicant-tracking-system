@@ -20,7 +20,7 @@ export interface CandidateRanking {
   applicationId: string;
   candidateId: string;
   candidateName: string;
-  score: number;
+  overallScore: number;
   experienceYears: number | null;
   appliedAt: string;
   stage: string;

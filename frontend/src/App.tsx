@@ -24,6 +24,7 @@ import OffersListPage from "@/pages/recruiter/OffersListPage";
 import OfferFormPage from "@/pages/recruiter/OfferFormPage";
 import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
 import OnboardingPage from "@/pages/recruiter/OnboardingPage";
+import JobsListPage from "@/pages/recruiter/JobsListPage";
 
 function App() {
   return (
@@ -48,7 +49,6 @@ function App() {
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
               {/* Placeholder routes */}
-              <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
 
               {/* Interview scorecard — accessible to any authenticated user */}
@@ -56,6 +56,7 @@ function App() {
 
               {/* HR-only routes */}
               <Route element={<HrRoute />}>
+                <Route path="/jobs" element={<JobsListPage />} />
                 <Route path="/candidates" element={<CandidateListPage />} />
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
                 <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />

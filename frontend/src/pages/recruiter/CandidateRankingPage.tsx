@@ -58,14 +58,14 @@ export default function CandidateRankingPage() {
           <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
             <p className="text-sm text-muted-foreground">Highest Score</p>
             <p className="mt-1 text-2xl font-bold text-green-600">
-              {rankings[0]?.score.toFixed(1) ?? "—"}
+              {rankings[0]?.overallScore.toFixed(1) ?? "—"}
             </p>
           </div>
           <div className="rounded-lg border border-border bg-card p-5 shadow-sm">
             <p className="text-sm text-muted-foreground">Average Score</p>
             <p className="mt-1 text-2xl font-bold">
               {rankings.length > 0
-                ? (rankings.reduce((sum, r) => sum + r.score, 0) / rankings.length).toFixed(1)
+                ? (rankings.reduce((sum, r) => sum + r.overallScore, 0) / rankings.length).toFixed(1)
                 : "—"}
             </p>
           </div>
@@ -128,14 +128,14 @@ export default function CandidateRankingPage() {
                       <td className="px-5 py-4">
                         <span
                           className={`text-sm font-semibold ${
-                            r.score >= 7
+                            r.overallScore >= 7
                               ? "text-green-600"
-                              : r.score >= 4
+                              : r.overallScore >= 4
                                 ? "text-yellow-600"
                                 : "text-red-600"
                           }`}
                         >
-                          {r.score.toFixed(1)}
+                          {r.overallScore.toFixed(1)}
                         </span>
                       </td>
                       <td className="px-5 py-4 text-sm text-muted-foreground">

@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { offerService } from "@/services/offerService";
 import type { CreateOfferRequest } from "@/types/offer";
+import { candidateService } from "@/services/candidateService";
+import type { CandidateListItem } from "@/types/candidate";
 
 export default function OfferFormPage() {
   const { id } = useParams<{ id: string }>();
@@ -11,7 +13,7 @@ export default function OfferFormPage() {
   const isEdit = !!id;
 
   const [form, setForm] = useState<CreateOfferRequest>({
-    applicationId: crypto.randomUUID(),
+    candidateId: "",
     salary: 0,
     positionTitle: "",
     startDate: null,
@@ -20,23 +22,30 @@ export default function OfferFormPage() {
   });
   const [loading, setLoading] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [candidates, setCandidates] = useState<CandidateListItem[]>([]);
+  const [editCandidateName, setEditCandidateName] = useState("");
 
   useEffect(() => {
-    if (!id) return;
     const load = async () => {
       setLoading(true);
       try {
-        const offer = await offerService.getOffer(id);
-        setForm({
-          applicationId: offer.applicationId,
-          salary: offer.salary,
-          positionTitle: offer.positionTitle,
-          startDate: offer.startDate,
-          benefits: offer.benefits,
-          notes: offer.notes,
-        });
+        if (id) {
+          const offer = await offerService.getOffer(id);
+          setForm({
+            candidateId: "",
+            salary: offer.salary,
+            positionTitle: offer.positionTitle,
+            startDate: offer.startDate,
+            benefits: offer.benefits,
+            notes: offer.notes,
+          });
+          setEditCandidateName(offer.candidateName);
+        } else {
+          const list = await candidateService.getCandidates();
+          setCandidates(list);
+        }
       } catch {
-        alert("Failed to load offer.");
+        alert("Failed to load data.");
       } finally {
         setLoading(false);
       }
@@ -49,12 +58,8 @@ export default function OfferFormPage() {
   };
 
   const handleSubmit = async () => {
-    if (!form.applicationId || !form.positionTitle || form.salary <= 0) {
+    if ((!isEdit && !form.candidateId) || !form.positionTitle || form.salary <= 0) {
       alert("Please fill all required fields.");
-      return;
-    }
-    if (!/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(form.applicationId)) {
-      alert("Application ID must be a valid 36-character UUID.");
       return;
     }
     setSaving(true);
@@ -94,15 +99,24 @@ export default function OfferFormPage() {
       <section className="mx-auto max-w-2xl rounded-lg border border-border bg-card p-6 shadow-sm">
         <div className="space-y-4">
           <div>
-            <label className="mb-1 block text-sm font-medium">Application ID *</label>
-            <Input
-              value={form.applicationId}
-              onChange={(e) => handleChange("applicationId", e.target.value)}
-              placeholder="UUID of the application"
-              disabled={isEdit}
-            />
+            <label className="mb-1 block text-sm font-medium">Candidate *</label>
+            {isEdit ? (
+              <Input value={editCandidateName} disabled />
+            ) : (
+              <select
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                value={form.candidateId}
+                onChange={(e) => handleChange("candidateId", e.target.value)}
+              >
+                <option value="">Select a Candidate</option>
+                {candidates.map((c) => (
+                  <option key={c.candidateId} value={c.candidateId}>
+                    {c.fullName} ({c.jobTitle})
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
-
           <div>
             <label className="mb-1 block text-sm font-medium">Position Title *</label>
             <Input
