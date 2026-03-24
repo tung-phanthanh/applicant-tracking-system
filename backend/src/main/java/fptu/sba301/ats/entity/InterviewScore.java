@@ -1,13 +1,7 @@
 package fptu.sba301.ats.entity;
-import fptu.sba301.ats.entity.BaseEntity;
-import fptu.sba301.ats.entity.Interview;
-import fptu.sba301.ats.entity.InterviewParticipant;
-import fptu.sba301.ats.entity.ScorecardCriterion;
+
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
@@ -29,27 +23,22 @@ public class InterviewScore extends BaseEntity {
 
     @Id
     @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
-    
+
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "interview_id", referencedColumnName = "interview_id", insertable = false, updatable = false),
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    })
-    private InterviewParticipant participant;
-    
+    @JoinColumn(name = "user_id", nullable = false)
+    private User interviewer;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criterion_id", nullable = false)
     private ScorecardCriterion criterion;
 
-    @Column(name = "score")
     private Integer score;
 
-    @Column(name = "comment", columnDefinition = "TEXT")
+    @Column(columnDefinition = "TEXT")
     private String comment;
 }
