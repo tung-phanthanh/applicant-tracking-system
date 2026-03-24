@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import {
     createContext,
     useState,
@@ -5,7 +6,7 @@ import {
     useCallback,
     type ReactNode,
 } from "react";
-import type { AuthContextType, LoginCredentials, User } from "@/types/auth";
+import type { AuthContextType, LoginCredentials, User, UserRole } from "@/types/auth";
 import { authService } from "@/services/authService";
 
 export const AuthContext = createContext<AuthContextType | null>(null);
@@ -112,8 +113,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    const hasRole = useCallback(
+        (role: UserRole | UserRole[]): boolean => {
+            if (!user) return false;
+            if (user.role === "SYSTEM_ADMIN") return true; 
+            if (Array.isArray(role)) {
+                return role.includes(user.role);
+            }
+            return user.role === role;
+        },
+        [user]
+    );
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, logout, hasRole }}>
             {children}
         </AuthContext.Provider>
     );

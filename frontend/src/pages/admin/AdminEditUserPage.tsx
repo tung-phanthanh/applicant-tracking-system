@@ -2,7 +2,6 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams, Link } from "react-router-dom";
 import { ArrowLeft, Lock, Unlock, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { userService } from "@/services/userService";
 import type { UserRecord, UserRole, UpdateUserPayload } from "@/types/user";
@@ -185,18 +184,11 @@ export default function AdminEditUserPage() {
                 </h2>
                 <form onSubmit={handleSave} className="space-y-4" noValidate>
                     <div className="space-y-1.5">
-                        <Label htmlFor="full-name">Full Name</Label>
-                        <Input
-                            id="full-name"
-                            className={fieldErrors.fullName ? "border-destructive" : ""}
-                            value={fullName}
-                            onChange={(e) => {
-                                setFullName(e.target.value);
-                                setFieldErrors((p) => ({ ...p, fullName: undefined }));
-                            }}
-                            disabled={isSaving}
-                        />
-                        {fieldErrors.fullName && <p className="text-xs text-destructive">{fieldErrors.fullName}</p>}
+                        <Label>Full Name</Label>
+                        <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+                            {user.fullName}
+                        </div>
+                        <p className="text-xs text-muted-foreground">Name cannot be changed by administrator.</p>
                     </div>
 
                     {/* Email (read-only) */}
@@ -214,6 +206,7 @@ export default function AdminEditUserPage() {
                         <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
                             {user.department || "—"}
                         </div>
+                        <p className="text-xs text-muted-foreground">Department cannot be changed.</p>
                     </div>
 
                     {/* Role */}

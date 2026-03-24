@@ -28,5 +28,6 @@ export interface AuthContextType {
     isLoading: boolean;
     login: (credentials: LoginCredentials, rememberMe?: boolean) => Promise<void>;
     logout: () => Promise<void>;
+    hasRole: (role: UserRole | UserRole[]) => boolean;
 }
 

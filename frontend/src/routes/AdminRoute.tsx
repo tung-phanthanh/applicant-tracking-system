@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-/** Wraps routes that require SYSTEM_ADMIN role. Redirects to /dashboard if not admin. */
+/** Wraps routes that require admin access. Redirects to /dashboard if not admin. */
 export default function AdminRoute() {
     const { user } = useAuth();
 

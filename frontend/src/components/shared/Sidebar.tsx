@@ -6,6 +6,13 @@ import {
     User,
     Users,
     ShieldCheck,
+    Building2,
+    Settings,
+    History,
+    Bell,
+    ClipboardList,
+    Gift,
+    MessageSquareQuote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -14,17 +21,33 @@ const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
+];
+
+const commonItems = [
+    { to: "/notifications", icon: Bell, label: "Notifications" },
     { to: "/profile", icon: User, label: "My Profile" },
 ];
 
+const hrNavItems = [
+    { to: "/scorecard-templates", icon: ClipboardList, label: "Scorecards" },
+    { to: "/offers", icon: Gift, label: "Offers" },
+];
+
 const adminNavItems = [
+    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
     { to: "/admin/users", icon: ShieldCheck, label: "Manage Users" },
+    { to: "/admin/departments", icon: Building2, label: "Departments" },
+    { to: "/admin/system-config", icon: Settings, label: "System Config" },
+    { to: "/admin/audit-logs", icon: History, label: "Audit Logs" },
+    { to: "/admin/notifications", icon: MessageSquareQuote, label: "Notification Center" },
 ];
 
 export default function Sidebar() {
     const { user } = useAuth();
+
     const isAdmin = user?.role === "SYSTEM_ADMIN";
-    const isHr = user?.role === "HR";
+    const isHr = user?.role === "HR" || user?.role === "HR_MANAGER";
+    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -39,7 +62,7 @@ export default function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4">
+            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
                 <ul className="space-y-1">
                     {navItems.map(({ to, icon: Icon, label }) => (
                         <li key={to}>
@@ -60,7 +83,7 @@ export default function Sidebar() {
                         </li>
                     ))}
 
-                    {isHr && (
+                    {(isHr || isHrManager) && (
                         <li>
                             <NavLink
                                 to="/candidates"
@@ -77,6 +100,35 @@ export default function Sidebar() {
                                 Candidates
                             </NavLink>
                         </li>
+                    )}
+
+                    {/* HR Section */}
+                    {(isHr || isHrManager) && (
+                        <>
+                            <li className="pt-3">
+                                <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                                    Recruitment
+                                </p>
+                            </li>
+                            {hrNavItems.map(({ to, icon: Icon, label }) => (
+                                <li key={to}>
+                                    <NavLink
+                                        to={to}
+                                        className={({ isActive }) =>
+                                            cn(
+                                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                                isActive
+                                                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                            )
+                                        }
+                                    >
+                                        <Icon className="h-4 w-4 shrink-0" />
+                                        {label}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </>
                     )}
 
                     {/* Admin section */}
@@ -108,6 +160,32 @@ export default function Sidebar() {
                         </>
                     )}
                 </ul>
+
+                <div>
+                    <h4 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
+                        Account
+                    </h4>
+                    <ul className="space-y-1">
+                        {commonItems.map(({ to, icon: Icon, label }) => (
+                            <li key={to}>
+                                <NavLink
+                                    to={to}
+                                    className={({ isActive }) =>
+                                        cn(
+                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                            isActive
+                                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                        )
+                                    }
+                                >
+                                    <Icon className="h-4 w-4 shrink-0" />
+                                    {label}
+                                </NavLink>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </nav>
 
             {/* Footer */}
@@ -119,3 +197,4 @@ export default function Sidebar() {
         </aside>
     );
 }
+

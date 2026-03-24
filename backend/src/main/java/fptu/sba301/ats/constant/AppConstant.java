@@ -5,6 +5,7 @@ public class AppConstant {
     public static final String AUTH_CONTROLLER_URL = "/auth";
     public static final String USER_CONTROLLER_URL = "/users";
     public static final String CANDIDATE_CONTROLLER_URL = "/candidates";
+
     private AppConstant() {
 
     }

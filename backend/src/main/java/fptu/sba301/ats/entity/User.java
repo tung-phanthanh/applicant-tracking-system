@@ -1,10 +1,7 @@
 package fptu.sba301.ats.entity;
 
-import fptu.sba301.ats.enums.Role;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -53,8 +50,8 @@ public class User extends BaseEntity {
     @Column(name = "account_locked", nullable = false)
     private boolean accountLocked = false;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "role", nullable = false)
+    @ManyToOne(fetch = jakarta.persistence.FetchType.EAGER)
+    @JoinColumn(name = "role_id", nullable = false)
     private Role role;
 
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)

@@ -1,7 +1,6 @@
 package fptu.sba301.ats.entity;
 import fptu.sba301.ats.entity.BaseEntity;
 import fptu.sba301.ats.entity.Interview;
-import fptu.sba301.ats.entity.InterviewParticipant;
 import fptu.sba301.ats.entity.ScorecardCriterion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -36,12 +35,8 @@ public class InterviewScore extends BaseEntity {
     @JoinColumn(name = "interview_id", nullable = false)
     private Interview interview;
     
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumns({
-            @JoinColumn(name = "interview_id", referencedColumnName = "interview_id", insertable = false, updatable = false),
-            @JoinColumn(name = "user_id", referencedColumnName = "user_id")
-    })
-    private InterviewParticipant participant;
+    @Column(name = "user_id", nullable = false)
+    private UUID userId;
     
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "criterion_id", nullable = false)
