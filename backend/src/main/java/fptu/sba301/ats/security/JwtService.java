@@ -13,7 +13,6 @@ import java.security.Key;
 import java.time.Instant;
 import java.util.Date;
 
-import static fptu.sba301.ats.constant.AuthConstants.EMAIL_KEY;
 import static fptu.sba301.ats.constant.AuthConstants.ROLE_KEY;
 
 @Service
@@ -37,7 +36,7 @@ public class JwtService {
             return Jwts.builder()
                     .setIssuer("skill-checking")
                     .setSubject(user.getEmail())
-                    .claim(ROLE_KEY, user.getRole())
+                    .claim(ROLE_KEY, user.getRole().getName().name())
                     .setIssuedAt(Date.from(now))
                     .setExpiration(Date.from(expiry))
                     .signWith(getSignKey(), SignatureAlgorithm.HS512)

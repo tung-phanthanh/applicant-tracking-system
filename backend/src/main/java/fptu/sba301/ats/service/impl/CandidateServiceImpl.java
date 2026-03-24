@@ -1,374 +1,446 @@
-package fptu.sba301.ats.service.impl;
+// package fptu.sba301.ats.service.impl;
 
-import com.opencsv.bean.CsvToBean;
-import com.opencsv.bean.CsvToBeanBuilder;
-import fptu.sba301.ats.dto.request.CreateCandidateRequest;
-import fptu.sba301.ats.dto.request.CsvCandidateRow;
-import fptu.sba301.ats.dto.response.BulkImportResponse;
-import fptu.sba301.ats.dto.response.CandidateDetailResponse;
-import fptu.sba301.ats.dto.response.CandidateDocumentResponse;
-import fptu.sba301.ats.dto.response.CandidateListResponse;
-import fptu.sba301.ats.entity.Application;
-import fptu.sba301.ats.entity.Candidate;
-import fptu.sba301.ats.entity.CandidateDocument;
-import fptu.sba301.ats.entity.CandidateStageHistory;
-import fptu.sba301.ats.entity.Job;
-import fptu.sba301.ats.enums.ApplicationStage;
-import fptu.sba301.ats.enums.ApplicationStatus;
-import fptu.sba301.ats.exception.BusinessException;
-import fptu.sba301.ats.repository.ApplicationRepository;
-import fptu.sba301.ats.repository.CandidateDocumentRepository;
-import fptu.sba301.ats.repository.CandidateRepository;
-import fptu.sba301.ats.repository.CandidateStageHistoryRepository;
-import fptu.sba301.ats.repository.JobRepository;
-import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
-import fptu.sba301.ats.service.CandidateService;
-import fptu.sba301.ats.service.CloudinaryService;
-import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
+// import com.opencsv.bean.CsvToBean;
+// import com.opencsv.bean.CsvToBeanBuilder;
+// import fptu.sba301.ats.dto.request.CreateCandidateRequest;
+// import fptu.sba301.ats.dto.request.CsvCandidateRow;
+// import fptu.sba301.ats.dto.response.BulkImportResponse;
+// import fptu.sba301.ats.dto.response.CandidateDetailResponse;
+// import fptu.sba301.ats.dto.response.CandidateDocumentResponse;
+// import fptu.sba301.ats.dto.response.CandidateHistoryResponse;
+// import fptu.sba301.ats.dto.response.CandidateListResponse;
+// import fptu.sba301.ats.entity.Application;
+// import fptu.sba301.ats.entity.Candidate;
+// import fptu.sba301.ats.entity.CandidateDocument;
+// import fptu.sba301.ats.entity.CandidateStageHistory;
+// import fptu.sba301.ats.entity.Job;
+// import fptu.sba301.ats.enums.ApplicationStage;
+// import fptu.sba301.ats.enums.ApplicationStatus;
+// import fptu.sba301.ats.exception.BusinessException;
+// import fptu.sba301.ats.repository.ApplicationRepository;
+// import fptu.sba301.ats.repository.CandidateDocumentRepository;
+// import fptu.sba301.ats.repository.CandidateRepository;
+// import fptu.sba301.ats.repository.CandidateStageHistoryRepository;
+// import fptu.sba301.ats.repository.JobRepository;
+// import fptu.sba301.ats.repository.UserRepository;
+// import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
+// import fptu.sba301.ats.service.CandidateService;
+// import fptu.sba301.ats.service.CloudinaryService;
+// import lombok.RequiredArgsConstructor;
+// import org.springframework.http.HttpStatus;
+// import org.springframework.stereotype.Service;
+// import org.springframework.transaction.annotation.Transactional;
+// import org.springframework.util.StringUtils;
+// import org.springframework.web.multipart.MultipartFile;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.UUID;
-import java.util.stream.Collectors;
+// import java.io.BufferedReader;
+// import java.io.InputStreamReader;
+// import java.io.Reader;
+// import java.time.LocalDateTime;
+// import java.time.ZoneId;
+// import java.util.ArrayList;
+// import java.util.HashMap;
+// import java.util.List;
+// import java.util.Map;
+// import java.util.Optional;
+// import java.util.UUID;
+// import java.util.stream.Collectors;
 
-@Service
-@RequiredArgsConstructor
-public class CandidateServiceImpl implements CandidateService {
+// @Service
+// @RequiredArgsConstructor
+// public class CandidateServiceImpl implements CandidateService {
 
-    private static final String CLOUDINARY_FOLDER = "candidate_documents";
-    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
+// private static final String CLOUDINARY_FOLDER = "candidate_documents";
+// private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
-    private final CandidateRepository candidateRepository;
-    private final ApplicationRepository applicationRepository;
-    private final CandidateStageHistoryRepository candidateStageHistoryRepository;
-    private final CandidateDocumentRepository candidateDocumentRepository;
-    private final JobRepository jobRepository;
-    private final CloudinaryService cloudinaryService;
+// private final CandidateRepository candidateRepository;
+// private final ApplicationRepository applicationRepository;
+// private final CandidateStageHistoryRepository
+// candidateStageHistoryRepository;
+// private final CandidateDocumentRepository candidateDocumentRepository;
+// private final JobRepository jobRepository;
+// private final UserRepository userRepository;
+// private final CloudinaryService cloudinaryService;
 
-    // ─────────────────────────── Existing methods ───────────────────────────
+// // ─────────────────────────── Existing methods ───────────────────────────
 
-    @Override
-    public List<CandidateListResponse> getCandidateList() {
-        return candidateRepository.findAllCandidatesWithApplications()
-                .stream()
-                .map(row -> CandidateListResponse.builder()
-                        .candidateId(UUID.fromString(row.getCandidateId()))
-                        .fullName(row.getFullName())
-                        .email(row.getEmail())
-                        .jobTitle(row.getJobTitle())
-                        .stage(row.getStage())
-                        .rating(row.getRating())
-                        .appliedAt(row.getAppliedAt())
-                        .build())
-                .collect(Collectors.toList());
-    }
+// @Override
+// public List<CandidateListResponse> getCandidateList() {
+// return candidateRepository.findAllCandidatesWithApplications()
+// .stream()
+// .map(row -> CandidateListResponse.builder()
+// .candidateId(UUID.fromString(row.getCandidateId()))
+// .fullName(row.getFullName())
+// .email(row.getEmail())
+// .jobTitle(row.getJobTitle())
+// .stage(row.getStage())
+// .rating(row.getRating())
+// .appliedAt(row.getAppliedAt())
+// .build())
+// .collect(Collectors.toList());
+// }
 
-    @Override
-    @Transactional
-    public CandidateDetailResponse getCandidateDetail(UUID candidateId) {
-        Optional<Application> latestActiveApplication = applicationRepository
-                .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE);
+// @Override
+// @Transactional
+// public CandidateDetailResponse getCandidateDetail(UUID candidateId) {
+// Optional<Application> latestActiveApplication = applicationRepository
+// .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId,
+// ApplicationStatus.ACTIVE);
 
-        if (latestActiveApplication.isPresent() && latestActiveApplication.get().getStage() == ApplicationStage.APPLIED) {
-            transitionStage(latestActiveApplication.get(), ApplicationStage.SCREENING);
-        }
+// if (latestActiveApplication.isPresent() &&
+// latestActiveApplication.get().getStage() == ApplicationStage.APPLIED) {
+// transitionStage(latestActiveApplication.get(), ApplicationStage.SCREENING);
+// }
 
-        return buildCandidateDetailResponse(candidateId);
-    }
+// return buildCandidateDetailResponse(candidateId);
+// }
 
-    @Override
-    @Transactional
-    public CandidateDetailResponse updateCandidateStage(UUID candidateId, ApplicationStage targetStage) {
-        Application application = findLatestActiveApplication(candidateId);
+// @Override
+// @Transactional
+// public CandidateDetailResponse updateCandidateStage(UUID candidateId,
+// ApplicationStage targetStage) {
+// Application application = findLatestActiveApplication(candidateId);
 
-        if (application.getStage() != ApplicationStage.SCREENING) {
-            throw new BusinessException("Only candidates in SCREENING can be moved to INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
-        }
+// if (application.getStage() != ApplicationStage.SCREENING) {
+// throw new BusinessException("Only candidates in SCREENING can be moved to
+// INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
+// }
 
-        if (targetStage != ApplicationStage.INTERVIEW && targetStage != ApplicationStage.REJECTED) {
-            throw new BusinessException("Target stage must be INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
-        }
+// if (targetStage != ApplicationStage.INTERVIEW && targetStage !=
+// ApplicationStage.REJECTED) {
+// throw new BusinessException("Target stage must be INTERVIEW or REJECTED",
+// HttpStatus.BAD_REQUEST);
+// }
 
-        transitionStage(application, targetStage);
-        return buildCandidateDetailResponse(candidateId);
-    }
+// transitionStage(application, targetStage);
+// return buildCandidateDetailResponse(candidateId);
+// }
 
-    // ─────────────────────────── New: Single Candidate Add ───────────────────────────
+// @Override
+// @Transactional(readOnly = true)
+// public List<CandidateHistoryResponse> getStageHistory(UUID candidateId) {
+// Application application = applicationRepository
+// .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId,
+// ApplicationStatus.ACTIVE)
+// .orElse(null);
 
-    @Override
-    @Transactional
-    public CandidateDetailResponse createCandidate(CreateCandidateRequest request, List<MultipartFile> documents) {
-        // 1. Validate duplicate email
-        if (StringUtils.hasText(request.getEmail()) && candidateRepository.existsByEmail(request.getEmail())) {
-            throw new BusinessException(
-                    "Email '" + request.getEmail() + "' already exists", HttpStatus.BAD_REQUEST);
-        }
+// if (application == null) {
+// return new ArrayList<>();
+// }
 
-        // 2. Save candidate
-        Candidate candidate = Candidate.builder()
-                .fullName(request.getFullName())
-                .email(request.getEmail())
-                .phone(request.getPhone())
-                .currentCompany(request.getCurrentCompany())
-                .source(request.getSource())
-                .location(request.getLocation())
-                .experienceYears(request.getExperienceYears())
-                .summary(request.getSummary())
-                .build();
-        candidate = candidateRepository.save(candidate);
+// List<CandidateStageHistory> histories = candidateStageHistoryRepository
+// .findByApplication_IdOrderByCreatedAtDesc(application.getId());
 
-        // 3. Link to job (create Application) if jobId provided
-        if (request.getJobId() != null) {
-            Job job = jobRepository.findById(request.getJobId())
-                    .orElseThrow(() -> new BusinessException(
-                            "Job not found: " + request.getJobId(), HttpStatus.NOT_FOUND));
-            applicationRepository.save(Application.builder()
-                    .candidate(candidate)
-                    .job(job)
-                    .build());
-        }
+// return histories.stream().map(h -> {
+// String changedBy = "System";
+// if (h.getCreatedBy() != null) {
+// changedBy = userRepository.findById(h.getCreatedBy())
+// .map(user -> user.getFullName())
+// .orElse("Unknown User");
+// }
+// return CandidateHistoryResponse.builder()
+// .id(h.getId())
+// .fromStage(h.getFromStage())
+// .toStage(h.getToStage())
+// .changedBy(changedBy)
+// .changedAt(h.getCreatedAt())
+// .build();
+// }).collect(Collectors.toList());
+// }
 
-        // 4. Upload documents to Cloudinary
-        List<CandidateDocumentResponse> documentResponses = new ArrayList<>();
-        if (documents != null && !documents.isEmpty()) {
-            uploadAndSaveDocuments(candidate, documents);
-            // Reload the saved documents for the response
-            documentResponses = candidateRepository
-                    .findDocumentsByCandidateId(candidate.getId().toString())
-                    .stream()
-                    .map(d -> CandidateDocumentResponse.builder()
-                            .documentId(UUID.fromString(d.getDocumentId()))
-                            .fileName(d.getFileName())
-                            .fileUrl(d.getFileUrl())
-                            .fileType(d.getFileType())
-                            .fileSizeBytes(d.getFileSizeBytes())
-                            .uploadedAt(d.getUploadedAt())
-                            .build())
-                    .collect(Collectors.toList());
-        }
+// // ─────────────────────────── New: Single Candidate Add
+// ───────────────────────────
 
-        // 5. If a job was linked, use the SQL-backed builder (includes jobTitle, stage etc.)
-        //    Otherwise build directly from the saved entity to avoid JOIN failure.
-        if (request.getJobId() != null) {
-            return buildCandidateDetailResponse(candidate.getId());
-        }
+// @Override
+// @Transactional
+// public CandidateDetailResponse createCandidate(CreateCandidateRequest
+// request, List<MultipartFile> documents) {
+// // 1. Validate duplicate email
+// if (StringUtils.hasText(request.getEmail()) &&
+// candidateRepository.existsByEmail(request.getEmail())) {
+// throw new BusinessException(
+// "Email '" + request.getEmail() + "' already exists", HttpStatus.BAD_REQUEST);
+// }
 
-        return CandidateDetailResponse.builder()
-                .candidateId(candidate.getId())
-                .fullName(candidate.getFullName())
-                .email(candidate.getEmail())
-                .phone(candidate.getPhone())
-                .currentCompany(candidate.getCurrentCompany())
-                .source(candidate.getSource())
-                .location(candidate.getLocation())
-                .experienceYears(candidate.getExperienceYears())
-                .summary(candidate.getSummary())
-                .documents(documentResponses)
-                .build();
-    }
+// // 2. Save candidate
+// Candidate candidate = Candidate.builder()
+// .fullName(request.getFullName())
+// .email(request.getEmail())
+// .phone(request.getPhone())
+// .currentCompany(request.getCurrentCompany())
+// .source(request.getSource())
+// .location(request.getLocation())
+// .experienceYears(request.getExperienceYears())
+// .summary(request.getSummary())
+// .build();
+// candidate = candidateRepository.save(candidate);
 
+// // 3. Link to job (create Application) if jobId provided
+// if (request.getJobId() != null) {
+// Job job = jobRepository.findById(request.getJobId())
+// .orElseThrow(() -> new BusinessException(
+// "Job not found: " + request.getJobId(), HttpStatus.NOT_FOUND));
+// applicationRepository.save(Application.builder()
+// .candidate(candidate)
+// .job(job)
+// .build());
+// }
 
-    // ─────────────────────────── New: CSV Bulk Import ───────────────────────────
+// // 4. Upload documents to Cloudinary
+// List<CandidateDocumentResponse> documentResponses = new ArrayList<>();
+// if (documents != null && !documents.isEmpty()) {
+// uploadAndSaveDocuments(candidate, documents);
+// // Reload the saved documents for the response
+// documentResponses = candidateRepository
+// .findDocumentsByCandidateId(candidate.getId().toString())
+// .stream()
+// .map(d -> CandidateDocumentResponse.builder()
+// .documentId(UUID.fromString(d.getDocumentId()))
+// .fileName(d.getFileName())
+// .fileUrl(d.getFileUrl())
+// .fileType(d.getFileType())
+// .fileSizeBytes(d.getFileSizeBytes())
+// .uploadedAt(d.getUploadedAt())
+// .build())
+// .collect(Collectors.toList());
+// }
 
-    @Override
-    @Transactional
-    public BulkImportResponse importCandidatesFromCsv(MultipartFile csvFile, List<MultipartFile> cvFiles) {
-        // 1. Build map: filename → MultipartFile for quick lookup
-        Map<String, MultipartFile> cvFileMap = new HashMap<>();
-        if (cvFiles != null) {
-            for (MultipartFile f : cvFiles) {
-                if (f != null && StringUtils.hasText(f.getOriginalFilename())) {
-                    cvFileMap.put(f.getOriginalFilename(), f);
-                }
-            }
-        }
+// // 5. If a job was linked, use the SQL-backed builder (includes jobTitle,
+// stage etc.)
+// // Otherwise build directly from the saved entity to avoid JOIN failure.
+// if (request.getJobId() != null) {
+// return buildCandidateDetailResponse(candidate.getId());
+// }
 
-        // 2. Parse CSV
-        List<CsvCandidateRow> rows;
-        try (Reader reader = new BufferedReader(new InputStreamReader(csvFile.getInputStream()))) {
-            CsvToBean<CsvCandidateRow> csvToBean = new CsvToBeanBuilder<CsvCandidateRow>(reader)
-                    .withType(CsvCandidateRow.class)
-                    .withIgnoreLeadingWhiteSpace(true)
-                    .withIgnoreEmptyLine(true)
-                    .build();
-            rows = csvToBean.parse();
-        } catch (Exception e) {
-            throw new BusinessException("Failed to parse CSV file: " + e.getMessage(), HttpStatus.BAD_REQUEST);
-        }
+// return CandidateDetailResponse.builder()
+// .candidateId(candidate.getId())
+// .fullName(candidate.getFullName())
+// .email(candidate.getEmail())
+// .phone(candidate.getPhone())
+// .currentCompany(candidate.getCurrentCompany())
+// .source(candidate.getSource())
+// .location(candidate.getLocation())
+// .experienceYears(candidate.getExperienceYears())
+// .summary(candidate.getSummary())
+// .documents(documentResponses)
+// .build();
+// }
 
-        // 3. Process rows
-        int successCount = 0;
-        int failCount = 0;
-        List<String> errors = new ArrayList<>();
+// // ─────────────────────────── New: CSV Bulk Import
+// ───────────────────────────
 
-        for (int i = 0; i < rows.size(); i++) {
-            int rowNumber = i + 2; // 1-indexed + header row
-            CsvCandidateRow row = rows.get(i);
-            try {
-                processCsvRow(row, rowNumber, cvFileMap, errors);
-                successCount++;
-            } catch (Exception e) {
-                failCount++;
-                errors.add("Row " + rowNumber + ": " + e.getMessage());
-            }
-        }
+// @Override
+// @Transactional
+// public BulkImportResponse importCandidatesFromCsv(MultipartFile csvFile,
+// List<MultipartFile> cvFiles) {
+// // 1. Build map: filename → MultipartFile for quick lookup
+// Map<String, MultipartFile> cvFileMap = new HashMap<>();
+// if (cvFiles != null) {
+// for (MultipartFile f : cvFiles) {
+// if (f != null && StringUtils.hasText(f.getOriginalFilename())) {
+// cvFileMap.put(f.getOriginalFilename(), f);
+// }
+// }
+// }
 
-        return BulkImportResponse.builder()
-                .totalRows(rows.size())
-                .successCount(successCount)
-                .failCount(failCount)
-                .errors(errors)
-                .build();
-    }
+// // 2. Parse CSV
+// List<CsvCandidateRow> rows;
+// try (Reader reader = new BufferedReader(new
+// InputStreamReader(csvFile.getInputStream()))) {
+// CsvToBean<CsvCandidateRow> csvToBean = new
+// CsvToBeanBuilder<CsvCandidateRow>(reader)
+// .withType(CsvCandidateRow.class)
+// .withIgnoreLeadingWhiteSpace(true)
+// .withIgnoreEmptyLine(true)
+// .build();
+// rows = csvToBean.parse();
+// } catch (Exception e) {
+// throw new BusinessException("Failed to parse CSV file: " + e.getMessage(),
+// HttpStatus.BAD_REQUEST);
+// }
 
-    /** Process a single CSV row inside a try-catch; warnings (missing CV) are added to errors list but do not throw. */
-    private void processCsvRow(CsvCandidateRow row, int rowNumber,
-                               Map<String, MultipartFile> cvFileMap,
-                               List<String> errors) {
-        // Validate fullName
-        if (!StringUtils.hasText(row.getFullName())) {
-            throw new BusinessException("fullName is required", HttpStatus.BAD_REQUEST);
-        }
+// // 3. Process rows
+// int successCount = 0;
+// int failCount = 0;
+// List<String> errors = new ArrayList<>();
 
-        // Validate email uniqueness
-        if (StringUtils.hasText(row.getEmail()) && candidateRepository.existsByEmail(row.getEmail())) {
-            throw new BusinessException("email '" + row.getEmail() + "' already exists", HttpStatus.BAD_REQUEST);
-        }
+// for (int i = 0; i < rows.size(); i++) {
+// int rowNumber = i + 2; // 1-indexed + header row
+// CsvCandidateRow row = rows.get(i);
+// try {
+// processCsvRow(row, rowNumber, cvFileMap, errors);
+// successCount++;
+// } catch (Exception e) {
+// failCount++;
+// errors.add("Row " + rowNumber + ": " + e.getMessage());
+// }
+// }
 
-        // Save candidate
-        Candidate candidate = Candidate.builder()
-                .fullName(row.getFullName())
-                .email(StringUtils.hasText(row.getEmail()) ? row.getEmail() : null)
-                .phone(StringUtils.hasText(row.getPhone()) ? row.getPhone() : null)
-                .currentCompany(StringUtils.hasText(row.getCurrentCompany()) ? row.getCurrentCompany() : null)
-                .source(StringUtils.hasText(row.getSource()) ? row.getSource() : null)
-                .location(StringUtils.hasText(row.getLocation()) ? row.getLocation() : null)
-                .experienceYears(row.getExperienceYears())
-                .summary(StringUtils.hasText(row.getSummary()) ? row.getSummary() : null)
-                .build();
-        candidate = candidateRepository.save(candidate);
+// return BulkImportResponse.builder()
+// .totalRows(rows.size())
+// .successCount(successCount)
+// .failCount(failCount)
+// .errors(errors)
+// .build();
+// }
 
-        // Create Application if jobId provided
-        if (StringUtils.hasText(row.getJobId())) {
-            try {
-                UUID jobUuid = UUID.fromString(row.getJobId().trim());
-                Job job = jobRepository.findById(jobUuid)
-                        .orElseThrow(() -> new RuntimeException("Job not found: " + row.getJobId()));
-                Application application = Application.builder()
-                        .candidate(candidate)
-                        .job(job)
-                        .build();
-                applicationRepository.save(application);
-            } catch (IllegalArgumentException e) {
-                errors.add("Row " + rowNumber + ": [WARNING] invalid jobId '" + row.getJobId() + "' – skipped");
-            }
-        }
+// /** Process a single CSV row inside a try-catch; warnings (missing CV) are
+// added to errors list but do not throw. */
+// private void processCsvRow(CsvCandidateRow row, int rowNumber,
+// Map<String, MultipartFile> cvFileMap,
+// List<String> errors) {
+// // Validate fullName
+// if (!StringUtils.hasText(row.getFullName())) {
+// throw new BusinessException("fullName is required", HttpStatus.BAD_REQUEST);
+// }
 
-        // Upload CV if filename is specified
-        if (StringUtils.hasText(row.getCvFileName())) {
-            MultipartFile cvFile = cvFileMap.get(row.getCvFileName().trim());
-            if (cvFile == null) {
-                // Warning only – candidate is still created
-                errors.add("Row " + rowNumber + ": [WARNING] missing CV file '" + row.getCvFileName()
-                        + "' – candidate created without CV");
-            } else {
-                uploadAndSaveDocuments(candidate, List.of(cvFile));
-            }
-        }
-    }
+// // Validate email uniqueness
+// if (StringUtils.hasText(row.getEmail()) &&
+// candidateRepository.existsByEmail(row.getEmail())) {
+// throw new BusinessException("email '" + row.getEmail() + "' already exists",
+// HttpStatus.BAD_REQUEST);
+// }
 
-    // ─────────────────────────── Private helpers ───────────────────────────
+// // Save candidate
+// Candidate candidate = Candidate.builder()
+// .fullName(row.getFullName())
+// .email(StringUtils.hasText(row.getEmail()) ? row.getEmail() : null)
+// .phone(StringUtils.hasText(row.getPhone()) ? row.getPhone() : null)
+// .currentCompany(StringUtils.hasText(row.getCurrentCompany()) ?
+// row.getCurrentCompany() : null)
+// .source(StringUtils.hasText(row.getSource()) ? row.getSource() : null)
+// .location(StringUtils.hasText(row.getLocation()) ? row.getLocation() : null)
+// .experienceYears(row.getExperienceYears())
+// .summary(StringUtils.hasText(row.getSummary()) ? row.getSummary() : null)
+// .build();
+// candidate = candidateRepository.save(candidate);
 
-    private void uploadAndSaveDocuments(Candidate candidate, List<MultipartFile> files) {
-        List<CandidateDocument> docs = new ArrayList<>();
-        for (MultipartFile file : files) {
-            if (file == null || file.isEmpty()) continue;
-            Map<String, Object> result = cloudinaryService.uploadFile(file, CLOUDINARY_FOLDER);
+// // Create Application if jobId provided
+// if (StringUtils.hasText(row.getJobId())) {
+// try {
+// UUID jobUuid = UUID.fromString(row.getJobId().trim());
+// Job job = jobRepository.findById(jobUuid)
+// .orElseThrow(() -> new RuntimeException("Job not found: " + row.getJobId()));
+// Application application = Application.builder()
+// .candidate(candidate)
+// .job(job)
+// .build();
+// applicationRepository.save(application);
+// } catch (IllegalArgumentException e) {
+// errors.add("Row " + rowNumber + ": [WARNING] invalid jobId '" +
+// row.getJobId() + "' – skipped");
+// }
+// }
 
-            String fileUrl = (String) result.get("secure_url");
-            String format = (String) result.get("format");
-            Object bytesObj = result.get("bytes");
-            Long fileSizeBytes = bytesObj != null ? Long.parseLong(bytesObj.toString()) : null;
-            String originalFilename = file.getOriginalFilename();
+// // Upload CV if filename is specified
+// if (StringUtils.hasText(row.getCvFileName())) {
+// MultipartFile cvFile = cvFileMap.get(row.getCvFileName().trim());
+// if (cvFile == null) {
+// // Warning only – candidate is still created
+// errors.add("Row " + rowNumber + ": [WARNING] missing CV file '" +
+// row.getCvFileName()
+// + "' – candidate created without CV");
+// } else {
+// uploadAndSaveDocuments(candidate, List.of(cvFile));
+// }
+// }
+// }
 
-            docs.add(CandidateDocument.builder()
-                    .candidate(candidate)
-                    .fileName(originalFilename != null ? originalFilename : "document")
-                    .fileUrl(fileUrl)
-                    .fileType(format)
-                    .fileSizeBytes(fileSizeBytes)
-                    .uploadedAt(LocalDateTime.now(APP_ZONE))
-                    .build());
-        }
-        candidateDocumentRepository.saveAll(docs);
-    }
+// // ─────────────────────────── Private helpers ───────────────────────────
 
-    private CandidateDetailResponse buildCandidateDetailResponse(UUID candidateId) {
-        CandidateDetailProjection detail = candidateRepository.findCandidateDetailById(candidateId.toString())
-                .orElseThrow(() -> new BusinessException("Candidate not found", HttpStatus.NOT_FOUND));
+// private void uploadAndSaveDocuments(Candidate candidate, List<MultipartFile>
+// files) {
+// List<CandidateDocument> docs = new ArrayList<>();
+// for (MultipartFile file : files) {
+// if (file == null || file.isEmpty()) continue;
+// Map<String, Object> result = cloudinaryService.uploadFile(file,
+// CLOUDINARY_FOLDER);
 
-        List<CandidateDocumentResponse> documents = candidateRepository.findDocumentsByCandidateId(candidateId.toString())
-                .stream()
-                .map(document -> CandidateDocumentResponse.builder()
-                        .documentId(UUID.fromString(document.getDocumentId()))
-                        .fileName(document.getFileName())
-                        .fileUrl(document.getFileUrl())
-                        .fileType(document.getFileType())
-                        .fileSizeBytes(document.getFileSizeBytes())
-                        .uploadedAt(document.getUploadedAt())
-                        .build())
-                .collect(Collectors.toList());
+// String fileUrl = (String) result.get("secure_url");
+// String format = (String) result.get("format");
+// Object bytesObj = result.get("bytes");
+// Long fileSizeBytes = bytesObj != null ? Long.parseLong(bytesObj.toString()) :
+// null;
+// String originalFilename = file.getOriginalFilename();
 
-        return CandidateDetailResponse.builder()
-                .candidateId(UUID.fromString(detail.getCandidateId()))
-                .fullName(detail.getFullName())
-                .email(detail.getEmail())
-                .phone(detail.getPhone())
-                .currentCompany(detail.getCurrentCompany())
-                .jobTitle(detail.getJobTitle())
-                .stage(detail.getStage())
-                .status(detail.getStatus())
-                .rating(detail.getRating())
-                .appliedAt(detail.getAppliedAt())
-                .source(detail.getSource())
-                .location(detail.getLocation())
-                .experienceYears(detail.getExperienceYears())
-                .summary(detail.getSummary())
-                .documents(documents)
-                .build();
-    }
+// docs.add(CandidateDocument.builder()
+// .candidate(candidate)
+// .fileName(originalFilename != null ? originalFilename : "document")
+// .fileUrl(fileUrl)
+// .fileType(format)
+// .fileSizeBytes(fileSizeBytes)
+// .uploadedAt(LocalDateTime.now(APP_ZONE))
+// .build());
+// }
+// candidateDocumentRepository.saveAll(docs);
+// }
 
-    private Application findLatestActiveApplication(UUID candidateId) {
-        return applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE)
-                .orElseThrow(() -> new BusinessException("Active application not found", HttpStatus.NOT_FOUND));
-    }
+// private CandidateDetailResponse buildCandidateDetailResponse(UUID
+// candidateId) {
+// CandidateDetailProjection detail =
+// candidateRepository.findCandidateDetailById(candidateId.toString())
+// .orElseThrow(() -> new BusinessException("Candidate not found",
+// HttpStatus.NOT_FOUND));
 
-    private void transitionStage(Application application, ApplicationStage toStage) {
-        ApplicationStage fromStage = application.getStage();
-        if (fromStage == toStage) {
-            return;
-        }
+// List<CandidateDocumentResponse> documents =
+// candidateRepository.findDocumentsByCandidateId(candidateId.toString())
+// .stream()
+// .map(document -> CandidateDocumentResponse.builder()
+// .documentId(UUID.fromString(document.getDocumentId()))
+// .fileName(document.getFileName())
+// .fileUrl(document.getFileUrl())
+// .fileType(document.getFileType())
+// .fileSizeBytes(document.getFileSizeBytes())
+// .uploadedAt(document.getUploadedAt())
+// .build())
+// .collect(Collectors.toList());
 
-        application.setStage(toStage);
-        applicationRepository.save(application);
+// return CandidateDetailResponse.builder()
+// .candidateId(UUID.fromString(detail.getCandidateId()))
+// .applicationId(detail.getApplicationId() != null ?
+// UUID.fromString(detail.getApplicationId()) : null)
+// .fullName(detail.getFullName())
+// .email(detail.getEmail())
+// .phone(detail.getPhone())
+// .currentCompany(detail.getCurrentCompany())
+// .jobTitle(detail.getJobTitle())
+// .stage(detail.getStage())
+// .status(detail.getStatus())
+// .rating(detail.getRating())
+// .appliedAt(detail.getAppliedAt())
+// .source(detail.getSource())
+// .location(detail.getLocation())
+// .experienceYears(detail.getExperienceYears())
+// .summary(detail.getSummary())
+// .documents(documents)
+// .build();
+// }
 
-        candidateStageHistoryRepository.save(CandidateStageHistory.builder()
-                .application(application)
-                .fromStage(fromStage)
-                .toStage(toStage)
-                .build());
-    }
-}
+// private Application findLatestActiveApplication(UUID candidateId) {
+// return
+// applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId,
+// ApplicationStatus.ACTIVE)
+// .orElseThrow(() -> new BusinessException("Active application not found",
+// HttpStatus.NOT_FOUND));
+// }
+
+// private void transitionStage(Application application, ApplicationStage
+// toStage) {
+// ApplicationStage fromStage = application.getStage();
+// if (fromStage == toStage) {
+// return;
+// }
+
+// application.setStage(toStage);
+// if (toStage == ApplicationStage.REJECTED) {
+// application.setStatus(ApplicationStatus.REJECTED);
+// }
+// applicationRepository.save(application);
+
+// candidateStageHistoryRepository.save(CandidateStageHistory.builder()
+// .application(application)
+// .fromStage(fromStage)
+// .toStage(toStage)
+// .build());
+// }
+// }
