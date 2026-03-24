@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public List<UserResponse> getAllUsers() {
-        return userRepository.findAllByDeletedFalse().stream()
+        return userRepository.findByDeletedFalse().stream()
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }

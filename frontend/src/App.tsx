@@ -10,6 +10,7 @@ import ForgotPasswordPage from "@/pages/auth/ForgotPasswordPage";
 import SetPasswordPage from "@/pages/auth/SetPasswordPage";
 import ResetPasswordPage from "@/pages/auth/ResetPasswordPage";
 import DashboardPage from "@/pages/recruiter/DashboardPage";
+import AdminDashboardPage from "@/pages/admin/AdminDashboardPage";
 import ProfilePage from "@/pages/recruiter/ProfilePage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
 import CandidateListPage from "@/pages/recruiter/CandidateListPage";
@@ -17,6 +18,10 @@ import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
+import DepartmentsPage from "@/pages/admin/DepartmentsPage";
+import SystemConfigPage from "@/pages/admin/SystemConfigPage";
+import AuditLogsPage from "@/pages/admin/AuditLogsPage";
+import NotificationPage from "@/pages/admin/NotificationPage";
 
 function App() {
   return (
@@ -52,9 +57,14 @@ function App() {
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}
               <Route element={<AdminRoute />}>
+                <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
                 <Route path="/admin/users" element={<AdminUsersPage />} />
                 <Route path="/admin/users/create" element={<AdminCreateUserPage />} />
                 <Route path="/admin/users/:id/edit" element={<AdminEditUserPage />} />
+                <Route path="/admin/departments" element={<DepartmentsPage />} />
+                <Route path="/admin/system-config" element={<SystemConfigPage />} />
+                <Route path="/admin/audit-logs" element={<AuditLogsPage />} />
+                <Route path="/admin/notifications" element={<NotificationPage />} />
               </Route>
             </Route>
           </Route>

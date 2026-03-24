@@ -1,0 +1,31 @@
+package fptu.sba301.ats.controller;
+
+import fptu.sba301.ats.constant.AdminConstants;
+import fptu.sba301.ats.constant.AppConstant;
+import fptu.sba301.ats.dto.response.AuditLogResponseDTO;
+import fptu.sba301.ats.service.AuditLogService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping(AppConstant.BASE_URL + AdminConstants.AUDIT_LOG_URL)
+@RequiredArgsConstructor
+@PreAuthorize("hasRole('SYSTEM_ADMIN')")
+public class AuditLogController {
+
+    private final AuditLogService auditLogService;
+
+    @GetMapping
+    public ResponseEntity<List<AuditLogResponseDTO>> getAllLogs() {
+        return ResponseEntity.ok(auditLogService.getAllLogs());
+    }
+
+    @GetMapping("/action")
+    public ResponseEntity<List<AuditLogResponseDTO>> getLogsByAction(@RequestParam String action) {
+        return ResponseEntity.ok(auditLogService.getLogsByAction(action));
+    }
+}

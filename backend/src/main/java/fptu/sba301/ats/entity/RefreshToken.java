@@ -29,7 +29,7 @@ public class RefreshToken extends BaseEntity {
     @Column(name = "id", updatable = false, nullable = false)
     private UUID id;
 
-    @Column(name = "token", nullable = false, unique = true, columnDefinition = "TEXT")
+    @Column(name = "token", nullable = false, unique = true, length = 1000)
     private String token;
 
     @ManyToOne(fetch = jakarta.persistence.FetchType.LAZY)

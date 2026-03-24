@@ -30,6 +30,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     public RefreshToken createRefreshToken(User user) {
 
         RefreshToken refreshToken = RefreshToken.builder()
+                .id(UUID.randomUUID())
                 .token(UUID.randomUUID().toString())
                 .user(user)
                 // Fix: LocalDateTime.from(Instant) throws; use LocalDateTime.now().plusSeconds()

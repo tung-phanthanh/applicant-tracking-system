@@ -37,12 +37,11 @@ public class NotificationEventListener {
             Notification notification = Notification.builder()
                     .userId(user.getId())
                     .title(event.getTitle())
-                    .content(event.getContent())
-                    .type(event.getType())
-                    .link(event.getLink())
+                    .message(event.getContent())
+                    .type(fptu.sba301.ats.enums.NotificationType.INTERVIEW_PENDING) 
                     .isRead(false)
                     .build();
-            notificationRepository.save(java.util.Objects.requireNonNull(notification));
+            notificationRepository.save(notification);
 
         }
 
