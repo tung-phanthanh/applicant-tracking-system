@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
 import type { PermissionKey, Role, Permission } from "@/types/index";
 import { roleService } from "@/services/api/role.service";
+import { toast } from "sonner";
 
 export default function RolesPage() {
     const [roles, setRoles] = useState<Role[]>([]);
@@ -39,14 +40,24 @@ export default function RolesPage() {
         const role = roles.find(r => r.id === roleId);
         if (!role) return;
         const has = role.permissions.includes(perm);
-        const newPerms = has ? role.permissions.filter(p => p !== perm) : [...role.permissions, perm];
+        const newPerms = has 
+            ? role.permissions.filter(p => p !== perm) 
+            : [...role.permissions, perm];
 
         // Optimistic update
         setRoles((prev) => prev.map((r) => r.id === roleId ? { ...r, permissions: newPerms } : r));
+        
         try {
-            await roleService.updateRole(roleId, { name: role.name, description: role.description, permissions: newPerms });
-        } catch (e) {
+            await roleService.updateRole(roleId, { 
+                name: role.name, 
+                description: role.description, 
+                permissions: newPerms 
+            });
+            toast.success(`Permission ${has ? 'removed' : 'added'} successfully`);
+        } catch (e: any) {
             console.error("Failed to update permission", e);
+            const errorMsg = e.response?.data?.message || "Failed to update permission";
+            toast.error(errorMsg);
             // Revert changes on error
             setRoles((prev) => prev.map((r) => r.id === roleId ? { ...r, permissions: role.permissions } : r));
         }
@@ -65,8 +76,10 @@ export default function RolesPage() {
             setExpandedRoleId(newRole.id);
             setNewRoleName("");
             setNewRoleDesc("");
-        } catch (e) {
+            toast.success("Role created successfully");
+        } catch (e: any) {
             console.error(e);
+            toast.error("Failed to create role");
         }
     };
 
@@ -75,8 +88,10 @@ export default function RolesPage() {
         try {
             await roleService.deleteRole(roleId);
             setRoles((prev) => prev.filter((r) => r.id !== roleId));
-        } catch (e) {
+            toast.success("Role deleted successfully");
+        } catch (e: any) {
             console.error(e);
+            toast.error("Failed to delete role");
         }
     };
 

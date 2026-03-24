@@ -13,9 +13,11 @@ import {
     Bell,
     ClipboardList,
     Gift,
+    MessageSquareQuote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
+import { PERMISSIONS } from "@/constants/permissions";
 
 const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
@@ -34,17 +36,21 @@ const hrNavItems = [
 ];
 
 const adminNavItems = [
-    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
-    { to: "/admin/users", icon: ShieldCheck, label: "Manage Users" },
-    { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
-    { to: "/admin/departments", icon: Building2, label: "Departments" },
-    { to: "/admin/system-config", icon: Settings, label: "System Config" },
-    { to: "/admin/audit-logs", icon: History, label: "Audit Logs" },
+    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard", permission: PERMISSIONS.DASHBOARD_VIEW },
+    { to: "/admin/users", icon: ShieldCheck, label: "Manage Users", permission: PERMISSIONS.USER_MANAGE },
+    { to: "/admin/roles", icon: Shield, label: "Roles & Permissions", permission: PERMISSIONS.ROLE_MANAGE },
+    { to: "/admin/departments", icon: Building2, label: "Departments", permission: PERMISSIONS.DEPARTMENT_MANAGE },
+    { to: "/admin/system-config", icon: Settings, label: "System Config", permission: PERMISSIONS.SYSTEM_CONFIG_MANAGE },
+    { to: "/admin/audit-logs", icon: History, label: "Audit Logs", permission: PERMISSIONS.AUDIT_LOG_VIEW },
+    { to: "/admin/notifications", icon: MessageSquareQuote, label: "Notification Center", permission: PERMISSIONS.NOTIFICATION_MANAGE },
 ];
 
 export default function Sidebar() {
-    const { user } = useAuth();
-    const isAdmin = user?.role === "SYSTEM_ADMIN";
+    const { user, hasPermission } = useAuth();
+
+    // Admin section should only show if user has at least one admin permission
+    const hasAnyAdminPerm = adminNavItems.some(item => hasPermission(item.permission));
+    const isAdmin = user?.role === "SYSTEM_ADMIN" || hasAnyAdminPerm;
     const isHr = user?.role === "HR";
     const isHrManager = user?.role === "HR_MANAGER";
 
@@ -138,23 +144,25 @@ export default function Sidebar() {
                                     Administration
                                 </p>
                             </li>
-                            {adminNavItems.map(({ to, icon: Icon, label }) => (
-                                <li key={to}>
-                                    <NavLink
-                                        to={to}
-                                        className={({ isActive }) =>
-                                            cn(
-                                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                                isActive
-                                                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                            )
-                                        }
-                                    >
-                                        <Icon className="h-4 w-4 shrink-0" />
-                                        {label}
-                                    </NavLink>
-                                </li>
+                            {adminNavItems.map(({ to, icon: Icon, label, permission }) => (
+                                hasPermission(permission) && (
+                                    <li key={to}>
+                                        <NavLink
+                                            to={to}
+                                            className={({ isActive }) =>
+                                                cn(
+                                                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                                    isActive
+                                                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                                )
+                                            }
+                                        >
+                                            <Icon className="h-4 w-4 shrink-0" />
+                                            {label}
+                                        </NavLink>
+                                    </li>
+                                )
                             ))}
                         </>
                     )}

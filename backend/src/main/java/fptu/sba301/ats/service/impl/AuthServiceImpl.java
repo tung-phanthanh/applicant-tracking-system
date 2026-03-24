@@ -47,6 +47,9 @@ public class AuthServiceImpl implements AuthService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole().getName())
+                .permissions(user.getRole().getPermissions() != null 
+                    ? user.getRole().getPermissions().stream().map(fptu.sba301.ats.entity.Permission::getKey).toList() 
+                    : java.util.Collections.emptyList())
                 .build();
     }
 }

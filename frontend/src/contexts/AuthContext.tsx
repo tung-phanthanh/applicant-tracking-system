@@ -50,6 +50,7 @@ function buildUserFromStorage(): User | null {
             role: parsed.role,
             fullName,
             department: parsed.department,
+            permissions: (parsed as any).permissions || [],
         };
     } catch {
         return null;
@@ -84,6 +85,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     fullName: response.fullName,
                     email: response.email,
                     role: response.role,
+                    permissions: response.permissions || [],
                 };
 
                 const storage = rememberMe ? localStorage : sessionStorage;
@@ -113,8 +115,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    const hasPermission = useCallback(
+        (permission: string): boolean => {
+            if (!user) return false;
+            if (user.role === "SYSTEM_ADMIN") return true; // System admins have all permissions
+            return user.permissions?.includes(permission) ?? false;
+        },
+        [user]
+    );
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, logout, hasPermission }}>
             {children}
         </AuthContext.Provider>
     );

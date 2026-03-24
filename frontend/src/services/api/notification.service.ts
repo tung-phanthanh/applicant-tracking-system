@@ -21,3 +21,18 @@ export const notificationService = {
         await api.patch('/notifications/read-all');
     }
 };
+
+export const adminNotificationService = {
+    sendBulkNotification: async (payload: { title: string; message: string; roleIds?: string[]; userIds?: string[] }) => {
+        const { data } = await api.post('/notifications/admin/send', payload);
+        return data;
+    },
+    getHistory: async (page = 0, size = 20): Promise<any[]> => {
+        const { data } = await api.get('/notifications/admin/history', { params: { page, size } });
+        return data;
+    },
+    getStats: async (): Promise<{ totalSent: number; delivered: number; failed: number; pending: number }> => {
+        const { data } = await api.get('/notifications/admin/stats');
+        return data;
+    }
+};

@@ -1,48 +1,44 @@
-// package fptu.sba301.ats.controller;
+package fptu.sba301.ats.controller;
 
-// import fptu.sba301.ats.entity.User;
-// import fptu.sba301.ats.repository.UserRepository;
-// import fptu.sba301.ats.service.DemoDataSeederService;
-// import lombok.RequiredArgsConstructor;
-// import org.springframework.security.crypto.password.PasswordEncoder;
-// import org.springframework.web.bind.annotation.GetMapping;
-// import org.springframework.web.bind.annotation.RestController;
+import fptu.sba301.ats.config.AdminUserSeeder;
+import fptu.sba301.ats.service.DemoDataSeederService;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-// @RestController
-// @RequiredArgsConstructor
-// public class SeederController {
-// private final UserRepository userRepository;
-// private final PasswordEncoder passwordEncoder;
-// private final DemoDataSeederService demoDataSeederService;
 
-// @GetMapping("/api/v1/seed-admin")
-// public String seed() {
-// if (!userRepository.existsByEmailAndDeletedFalse("admin@ats.com")) {
-// User admin = new User();
-// admin.setEmail("admin@ats.com");
-// admin.setPasswordHash(passwordEncoder.encode("password"));
-// admin.setFullName("System Admin");
-// admin.setRole(fptu.sba301.ats.enums.Role.SYSTEM_ADMIN);
-// admin.setActive(true);
-// userRepository.save(admin);
+@RestController
+@RequiredArgsConstructor
+@Slf4j
+public class SeederController {
+    
+    private final AdminUserSeeder adminUserSeeder;
+    private final DemoDataSeederService demoDataSeederService;
 
-// User hr = new User();
-// hr.setEmail("hr@ats.com");
-// hr.setPasswordHash(passwordEncoder.encode("password"));
-// hr.setFullName("HR Manager");
-// hr.setRole(fptu.sba301.ats.enums.Role.HR_MANAGER);
-// hr.setActive(true);
-// userRepository.save(hr);
+    @GetMapping("/api/v1/seed-admin")
+    public String seedAdmin() {
+        log.info(" Seeding admin user...");
+        try {
+            adminUserSeeder.seedAdminUser();
+            return " Admin user seeded successfully! Email: admin@ats.com\n" +
+                   " Change password after first login!\n" + 
+                   " Remove this endpoint from permitAll() after seeding!";
+        } catch (Exception e) {
+            log.error(" Error seeding admin user", e);
+            return " Error: " + e.getMessage();
+        }
+    }
 
-// return "Admin (admin@ats.com/password) and HR (hr@ats.com/password)
-// created!";
-// }
-// return "Users already exist.";
-// }
-
-// @GetMapping("/api/v1/seed-demo-data")
-// public String seedDemoData() {
-// seed();
-// return demoDataSeederService.seedDemoData();
-// }
-// }
+    @GetMapping("/api/v1/seed-demo-data")
+    public String seedDemoData() {
+        log.info(" Seeding demo data...");
+        try {
+            seedAdmin();  // Ensure admin exists first
+            return demoDataSeederService.seedDemoData();
+        } catch (Exception e) {
+            log.error(" Error seeding demo data", e);
+            return " Error: " + e.getMessage();
+        }
+    }
+}

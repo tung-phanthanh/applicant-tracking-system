@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
-
 import java.util.UUID;
 
 @Service
@@ -69,15 +68,19 @@ public class RoleServiceImpl implements RoleService {
         Role role = roleRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Role not found", HttpStatus.NOT_FOUND));
 
-        if (role.isSystemRole()) {
-            throw new BusinessException("Cannot modify system roles", HttpStatus.FORBIDDEN);
+        // We allow modifying permissions even for system roles for demo/testing purposes.
+        // But we prevent changing their name or deleting them if they are system roles.
+        
+        if (role.getName() != request.getName()) {
+            if (role.isSystemRole()) {
+                 throw new BusinessException("Cannot change name of system roles", HttpStatus.FORBIDDEN);
+            }
+            if (roleRepository.existsByName(request.getName())) {
+                throw new BusinessException("Role name already exists", HttpStatus.BAD_REQUEST);
+            }
+            role.setName(request.getName());
         }
-
-        if (role.getName() != request.getName() && roleRepository.existsByName(request.getName())) {
-            throw new BusinessException("Role name already exists", HttpStatus.BAD_REQUEST);
-        }
-
-        role.setName(request.getName());
+        
         role.setDescription(request.getDescription());
 
         if (request.getPermissionKeys() != null) {

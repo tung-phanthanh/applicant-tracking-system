@@ -8,6 +8,7 @@ public class AdminConstants {
     public static final String AUDIT_LOG_URL = "/audit-logs";
     public static final String SYSTEM_CONFIG_URL = "/system-config";
     public static final String DEPARTMENT_URL = "/departments";
+    public static final String NOTIFICATION_URL = "/notifications";
 
     private AdminConstants() {
         // Private constructor to prevent instantiation
