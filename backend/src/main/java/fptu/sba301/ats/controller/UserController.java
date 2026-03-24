@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.annotation.LogAudit;
 import fptu.sba301.ats.dto.request.ChangePasswordRequest;
 import fptu.sba301.ats.dto.request.CreateUserRequest;
 import fptu.sba301.ats.dto.request.UpdateUserRequest;
@@ -63,7 +64,7 @@ public class UserController {
      * List all non-deleted users. Admin only.
      */
     @GetMapping
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<List<UserResponse>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
     }
@@ -72,7 +73,7 @@ public class UserController {
      * Get a specific user by ID. Admin only.
      */
     @GetMapping("/{id}")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<UserResponse> getUserById(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.getUserById(id));
     }
@@ -81,7 +82,8 @@ public class UserController {
      * Create a new user account. Admin only.
      */
     @PostMapping
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @LogAudit(action = "CREATE_USER", resource = "User")
     public ResponseEntity<UserResponse> createUser(
             @Valid @RequestBody CreateUserRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(userService.createUser(request));
@@ -91,7 +93,8 @@ public class UserController {
      * Update user info (name, role, department). Admin only.
      */
     @PutMapping("/{id}")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @LogAudit(action = "UPDATE_USER", resource = "User")
     public ResponseEntity<UserResponse> updateUser(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateUserRequest request) {
@@ -102,7 +105,8 @@ public class UserController {
      * Lock a user account. Admin only.
      */
     @PatchMapping("/{id}/lock")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @LogAudit(action = "LOCK_USER", resource = "User")
     public ResponseEntity<UserResponse> lockUser(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.lockUser(id));
     }
@@ -111,7 +115,8 @@ public class UserController {
      * Unlock a user account. Admin only.
      */
     @PatchMapping("/{id}/unlock")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @LogAudit(action = "UNLOCK_USER", resource = "User")
     public ResponseEntity<UserResponse> unlockUser(@PathVariable UUID id) {
         return ResponseEntity.ok(userService.unlockUser(id));
     }
@@ -120,7 +125,8 @@ public class UserController {
      * Soft-delete a user. Admin only.
      */
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAuthority('SYSTEM_ADMIN')")
+    @PreAuthorize("hasRole('SYSTEM_ADMIN')")
+    @LogAudit(action = "DELETE_USER", resource = "User")
     public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();

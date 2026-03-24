@@ -11,10 +11,12 @@ import java.util.UUID;
 @Repository
 public interface UserRepository extends JpaRepository<User, UUID> {
     Optional<User> findByEmailAndDeletedFalse(String email);
-    List<User> findAllByDeletedFalse();
+    List<User> findByDeletedFalse();
+    List<User> findByRoleAndDeletedFalse(fptu.sba301.ats.enums.Role role);
     Optional<User> findByResetTokenAndDeletedFalse(String resetToken);
     Optional<User> findByIdAndDeletedFalse(UUID id);
     boolean existsByEmailAndDeletedFalse(String email);
     Optional<User> findByActivationTokenAndDeletedFalse(String activationToken);
+    long countByDepartment_IdAndDeletedFalse(UUID departmentId);
 }
 
