@@ -6,8 +6,6 @@ import {
     User,
     Users,
     ShieldCheck,
-    ClipboardList,
-    Gift,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,11 +17,6 @@ const navItems = [
     { to: "/profile", icon: User, label: "My Profile" },
 ];
 
-const hrNavItems = [
-    { to: "/scorecard-templates", icon: ClipboardList, label: "Scorecards" },
-    { to: "/offers", icon: Gift, label: "Offers" },
-];
-
 const adminNavItems = [
     { to: "/admin/users", icon: ShieldCheck, label: "Manage Users" },
 ];
@@ -32,7 +25,6 @@ export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
     const isHr = user?.role === "HR";
-    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -68,7 +60,7 @@ export default function Sidebar() {
                         </li>
                     ))}
 
-                    {(isHr || isHrManager) && (
+                    {isHr && (
                         <li>
                             <NavLink
                                 to="/candidates"
@@ -85,35 +77,6 @@ export default function Sidebar() {
                                 Candidates
                             </NavLink>
                         </li>
-                    )}
-
-                    {/* HR Section */}
-                    {(isHr || isHrManager) && (
-                        <>
-                            <li className="pt-3">
-                                <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                    Recruitment
-                                </p>
-                            </li>
-                            {hrNavItems.map(({ to, icon: Icon, label }) => (
-                                <li key={to}>
-                                    <NavLink
-                                        to={to}
-                                        className={({ isActive }) =>
-                                            cn(
-                                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                                isActive
-                                                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                            )
-                                        }
-                                    >
-                                        <Icon className="h-4 w-4 shrink-0" />
-                                        {label}
-                                    </NavLink>
-                                </li>
-                            ))}
-                        </>
                     )}
 
                     {/* Admin section */}
@@ -156,4 +119,3 @@ export default function Sidebar() {
         </aside>
     );
 }
-

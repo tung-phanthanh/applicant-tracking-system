@@ -7,7 +7,6 @@ import fptu.sba301.ats.dto.request.CsvCandidateRow;
 import fptu.sba301.ats.dto.response.BulkImportResponse;
 import fptu.sba301.ats.dto.response.CandidateDetailResponse;
 import fptu.sba301.ats.dto.response.CandidateDocumentResponse;
-import fptu.sba301.ats.dto.response.CandidateHistoryResponse;
 import fptu.sba301.ats.dto.response.CandidateListResponse;
 import fptu.sba301.ats.entity.Application;
 import fptu.sba301.ats.entity.Candidate;
@@ -22,7 +21,6 @@ import fptu.sba301.ats.repository.CandidateDocumentRepository;
 import fptu.sba301.ats.repository.CandidateRepository;
 import fptu.sba301.ats.repository.CandidateStageHistoryRepository;
 import fptu.sba301.ats.repository.JobRepository;
-import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
 import fptu.sba301.ats.service.CandidateService;
 import fptu.sba301.ats.service.CloudinaryService;
@@ -58,7 +56,6 @@ public class CandidateServiceImpl implements CandidateService {
     private final CandidateStageHistoryRepository candidateStageHistoryRepository;
     private final CandidateDocumentRepository candidateDocumentRepository;
     private final JobRepository jobRepository;
-    private final UserRepository userRepository;
     private final CloudinaryService cloudinaryService;
 
     // ─────────────────────────── Existing methods ───────────────────────────
@@ -107,37 +104,6 @@ public class CandidateServiceImpl implements CandidateService {
 
         transitionStage(application, targetStage);
         return buildCandidateDetailResponse(candidateId);
-    }
-
-    @Override
-    @Transactional(readOnly = true)
-    public List<CandidateHistoryResponse> getStageHistory(UUID candidateId) {
-        Application application = applicationRepository
-                .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE)
-                .orElse(null);
-
-        if (application == null) {
-            return new ArrayList<>();
-        }
-
-        List<CandidateStageHistory> histories = candidateStageHistoryRepository
-                .findByApplication_IdOrderByCreatedAtDesc(application.getId());
-
-        return histories.stream().map(h -> {
-            String changedBy = "System";
-            if (h.getCreatedBy() != null) {
-                changedBy = userRepository.findById(h.getCreatedBy())
-                        .map(user -> user.getFullName())
-                        .orElse("Unknown User");
-            }
-            return CandidateHistoryResponse.builder()
-                    .id(h.getId())
-                    .fromStage(h.getFromStage())
-                    .toStage(h.getToStage())
-                    .changedBy(changedBy)
-                    .changedAt(h.getCreatedAt())
-                    .build();
-        }).collect(Collectors.toList());
     }
 
     // ─────────────────────────── New: Single Candidate Add ───────────────────────────
@@ -368,7 +334,6 @@ public class CandidateServiceImpl implements CandidateService {
 
         return CandidateDetailResponse.builder()
                 .candidateId(UUID.fromString(detail.getCandidateId()))
-                .applicationId(detail.getApplicationId() != null ? UUID.fromString(detail.getApplicationId()) : null)
                 .fullName(detail.getFullName())
                 .email(detail.getEmail())
                 .phone(detail.getPhone())

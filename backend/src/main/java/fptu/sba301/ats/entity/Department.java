@@ -20,7 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "departments")
-public class Department extends BaseEntity {
+public class Department {
     @Id
     @UuidGenerator
     @Column(name = "id", nullable = false, updatable = false)

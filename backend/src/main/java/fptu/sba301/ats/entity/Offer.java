@@ -7,7 +7,6 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.LocalDate;
 
 
 @Entity
@@ -39,14 +38,4 @@ public class Offer extends BaseEntity {
     @Builder.Default
     private OfferStatus status = OfferStatus.DRAFT;
 
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "benefits", columnDefinition = "TEXT")
-    private String benefits;
-
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
 }
-

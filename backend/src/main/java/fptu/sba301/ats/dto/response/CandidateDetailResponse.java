@@ -14,7 +14,6 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CandidateDetailResponse {
     private UUID candidateId;
-    private UUID applicationId;
     private String fullName;
     private String email;
     private String phone;

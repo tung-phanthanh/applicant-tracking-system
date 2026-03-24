@@ -50,14 +50,11 @@ function App() {
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
               {/* Placeholder routes */}
+              <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
 
-              {/* Interview scorecard — accessible to any authenticated user */}
-              <Route path="/interviews/:interviewId/scores" element={<InterviewScorecardPage />} />
-
-              {/* HR-only routes */}
+              {/* HR-only route */}
               <Route element={<HrRoute />}>
-                <Route path="/jobs" element={<JobsListPage />} />
                 <Route path="/candidates" element={<CandidateListPage />} />
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
                 <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />

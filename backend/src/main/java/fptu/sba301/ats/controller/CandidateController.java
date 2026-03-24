@@ -40,32 +40,24 @@ public class CandidateController {
     // ───────────── Existing endpoints ─────────────
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<List<CandidateListResponse>> getCandidateList() {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
     @GetMapping("/{candidateId}")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateDetail(candidateId));
     }
 
     @PatchMapping("/{candidateId}/stage")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<CandidateDetailResponse> updateCandidateStage(
             @PathVariable UUID candidateId,
             @Valid @RequestBody CandidateStageUpdateRequest request
     ) {
         return ResponseEntity.ok(candidateService.updateCandidateStage(candidateId, request.getStage()));
-    }
-
-    @GetMapping("/{candidateId}/history")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
-    public ResponseEntity<List<fptu.sba301.ats.dto.response.CandidateHistoryResponse>> getStageHistory(
-            @PathVariable UUID candidateId
-    ) {
-        return ResponseEntity.ok(candidateService.getStageHistory(candidateId));
     }
 
     // ───────────── New: Single Candidate Add ─────────────
@@ -77,7 +69,7 @@ public class CandidateController {
      *   - documents (optional, multiple files): CV / supporting documents to upload to Cloudinary
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<CandidateDetailResponse> createCandidate(
             @RequestPart("request") @Valid CreateCandidateRequest request,
             @RequestPart(value = "documents", required = false) List<MultipartFile> documents
@@ -98,7 +90,7 @@ public class CandidateController {
      *   - cvFiles (optional, multiple files): PDF CV files whose names match the 'cvFileName' column in CSV
      */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<BulkImportResponse> importCandidates(
             @RequestPart("csv") MultipartFile csvFile,
             @RequestPart(value = "cvFiles", required = false) List<MultipartFile> cvFiles

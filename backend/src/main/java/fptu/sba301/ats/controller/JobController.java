@@ -21,7 +21,7 @@ public class JobController {
     private final JobService jobService;
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<List<JobResponse>> getAllJobs() {
         return ResponseEntity.ok(jobService.getAllJobs());
     }
