@@ -1,16 +1,13 @@
 package fptu.sba301.ats.service;
 
-import fptu.sba301.ats.dto.request.SubmitFeedbackRequest;
-import fptu.sba301.ats.dto.response.InterviewResponse;
-import fptu.sba301.ats.entity.Interview;
+import fptu.sba301.ats.dto.request.SubmitInterviewScoreRequest;
+import fptu.sba301.ats.dto.response.InterviewScorecardResponse;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
 public interface InterviewService {
-    List<InterviewResponse> getAllInterviews();
-    void submitFeedback(SubmitFeedbackRequest req);
-    BigDecimal calculateFinalScore(Interview interview);
-    Interview getInterviewById(UUID interviewId);
+    void submitScores(UUID interviewId, SubmitInterviewScoreRequest request, String userEmail);
+    InterviewScorecardResponse getMyScorecard(UUID interviewId, String userEmail);
+    List<InterviewScorecardResponse> getAllScorecards(UUID interviewId);
 }

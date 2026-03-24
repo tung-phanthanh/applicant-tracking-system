@@ -1,6 +1,7 @@
 package fptu.sba301.ats.controller;
 
 import fptu.sba301.ats.entity.User;
+import fptu.sba301.ats.enums.Role;
 import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.service.DemoDataSeederService;
 import lombok.RequiredArgsConstructor;
@@ -22,7 +23,7 @@ public class SeederController {
             admin.setEmail("admin@ats.com");
             admin.setPasswordHash(passwordEncoder.encode("password"));
             admin.setFullName("System Admin");
-            admin.setRole(fptu.sba301.ats.enums.Role.SYSTEM_ADMIN);
+            admin.setRole(Role.HR_MANAGER);
             admin.setActive(true);
             userRepository.save(admin);
             
@@ -30,7 +31,7 @@ public class SeederController {
             hr.setEmail("hr@ats.com");
             hr.setPasswordHash(passwordEncoder.encode("password"));
             hr.setFullName("HR Manager");
-            hr.setRole(fptu.sba301.ats.enums.Role.HR_MANAGER);
+            hr.setRole(Role.HR);
             hr.setActive(true);
             userRepository.save(hr);
             

@@ -6,6 +6,8 @@ import {
     User,
     Users,
     ShieldCheck,
+    ClipboardList,
+    FileText,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -61,22 +63,56 @@ export default function Sidebar() {
                     ))}
 
                     {isHr && (
-                        <li>
-                            <NavLink
-                                to="/candidates"
-                                className={({ isActive }) =>
-                                    cn(
-                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                        isActive
-                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                    )
-                                }
-                            >
-                                <Users className="h-4 w-4 shrink-0" />
-                                Candidates
-                            </NavLink>
-                        </li>
+                        <>
+                            <li>
+                                <NavLink
+                                    to="/candidates"
+                                    className={({ isActive }) =>
+                                        cn(
+                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                            isActive
+                                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                        )
+                                    }
+                                >
+                                    <Users className="h-4 w-4 shrink-0" />
+                                    Candidates
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink
+                                    to="/scorecard-templates"
+                                    className={({ isActive }) =>
+                                        cn(
+                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                            isActive
+                                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                        )
+                                    }
+                                >
+                                    <ClipboardList className="h-4 w-4 shrink-0" />
+                                    Scorecard Templates
+                                </NavLink>
+                            </li>
+                            <li>
+                                <NavLink
+                                    to="/offers"
+                                    className={({ isActive }) =>
+                                        cn(
+                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                            isActive
+                                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                        )
+                                    }
+                                >
+                                    <FileText className="h-4 w-4 shrink-0" />
+                                    Offers
+                                </NavLink>
+                            </li>
+                        </>
                     )}
 
                     {/* Admin section */}

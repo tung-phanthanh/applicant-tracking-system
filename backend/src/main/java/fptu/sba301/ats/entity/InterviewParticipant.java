@@ -3,8 +3,8 @@ package fptu.sba301.ats.entity;
 import fptu.sba301.ats.enums.ParticipantRole;
 import jakarta.persistence.*;
 import lombok.*;
+
 import java.io.Serializable;
-import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -13,12 +13,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(
-        name = "interview_participants",
-        uniqueConstraints = @UniqueConstraint(
-                columnNames = {"interview_id", "user_id"}
-        )
-)
+@Table(name = "interview_participants")
 public class InterviewParticipant {
 
     @EmbeddedId
@@ -35,10 +30,14 @@ public class InterviewParticipant {
     private User user;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "role", nullable = false)
     private ParticipantRole role;
-
+    
+    @Column(name = "feedback", columnDefinition = "TEXT")
     private String feedback;
-    private BigDecimal overallScore;
+    
+    @Column(name = "overall_score")
+    private Integer overallScore;
 
     @Embeddable
     @Getter
@@ -47,7 +46,10 @@ public class InterviewParticipant {
     @AllArgsConstructor
     @EqualsAndHashCode
     public static class InterviewParticipantId implements Serializable {
+        @Column(name = "interview_id")
         private UUID interviewId;
+
+        @Column(name = "user_id")
         private UUID userId;
     }
 }

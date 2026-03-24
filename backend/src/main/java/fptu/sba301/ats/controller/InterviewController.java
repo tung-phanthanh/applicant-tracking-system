@@ -1,49 +1,26 @@
 package fptu.sba301.ats.controller;
 
-import fptu.sba301.ats.dto.request.SubmitFeedbackRequest;
-import fptu.sba301.ats.dto.response.InterviewResponse;
-import fptu.sba301.ats.entity.Interview;
+import fptu.sba301.ats.dto.request.SubmitInterviewScoreRequest;
+import fptu.sba301.ats.dto.response.InterviewScorecardResponse;
 import fptu.sba301.ats.service.InterviewService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
-import static fptu.sba301.ats.constant.AppConstant.*;
+import static fptu.sba301.ats.constant.AppConstant.BASE_URL;
 
 @RestController
-@RequestMapping(BASE_URL + INTERVIEW_CONTROLLER_URL)
+@RequestMapping(BASE_URL + "/interviews")
 @RequiredArgsConstructor
 public class InterviewController {
 
     private final InterviewService interviewService;
 
-    @GetMapping
-//    @PreAuthorize("hasAnyAuthority('INTERVIEWER')")
-    public ResponseEntity<List<InterviewResponse>> getAllInterviews() {
-        return ResponseEntity.ok(interviewService.getAllInterviews());
-    }
-
-    @PostMapping("/feedback")
-//    @PreAuthorize("hasAnyAuthority('INTERVIEWER')")
-    public ResponseEntity<String> submitFeedback(
-            @RequestBody SubmitFeedbackRequest request
-    ) {
-        interviewService.submitFeedback(request);
-        return ResponseEntity.ok("Feedback submitted successfully");
-    }
-
-    @GetMapping("/{interviewId}/final-score")
-//    @PreAuthorize("hasAnyAuthority('INTERVIEWER')")
-    public ResponseEntity<BigDecimal> getFinalScore(
-            @PathVariable UUID interviewId
-    ) {
-        Interview interview = interviewService.getInterviewById(interviewId);
-        BigDecimal result = interviewService.calculateFinalScore(interview);
-        return ResponseEntity.ok(result);
-    }
 }

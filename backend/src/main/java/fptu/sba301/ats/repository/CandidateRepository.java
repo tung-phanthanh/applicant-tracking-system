@@ -41,6 +41,7 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
     @Query(value = """
         SELECT
             BIN_TO_UUID(c.id) AS candidateId,
+            BIN_TO_UUID(a.id) AS applicationId,
             c.full_name AS fullName,
             c.email AS email,
             c.phone AS phone,

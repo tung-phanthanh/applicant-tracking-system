@@ -3,6 +3,7 @@ package fptu.sba301.ats.service;
 import fptu.sba301.ats.dto.request.CreateCandidateRequest;
 import fptu.sba301.ats.dto.response.BulkImportResponse;
 import fptu.sba301.ats.dto.response.CandidateDetailResponse;
+import fptu.sba301.ats.dto.response.CandidateHistoryResponse;
 import fptu.sba301.ats.dto.response.CandidateListResponse;
 import fptu.sba301.ats.enums.ApplicationStage;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,4 +20,5 @@ public interface CandidateService {
 
     BulkImportResponse importCandidatesFromCsv(MultipartFile csvFile, List<MultipartFile> cvFiles);
 
+    List<CandidateHistoryResponse> getStageHistory(UUID candidateId);
 }
