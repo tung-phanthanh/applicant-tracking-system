@@ -14,9 +14,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.http.HttpStatus;
 import fptu.sba301.ats.exception.BusinessException;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 @Service
@@ -28,11 +27,10 @@ public class DepartmentServiceImpl implements DepartmentService {
     private final JobRepository jobRepository;
 
     @Override
-    public List<DepartmentResponseDTO> getAllDepartments() {
-        return departmentRepository.findAll()
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    @SuppressWarnings("null")
+    public Page<DepartmentResponseDTO> getAllDepartments(Pageable pageable) {
+        return departmentRepository.findAll(pageable)
+                .map(this::toDTO);
     }
 
     @Override

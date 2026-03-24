@@ -37,3 +37,15 @@ export interface Notification {
     read: boolean;
     createdAt: string;
 }
+
+export interface PaginatedResponse<T> {
+    content: T[];
+    totalElements: number;
+    totalPages: number;
+    size: number;
+    number: number;
+    last: boolean;
+    first: boolean;
+    numberOfElements: number;
+    empty: boolean;
+}

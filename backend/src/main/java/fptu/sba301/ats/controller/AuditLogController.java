@@ -9,7 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 @RestController
 @RequestMapping(AppConstant.BASE_URL + AdminConstants.AUDIT_LOG_URL)
@@ -20,12 +21,12 @@ public class AuditLogController {
     private final AuditLogService auditLogService;
 
     @GetMapping
-    public ResponseEntity<List<AuditLogResponseDTO>> getAllLogs() {
-        return ResponseEntity.ok(auditLogService.getAllLogs());
+    public ResponseEntity<Page<AuditLogResponseDTO>> getAllLogs(Pageable pageable) {
+        return ResponseEntity.ok(auditLogService.getAllLogs(pageable));
     }
-
+    
     @GetMapping("/action")
-    public ResponseEntity<List<AuditLogResponseDTO>> getLogsByAction(@RequestParam String action) {
-        return ResponseEntity.ok(auditLogService.getLogsByAction(action));
+    public ResponseEntity<Page<AuditLogResponseDTO>> getLogsByAction(@RequestParam String action, Pageable pageable) {
+        return ResponseEntity.ok(auditLogService.getLogsByAction(action, pageable));
     }
 }

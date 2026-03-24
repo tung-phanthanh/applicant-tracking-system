@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
     Bell, CheckCheck, RefreshCw, Clock, Inbox, Info, AlertTriangle, CheckCircle2, MoreVertical
 } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { adminService } from "@/services/adminService";
 import type { Notification } from "@/types/admin";
@@ -36,6 +37,10 @@ import { Trash2 } from "lucide-react";
 
 export default function NotificationPage() {
     const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [page, setPage] = useState(0);
+    const [pageSize] = useState(10);
+    const [totalElements, setTotalElements] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isSending, setIsSending] = useState(false);
     const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -47,21 +52,24 @@ export default function NotificationPage() {
     const [selectedRole, setSelectedRole] = useState("RECRUITER");
     const [notifType, setNotifType] = useState("SYSTEM_ALERT");
 
-    const loadNotifications = useCallback(async () => {
+    const loadNotifications = useCallback(async (p: number) => {
         setIsLoading(true);
         try {
-            const data = await adminService.getNotifications();
-            setNotifications(data);
+            const data = await adminService.getAllNotificationsAdmin(p, pageSize);
+            setNotifications(data.content);
+            setTotalElements(data.totalElements);
+            setTotalPages(data.totalPages);
+            setPage(data.number);
         } catch {
             // Silently fail
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [pageSize]);
 
     useEffect(() => {
-        loadNotifications();
-    }, [loadNotifications]);
+        loadNotifications(page);
+    }, [loadNotifications, page]);
 
     const handleMarkAsRead = async (id: string) => {
         try {
@@ -120,7 +128,7 @@ export default function NotificationPage() {
             setIsDialogOpen(false);
             setTitle("");
             setMessage("");
-            loadNotifications();
+            loadNotifications(page);
         } catch (error) {
             console.error("Failed to send notification", error);
             toast.error("Failed to send notification");
@@ -259,7 +267,7 @@ export default function NotificationPage() {
                             </DialogFooter>
                         </DialogContent>
                     </Dialog>
-                    <Button variant="outline" size="sm" onClick={loadNotifications} disabled={isLoading} className="rounded-full">
+                    <Button variant="outline" size="sm" onClick={() => loadNotifications(page)} disabled={isLoading} className="rounded-full">
                         <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                         Refresh
                     </Button>
@@ -291,7 +299,7 @@ export default function NotificationPage() {
                             </div>
                             <p className="text-xl font-semibold opacity-40 italic">Your inbox is empty</p>
                             <p className="text-sm opacity-30 mt-1 uppercase tracking-tighter font-mono">No new alerts found</p>
-                            <Button variant="ghost" className="mt-6 rounded-full opacity-40 hover:opacity-100" onClick={loadNotifications}>
+                            <Button variant="ghost" className="mt-6 rounded-full opacity-40 hover:opacity-100" onClick={() => loadNotifications(page)}>
                                 <RefreshCw className="mr-2 h-4 w-4" /> Check again
                             </Button>
                         </div>
@@ -351,6 +359,15 @@ export default function NotificationPage() {
                             </div>
                         ))
                     )}
+                </div>
+                <div className="px-4 pb-4">
+                    <Pagination 
+                        currentPage={page} 
+                        totalPages={totalPages} 
+                        totalElements={totalElements} 
+                        pageSize={pageSize} 
+                        onPageChange={setPage}
+                    />
                 </div>
             </div>
             

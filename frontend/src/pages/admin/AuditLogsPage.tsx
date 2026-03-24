@@ -1,7 +1,8 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-    Activity, Search, RefreshCw, Clock, ChevronRight
+    Activity, Search, RefreshCw, Clock, ChevronRight, Download, FileSpreadsheet, FileText
 } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminService } from "@/services/adminService";
@@ -12,28 +13,42 @@ import {
     DialogHeader,
     DialogTitle,
 } from "@/components/ui/dialog";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function AuditLogsPage() {
     const [logs, setLogs] = useState<AuditLog[]>([]);
+    const [page, setPage] = useState(0);
+    const [pageSize] = useState(15);
+    const [totalElements, setTotalElements] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [search, setSearch] = useState("");
     const [selectedLog, setSelectedLog] = useState<AuditLog | null>(null);
+    const [isExporting, setIsExporting] = useState(false);
 
-    const loadLogs = useCallback(async () => {
+    const loadLogs = useCallback(async (p: number) => {
         setIsLoading(true);
         try {
-            const data = await adminService.getAuditLogs();
-            setLogs(data);
+            const data = await adminService.getAuditLogs(p, pageSize);
+            setLogs(data.content);
+            setTotalElements(data.totalElements);
+            setTotalPages(data.totalPages);
+            setPage(data.number);
         } catch {
             // Silently handle error
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [pageSize]);
 
     useEffect(() => {
-        loadLogs();
-    }, [loadLogs]);
+        loadLogs(page);
+    }, [loadLogs, page]);
 
     const filtered = logs.filter((log) =>
         log.action.toLowerCase().includes(search.toLowerCase()) ||
@@ -41,6 +56,25 @@ export default function AuditLogsPage() {
         (log.userFullName?.toLowerCase() || "").includes(search.toLowerCase()) ||
         log.entityType.toLowerCase().includes(search.toLowerCase())
     );
+
+    const handleExport = async (format: "csv" | "excel") => {
+        setIsExporting(true);
+        try {
+            const blob = await adminService.exportAuditLogs(format);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `audit_logs.${format === "csv" ? "csv" : "xlsx"}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch {
+            // handle error if needed
+        } finally {
+            setIsExporting(false);
+        }
+    };
 
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -55,10 +89,31 @@ export default function AuditLogsPage() {
                         <p className="text-sm text-muted-foreground">Monitor system-wide activity and changes</p>
                     </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={loadLogs} disabled={isLoading} className="rounded-full">
-                    <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
-                    Refresh
-                </Button>
+                <div className="flex gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" className="rounded-full" disabled={isExporting}>
+                                {isExporting ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                                Export
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 border-border/50 bg-card/95 backdrop-blur-xl">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleExport("csv")}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Export as CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleExport("excel")}>
+                                <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                                Export as Excel
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
+                    <Button variant="outline" size="sm" onClick={() => loadLogs(page)} disabled={isLoading} className="rounded-full">
+                        <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
+                        Refresh
+                    </Button>
+                </div>
             </div>
 
             {/* Content Table */}
@@ -136,6 +191,16 @@ export default function AuditLogsPage() {
                         </tbody>
                     </table>
                 </div>
+            </div>
+
+            <div className="mt-8 flex justify-center pb-8 border-t border-border/10 pt-4">
+                <Pagination 
+                    currentPage={page} 
+                    totalPages={totalPages} 
+                    totalElements={totalElements} 
+                    pageSize={pageSize} 
+                    onPageChange={setPage}
+                />
             </div>
             
             <Dialog open={!!selectedLog} onOpenChange={() => setSelectedLog(null)}>

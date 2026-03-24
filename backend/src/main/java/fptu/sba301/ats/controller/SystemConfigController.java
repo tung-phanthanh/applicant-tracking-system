@@ -8,6 +8,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import fptu.sba301.ats.dto.response.SystemConfigResponseDTO;
 
 import java.util.Map;
 
@@ -19,8 +22,8 @@ public class SystemConfigController {
     private final SystemConfigService systemConfigService;
 
     @GetMapping
-    public ResponseEntity<java.util.List<fptu.sba301.ats.dto.response.SystemConfigResponseDTO>> getAllConfigs() {
-        return ResponseEntity.ok(systemConfigService.getAllConfigs());
+    public ResponseEntity<Page<SystemConfigResponseDTO>> getAllConfigs(Pageable pageable) {
+        return ResponseEntity.ok(systemConfigService.getAllConfigs(pageable));
     }
 
     @PutMapping
@@ -34,7 +37,7 @@ public class SystemConfigController {
     @PostMapping
     @LogAudit(action = "UPDATE", resource = "SystemConfig")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
-    public ResponseEntity<fptu.sba301.ats.dto.response.SystemConfigResponseDTO> updateConfig(@RequestBody Map<String, String> payload) {
+    public ResponseEntity<SystemConfigResponseDTO> updateConfig(@RequestBody Map<String, String> payload) {
         String key = payload.get("configKey");
         String value = payload.get("value");
         return ResponseEntity.ok(systemConfigService.updateConfig(key, value));

@@ -9,6 +9,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import fptu.sba301.ats.dto.response.SystemConfigResponseDTO;
 
 import java.time.Instant;
 import java.util.Map;
@@ -21,10 +24,10 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     private final ApplicationEventPublisher eventPublisher;
 
     @Override
-    public java.util.List<fptu.sba301.ats.dto.response.SystemConfigResponseDTO> getAllConfigs() {
-        return systemConfigRepository.findAll().stream()
-                .map(this::toDTO)
-                .collect(java.util.stream.Collectors.toList());
+    @SuppressWarnings("null")
+    public Page<SystemConfigResponseDTO> getAllConfigs(Pageable pageable) {
+        return systemConfigRepository.findAll(pageable)
+                .map(this::toDTO);
     }
 
     @Override
@@ -47,7 +50,7 @@ public class SystemConfigServiceImpl implements SystemConfigService {
     @Override
     @Transactional
     @LogAudit(action = "UPDATE", resource = "SystemConfig")
-    public fptu.sba301.ats.dto.response.SystemConfigResponseDTO updateConfig(String key, String value) {
+    public SystemConfigResponseDTO updateConfig(String key, String value) {
         SystemConfig config = updateSingleConfig(key, value);
         return toDTO(config);
     }
@@ -89,8 +92,8 @@ public class SystemConfigServiceImpl implements SystemConfigService {
         return Boolean.parseBoolean(val);
     }
 
-    private fptu.sba301.ats.dto.response.SystemConfigResponseDTO toDTO(SystemConfig config) {
-        return fptu.sba301.ats.dto.response.SystemConfigResponseDTO.builder()
+    private SystemConfigResponseDTO toDTO(SystemConfig config) {
+        return SystemConfigResponseDTO.builder()
                 .configKey(config.getKey())
                 .value(config.getValue())
                 .updatedAt(config.getUpdatedAt())
