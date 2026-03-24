@@ -24,6 +24,7 @@ import OffersListPage from "@/pages/recruiter/OffersListPage";
 import OfferFormPage from "@/pages/recruiter/OfferFormPage";
 import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
 import OnboardingPage from "@/pages/recruiter/OnboardingPage";
+import OnboardingListPage from "@/pages/recruiter/OnboardingListPage";
 
 function App() {
   return (
@@ -62,6 +63,7 @@ function App() {
                 <Route path="/offers/new" element={<OfferFormPage />} />
                 <Route path="/offers/:id" element={<OfferDetailPage />} />
                 <Route path="/offers/:id/edit" element={<OfferFormPage />} />
+                <Route path="/onboarding-list" element={<OnboardingListPage />} />
                 <Route path="/onboarding/:id" element={<OnboardingPage />} />
                 <Route path="/onboarding/application/:applicationId" element={<OnboardingPage />} />
               </Route>

@@ -30,4 +30,21 @@ export const onboardingService = {
     );
     return data;
   },
+
+  async getAllChecklists(): Promise<OnboardingChecklist[]> {
+    // Use offers API to get application IDs with onboarding
+    const { data } = await api.get<any[]>("/offers");
+    const checklists: OnboardingChecklist[] = [];
+    for (const offer of data) {
+      if (offer.applicationId) {
+        try {
+          const checklist = await this.getByApplicationId(offer.applicationId);
+          checklists.push(checklist);
+        } catch {
+          // Skip if no onboarding
+        }
+      }
+    }
+    return checklists;
+  },
 };

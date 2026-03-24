@@ -1,9 +1,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { FileText, CheckCircle2, XCircle, Send, Download, Clock } from "lucide-react";
+import { FileText, CheckCircle2, XCircle, Send, Download, Clock, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { offerService } from "@/services/offerService";
+import { onboardingService } from "@/services/onboardingService";
 import type { Offer, OfferApproval, OfferStatus, ApprovalStatus } from "@/types/offer";
 import { useAuth } from "@/hooks/useAuth";
 
@@ -27,6 +28,7 @@ export default function OfferDetailPage() {
   const [error, setError] = useState("");
   const [approvalComment, setApprovalComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
+  const [hasOnboarding, setHasOnboarding] = useState(false);
 
   const isHrManager = user?.role === "HR_MANAGER";
 
@@ -40,6 +42,14 @@ export default function OfferDetailPage() {
       ]);
       setOffer(offerData);
       setHistory(historyData);
+      if (offerData.applicationId) {
+        try {
+          await onboardingService.getByApplicationId(offerData.applicationId);
+          setHasOnboarding(true);
+        } catch {
+          setHasOnboarding(false);
+        }
+      }
     } catch {
       setError("Failed to load offer details.");
     } finally {
@@ -78,11 +88,22 @@ export default function OfferDetailPage() {
     }
   };
 
-  const handlePreviewPdf = () => {
+  const handlePreviewPdf = async () => {
     if (!id) return;
-    const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
-    const pdfUrl = offerService.getOfferPdfUrl(id);
-    window.open(`${pdfUrl}?token=${token}`, "_blank");
+    try {
+      const token = localStorage.getItem("accessToken") || sessionStorage.getItem("accessToken");
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || "http://localhost:8386/api/v1"}/offers/${id}/pdf`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+      if (!response.ok) throw new Error("Failed to fetch PDF");
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      window.open(url, "_blank");
+    } catch {
+      alert("Failed to preview PDF.");
+    }
   };
 
   if (loading) {
@@ -153,10 +174,29 @@ export default function OfferDetailPage() {
           </>
         )}
         {(offer.status === "APPROVED" || offer.status === "SENT") && (
-          <Button variant="outline" onClick={handlePreviewPdf}>
-            <Download className="h-4 w-4" />
-            Preview PDF
-          </Button>
+          <>
+            <Button variant="outline" onClick={handlePreviewPdf}>
+              <Download className="h-4 w-4" />
+              Preview PDF
+            </Button>
+            {offer.applicationId && (
+              <Button
+                variant="outline"
+                onClick={() => navigate(`/onboarding/application/${offer.applicationId}`)}
+              >
+                {hasOnboarding ? (
+                  <>
+                    View Onboarding
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    Create Onboarding
+                  </>
+                )}
+              </Button>
+            )}
+          </>
         )}
       </section>
 

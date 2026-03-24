@@ -13,12 +13,14 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { onboardingService } from "@/services/onboardingService";
+import { userService } from "@/services/userService";
 import type {
   OnboardingChecklist,
   OnboardingStatus,
   CreateOnboardingRequest,
   TaskEntry,
 } from "@/types/onboarding";
+import type { UserRecord } from "@/types/user";
 
 const STATUS_STYLES: Record<OnboardingStatus, string> = {
   NOT_STARTED: "bg-gray-100 text-gray-700 ring-1 ring-gray-300",
@@ -207,6 +209,22 @@ function CreateChecklistForm({
     { title: "", description: "", sortOrder: 0, dueDate: null, assignedToUserId: null },
   ]);
   const [saving, setSaving] = useState(false);
+  const [users, setUsers] = useState<UserRecord[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(true);
+
+  useEffect(() => {
+    const loadUsers = async () => {
+      try {
+        const data = await userService.getUsers();
+        setUsers(data.filter((u) => u.active));
+      } catch {
+        // Ignore error
+      } finally {
+        setLoadingUsers(false);
+      }
+    };
+    void loadUsers();
+  }, []);
 
   const addTask = () => {
     setTasks([
@@ -300,12 +318,28 @@ function CreateChecklistForm({
                     placeholder="Description (optional)"
                     className="mt-2"
                   />
-                  <Input
-                    type="date"
-                    value={task.dueDate ?? ""}
-                    onChange={(e) => updateTask(i, "dueDate", e.target.value || null)}
-                    className="mt-2"
-                  />
+                  <div className="mt-2 flex gap-2">
+                    <Input
+                      type="date"
+                      value={task.dueDate ?? ""}
+                      onChange={(e) => updateTask(i, "dueDate", e.target.value || null)}
+                      className="flex-1"
+                      placeholder="Due date"
+                    />
+                    <select
+                      value={task.assignedToUserId ?? ""}
+                      onChange={(e) => updateTask(i, "assignedToUserId", e.target.value || null)}
+                      disabled={loadingUsers}
+                      className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    >
+                      <option value="">Assign to user</option>
+                      {users.map((user) => (
+                        <option key={user.id} value={user.id}>
+                          {user.fullName}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               ))}
             </div>
