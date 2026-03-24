@@ -20,6 +20,7 @@ import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
 import ScorecardTemplatesPage from "@/pages/recruiter/ScorecardTemplatesPage";
 import InterviewScorecardPage from "@/pages/recruiter/InterviewScorecardPage";
 import CandidateRankingPage from "@/pages/recruiter/CandidateRankingPage";
+import CandidateEvaluationPage from "@/pages/recruiter/CandidateEvaluationPage";
 import OffersListPage from "@/pages/recruiter/OffersListPage";
 import OfferFormPage from "@/pages/recruiter/OfferFormPage";
 import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
@@ -60,6 +61,7 @@ function App() {
                 <Route path="/candidates" element={<CandidateListPage />} />
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
                 <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
+                <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
                 <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
                 <Route path="/offers" element={<OffersListPage />} />
                 <Route path="/offers/new" element={<OfferFormPage />} />

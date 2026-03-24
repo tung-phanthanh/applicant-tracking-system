@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { scorecardService } from "@/services/scorecardService";
+import { departmentService } from "@/services/departmentService";
+import type { Department } from "@/types/department";
 import type {
   ScorecardTemplate,
   CreateScorecardTemplateRequest,
@@ -208,6 +210,11 @@ function TemplateDialog({
     ],
   );
   const [saving, setSaving] = useState(false);
+  const [departments, setDepartments] = useState<Department[]>([]);
+
+  useEffect(() => {
+    void departmentService.getAllDepartments().then(setDepartments).catch(console.error);
+  }, []);
 
   const addCriterion = () => {
     setCriteria([...criteria, { name: "", weight: 1 }]);
@@ -230,10 +237,6 @@ function TemplateDialog({
     }
     if (criteria.some((c) => !c.name.trim())) {
       alert("All criteria must have a name.");
-      return;
-    }
-    if (departmentId && !/^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/.test(departmentId)) {
-      alert("Department ID must be a valid 36-character UUID.");
       return;
     }
     setSaving(true);
@@ -270,12 +273,19 @@ function TemplateDialog({
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium">Department ID (optional)</label>
-            <Input
+            <label className="mb-1 block text-sm font-medium">Department (optional)</label>
+            <select
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
-              placeholder="Leave empty for company-wide"
-            />
+            >
+              <option value="">-- Company Wide --</option>
+              {departments.map((d) => (
+                <option key={d.id} value={d.id}>
+                  {d.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div>

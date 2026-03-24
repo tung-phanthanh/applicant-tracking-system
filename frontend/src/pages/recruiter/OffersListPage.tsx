@@ -91,6 +91,8 @@ export default function OffersListPage() {
               <option value="APPROVED">Approved</option>
               <option value="REJECTED">Rejected</option>
               <option value="SENT">Sent</option>
+              <option value="ACCEPTED">Accepted</option>
+              <option value="DECLINED">Declined</option>
             </select>
             <Button size="sm" className="h-9" onClick={() => navigate("/offers/new")}>
               <Plus className="h-4 w-4" />
