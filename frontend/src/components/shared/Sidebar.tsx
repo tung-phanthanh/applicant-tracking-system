@@ -6,53 +6,25 @@ import {
     User,
     Users,
     ShieldCheck,
-    Shield,
-    Building2,
-    Settings,
-    History,
-    Bell,
-    ClipboardList,
-    Gift,
-    MessageSquareQuote,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
-import { PERMISSIONS } from "@/constants/permissions";
 
 const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
-];
-
-const commonItems = [
-    { to: "/notifications", icon: Bell, label: "Notifications" },
     { to: "/profile", icon: User, label: "My Profile" },
 ];
 
-const hrNavItems = [
-    { to: "/scorecard-templates", icon: ClipboardList, label: "Scorecards" },
-    { to: "/offers", icon: Gift, label: "Offers" },
-];
-
 const adminNavItems = [
-    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard", permission: PERMISSIONS.DASHBOARD_VIEW },
-    { to: "/admin/users", icon: ShieldCheck, label: "Manage Users", permission: PERMISSIONS.USER_MANAGE },
-    { to: "/admin/roles", icon: Shield, label: "Roles & Permissions", permission: PERMISSIONS.ROLE_MANAGE },
-    { to: "/admin/departments", icon: Building2, label: "Departments", permission: PERMISSIONS.DEPARTMENT_MANAGE },
-    { to: "/admin/system-config", icon: Settings, label: "System Config", permission: PERMISSIONS.SYSTEM_CONFIG_MANAGE },
-    { to: "/admin/audit-logs", icon: History, label: "Audit Logs", permission: PERMISSIONS.AUDIT_LOG_VIEW },
-    { to: "/admin/notifications", icon: MessageSquareQuote, label: "Notification Center", permission: PERMISSIONS.NOTIFICATION_MANAGE },
+    { to: "/admin/users", icon: ShieldCheck, label: "Manage Users" },
 ];
 
 export default function Sidebar() {
-    const { user, hasPermission } = useAuth();
-
-    // Admin section should only show if user has at least one admin permission
-    const hasAnyAdminPerm = adminNavItems.some(item => hasPermission(item.permission));
-    const isAdmin = user?.role === "SYSTEM_ADMIN" || hasAnyAdminPerm;
+    const { user } = useAuth();
+    const isAdmin = user?.role === "SYSTEM_ADMIN";
     const isHr = user?.role === "HR";
-    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -67,7 +39,7 @@ export default function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <ul className="space-y-1">
                     {navItems.map(({ to, icon: Icon, label }) => (
                         <li key={to}>
@@ -88,7 +60,7 @@ export default function Sidebar() {
                         </li>
                     ))}
 
-                    {(isHr || isHrManager) && (
+                    {isHr && (
                         <li>
                             <NavLink
                                 to="/candidates"
@@ -107,15 +79,15 @@ export default function Sidebar() {
                         </li>
                     )}
 
-                    {/* HR Section */}
-                    {(isHr || isHrManager) && (
+                    {/* Admin section */}
+                    {isAdmin && (
                         <>
                             <li className="pt-3">
                                 <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                    Recruitment
+                                    Administration
                                 </p>
                             </li>
-                            {hrNavItems.map(({ to, icon: Icon, label }) => (
+                            {adminNavItems.map(({ to, icon: Icon, label }) => (
                                 <li key={to}>
                                     <NavLink
                                         to={to}
@@ -135,64 +107,7 @@ export default function Sidebar() {
                             ))}
                         </>
                     )}
-
-                    {/* Admin section */}
-                    {isAdmin && (
-                        <>
-                            <li className="pt-3">
-                                <p className="mb-1 px-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                                    Administration
-                                </p>
-                            </li>
-                            {adminNavItems.map(({ to, icon: Icon, label, permission }) => (
-                                hasPermission(permission) && (
-                                    <li key={to}>
-                                        <NavLink
-                                            to={to}
-                                            className={({ isActive }) =>
-                                                cn(
-                                                    "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                                    isActive
-                                                        ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                                )
-                                            }
-                                        >
-                                            <Icon className="h-4 w-4 shrink-0" />
-                                            {label}
-                                        </NavLink>
-                                    </li>
-                                )
-                            ))}
-                        </>
-                    )}
                 </ul>
-
-                <div>
-                    <h4 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-                        Account
-                    </h4>
-                    <ul className="space-y-1">
-                        {commonItems.map(({ to, icon: Icon, label }) => (
-                            <li key={to}>
-                                <NavLink
-                                    to={to}
-                                    className={({ isActive }) =>
-                                        cn(
-                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                            isActive
-                                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                        )
-                                    }
-                                >
-                                    <Icon className="h-4 w-4 shrink-0" />
-                                    {label}
-                                </NavLink>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
             </nav>
 
             {/* Footer */}
@@ -204,4 +119,3 @@ export default function Sidebar() {
         </aside>
     );
 }
-

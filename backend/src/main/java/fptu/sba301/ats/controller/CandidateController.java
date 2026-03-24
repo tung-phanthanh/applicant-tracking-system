@@ -40,19 +40,19 @@ public class CandidateController {
     // ───────────── Existing endpoints ─────────────
 
     @GetMapping
-    @PreAuthorize("hasAuthority('CANDIDATE_VIEW')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<List<CandidateListResponse>> getCandidateList() {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
     @GetMapping("/{candidateId}")
-    @PreAuthorize("hasAuthority('CANDIDATE_VIEW')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateDetail(candidateId));
     }
 
     @PatchMapping("/{candidateId}/stage")
-    @PreAuthorize("hasAuthority('CANDIDATE_MANAGE')")
+    @PreAuthorize("hasAnyAuthority('HR')")
     public ResponseEntity<CandidateDetailResponse> updateCandidateStage(
             @PathVariable UUID candidateId,
             @Valid @RequestBody CandidateStageUpdateRequest request

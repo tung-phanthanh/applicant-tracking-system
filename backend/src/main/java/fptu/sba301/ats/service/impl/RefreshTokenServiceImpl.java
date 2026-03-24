@@ -70,7 +70,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
     @Override
     public void revokeAllUserTokens(User user) {
 
-        List<RefreshToken> tokens = refreshTokenRepository.findAllByUserAndRevokedFalse(user);
+        List<RefreshToken> tokens =
+                refreshTokenRepository.findAllByUserAndRevokedFalse(user);
 
         tokens.forEach(t -> t.setRevoked(true));
 
@@ -105,7 +106,7 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 .userId(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .role(user.getRole().getName())
+                .role(user.getRole())
                 .build();
     }
 

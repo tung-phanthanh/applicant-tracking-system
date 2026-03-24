@@ -8,7 +8,7 @@ export default function HrRoute() {
     return <Navigate to="/login" replace />;
   }
 
-  if (user.role !== "HR" && user.role !== "HR_MANAGER") {
+  if (user.role !== "HR") {
     return <Navigate to="/dashboard" replace />;
   }
 

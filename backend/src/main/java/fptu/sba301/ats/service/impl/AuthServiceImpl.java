@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
 
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
@@ -46,10 +47,7 @@ public class AuthServiceImpl implements AuthService {
                 .userId(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .role(user.getRole().getName())
-                .permissions(user.getRole().getPermissions() != null 
-                    ? user.getRole().getPermissions().stream().map(fptu.sba301.ats.entity.Permission::getKey).toList() 
-                    : java.util.Collections.emptyList())
+                .role(user.getRole())
                 .build();
     }
 }

@@ -8,12 +8,10 @@ import fptu.sba301.ats.dto.request.SetPasswordRequest;
 import fptu.sba301.ats.dto.request.UpdateUserRequest;
 import fptu.sba301.ats.dto.response.UserResponse;
 import fptu.sba301.ats.entity.Department;
-import fptu.sba301.ats.entity.Role;
 import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.DepartmentRepository;
 import fptu.sba301.ats.repository.UserRepository;
-import fptu.sba301.ats.repository.RoleRepository;
 import fptu.sba301.ats.service.EmailService;
 import fptu.sba301.ats.service.UserService;
 import lombok.RequiredArgsConstructor;
@@ -32,7 +30,6 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final DepartmentRepository departmentRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
 
@@ -89,14 +86,11 @@ public class UserServiceImpl implements UserService {
         // Generate activation token — valid 24 hours
         String activationToken = UUID.randomUUID().toString().replace("-", "");
 
-        Role role = roleRepository.findByName(request.getRole())
-                .orElseThrow(() -> new BusinessException("Role not found: " + request.getRole(), HttpStatus.NOT_FOUND));
-
         User user = User.builder()
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .passwordHash(null)          // No password until user activates
-                .role(role)
+                .role(request.getRole())
                 .department(department)
                 .active(false)               // Not active until account is activated
                 .deleted(false)
@@ -122,9 +116,7 @@ public class UserServiceImpl implements UserService {
             user.setFullName(request.getFullName());
         }
         if (request.getRole() != null) {
-            Role role = roleRepository.findByName(request.getRole())
-                    .orElseThrow(() -> new BusinessException("Role not found: " + request.getRole(), HttpStatus.NOT_FOUND));
-            user.setRole(role);
+            user.setRole(request.getRole());
         }
         if (request.getDepartmentId() != null) {
             Department department = resolveDepartment(request.getDepartmentId());
@@ -251,7 +243,7 @@ public class UserServiceImpl implements UserService {
                 .id(user.getId())
                 .fullName(user.getFullName())
                 .email(user.getEmail())
-                .role(user.getRole().getName())
+                .role(user.getRole())
                 .active(user.isActive())
                 .accountLocked(user.isAccountLocked())
                 .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
