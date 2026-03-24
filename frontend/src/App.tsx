@@ -18,14 +18,12 @@ import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
 import ScorecardTemplatesPage from "@/pages/recruiter/ScorecardTemplatesPage";
-import InterviewScorecardPage from "@/pages/recruiter/InterviewScorecardPage";
 import CandidateRankingPage from "@/pages/recruiter/CandidateRankingPage";
 import CandidateEvaluationPage from "@/pages/recruiter/CandidateEvaluationPage";
 import OffersListPage from "@/pages/recruiter/OffersListPage";
 import OfferFormPage from "@/pages/recruiter/OfferFormPage";
 import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
 import OnboardingPage from "@/pages/recruiter/OnboardingPage";
-import JobsListPage from "@/pages/recruiter/JobsListPage";
 
 function App() {
   return (

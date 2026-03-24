@@ -117,7 +117,7 @@ export default function CandidateEvaluationPage() {
   );
 }
 
-function Badge({ children, variant, className }: any) {
+function Badge({ children, className }: any) {
   return (
     <span className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold ${className}`}>
       {children}

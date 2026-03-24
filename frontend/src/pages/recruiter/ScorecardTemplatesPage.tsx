@@ -205,7 +205,7 @@ function TemplateDialog({
   const [name, setName] = useState(template?.name ?? "");
   const [departmentId, setDepartmentId] = useState(template?.departmentId ?? "");
   const [criteria, setCriteria] = useState<CriterionRequest[]>(
-    template?.criteria.map((c) => ({ name: c.name, weight: c.weight })) ?? [
+    template?.criteria.map((c: any) => ({ name: c.name, weight: c.weight })) ?? [
       { name: "", weight: 1 },
     ],
   );

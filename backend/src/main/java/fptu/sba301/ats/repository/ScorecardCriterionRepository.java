@@ -8,4 +8,6 @@ import java.util.UUID;
 
 public interface ScorecardCriterionRepository extends JpaRepository<ScorecardCriterion, UUID> {
     Optional<ScorecardCriterion> findByName(String name);
+    List<ScorecardCriterion> findByTemplateId(UUID templateId);
+    void deleteByTemplateId(UUID templateId);
 }
