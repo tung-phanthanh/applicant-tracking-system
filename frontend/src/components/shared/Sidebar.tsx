@@ -11,6 +11,9 @@ import {
     Settings,
     Activity,
     Bell,
+    ClipboardList,
+    FileText,
+    ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +22,13 @@ const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
+];
+
+const hrNavItems = [
+    { to: "/candidates", icon: Users, label: "Candidates" },
+    { to: "/scorecard-templates", icon: ClipboardList, label: "Scorecard Templates" },
+    { to: "/offers", icon: FileText, label: "Offers" },
+    { to: "/onboarding-list", icon: ClipboardCheck, label: "Onboarding" },
 ];
 
 const adminNavItems = [
@@ -34,7 +44,6 @@ const adminNavItems = [
 export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
-    const isHr = user?.role === "HR";
     const [appName, setAppName] = useState("Enterprise ATS");
 
     useEffect(() => {
@@ -47,6 +56,7 @@ export default function Sidebar() {
             })
             .catch(() => {});
     }, []);
+    const isHr = user?.role === "HR" || user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -83,22 +93,26 @@ export default function Sidebar() {
                     ))}
 
                     {isHr && (
-                        <li>
-                            <NavLink
-                                to="/candidates"
-                                className={({ isActive }) =>
-                                    cn(
-                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                        isActive
-                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                    )
-                                }
-                            >
-                                <Users className="h-4 w-4 shrink-0" />
-                                Candidates
-                            </NavLink>
-                        </li>
+                        <>
+                            {hrNavItems.map(({ to, icon: Icon, label }) => (
+                                <li key={to}>
+                                    <NavLink
+                                        to={to}
+                                        className={({ isActive }) =>
+                                            cn(
+                                                "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                                isActive
+                                                    ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                            )
+                                        }
+                                    >
+                                        <Icon className="h-4 w-4 shrink-0" />
+                                        {label}
+                                    </NavLink>
+                                </li>
+                            ))}
+                        </>
                     )}
 
                     {/* Admin section */}

@@ -9,7 +9,6 @@ import org.hibernate.annotations.UuidGenerator;
 
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.List;
 
 
 @Entity
@@ -57,8 +56,5 @@ public class Application extends BaseEntity {
             appliedAt = LocalDateTime.now(APP_ZONE);
         }
     }
-
-    @OneToMany(mappedBy = "application")
-    private List<Interview> interviews;
 
 }
