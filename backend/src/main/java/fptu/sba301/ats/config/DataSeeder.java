@@ -10,7 +10,6 @@ import fptu.sba301.ats.repository.*;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
@@ -28,11 +27,13 @@ public class DataSeeder implements CommandLineRunner {
     private final JobRepository jobRepository;
     private final CandidateRepository candidateRepository;
     private final ApplicationRepository applicationRepository;
+    private final ScorecardTemplateRepository scorecardTemplateRepository;
     private final ScorecardCriterionRepository scorecardCriterionRepository;
     private final InterviewRepository interviewRepository;
     private final InterviewParticipantRepository interviewParticipantRepository;
     private final InterviewScoreRepository interviewScoreRepository;
     private final CandidateDocumentRepository candidateDocumentRepository;
+    private final CandidateNoteRepository candidateNoteRepository;
     private final CandidateStageHistoryRepository candidateStageHistoryRepository;
     private final OfferRepository offerRepository;
     private final JobApprovalRepository jobApprovalRepository;
@@ -141,11 +142,11 @@ public class DataSeeder implements CommandLineRunner {
                 .appliedAt(LocalDateTime.now())
                 .build());
 
-        // ScorecardTemplate template = scorecardTemplateRepository.save(ScorecardTemplate.builder()
-        //         .id(UUID.fromString("f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1"))
-        //         .name("Engineering Template")
-        //         .department(engineering)
-        //         .build());
+        ScorecardTemplate template = scorecardTemplateRepository.save(ScorecardTemplate.builder()
+                .id(UUID.fromString("f1f1f1f1-f1f1-f1f1-f1f1-f1f1f1f1f1f1"))
+                .name("Engineering Template")
+                .department(engineering)
+                .build());
 
         ScorecardCriterion criterion1 = scorecardCriterionRepository.save(ScorecardCriterion.builder()
                 .id(UUID.fromString("g1g1g1g1-g1g1-g1g1-g1g1-g1g1g1g1g1g1"))

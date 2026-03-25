@@ -111,6 +111,7 @@ public class UserServiceImpl implements UserService {
         String activationToken = UUID.randomUUID().toString().replace("-", "");
 
         User user = User.builder()
+                .id(UUID.randomUUID())
                 .fullName(request.getFullName())
                 .email(request.getEmail())
                 .passwordHash(null)          // No password until user activates
