@@ -11,8 +11,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface InterviewService {
-    void submitScores(UUID interviewId, SubmitInterviewScoreRequest request, String userEmail);
-    InterviewScorecardResponse getMyScorecard(UUID interviewId, String userEmail);
     List<InterviewScorecardResponse> getAllScorecards(UUID interviewId);
     List<InterviewResponse> getAllInterviews();
     void submitFeedback(SubmitFeedbackRequest req);

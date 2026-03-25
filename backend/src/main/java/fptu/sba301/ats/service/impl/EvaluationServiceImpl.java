@@ -38,7 +38,7 @@ public class EvaluationServiceImpl implements EvaluationService {
 
                     double avgScore = scorecards.stream()
                             .filter(sc -> sc.getOverallScore() != null)
-                            .mapToInt(InterviewScorecardResponse::getOverallScore)
+                            .mapToDouble(sc -> sc.getOverallScore().doubleValue())
                             .average()
                             .orElse(0.0);
 
@@ -48,6 +48,7 @@ public class EvaluationServiceImpl implements EvaluationService {
                             .type(interview.getType() != null ? interview.getType().name() : null)
                             .status(interview.getStatus() != null ? interview.getStatus().name() : null)
                             .averageScore(avgScore)
+                            .interviewerCount(scorecards.size())
                             .scorecards(scorecards)
                             .build();
                 })
@@ -60,6 +61,7 @@ public class EvaluationServiceImpl implements EvaluationService {
 
         return CandidateEvaluationResponse.builder()
                 .applicationId(applicationId)
+                .candidateId(application.getCandidate() != null ? application.getCandidate().getId() : null)
                 .candidateName(application.getCandidate() != null ? application.getCandidate().getFullName() : null)
                 .jobTitle(application.getJob() != null ? application.getJob().getTitle() : null)
                 .overallScore(overallScore)

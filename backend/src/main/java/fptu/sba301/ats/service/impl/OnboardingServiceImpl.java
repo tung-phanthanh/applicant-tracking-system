@@ -73,6 +73,13 @@ public class OnboardingServiceImpl implements OnboardingService {
     }
 
     @Override
+    public List<OnboardingChecklistResponse> getAll() {
+        return checklistRepository.findAllByOrderByCreatedAtDesc().stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
+    }
+
+    @Override
     public OnboardingChecklistResponse getById(UUID id) {
         OnboardingChecklist checklist = checklistRepository.findById(id)
                 .orElseThrow(() -> new BusinessException("Onboarding checklist not found", HttpStatus.NOT_FOUND));

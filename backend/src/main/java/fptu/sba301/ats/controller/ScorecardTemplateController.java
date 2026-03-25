@@ -23,7 +23,7 @@ public class ScorecardTemplateController {
     private final ScorecardTemplateService scorecardTemplateService;
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER', 'HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<ScorecardTemplateResponse> create(
             @Valid @RequestBody CreateScorecardTemplateRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -31,26 +31,26 @@ public class ScorecardTemplateController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER', 'HR', 'INTERVIEWER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'INTERVIEWER')")
     public ResponseEntity<List<ScorecardTemplateResponse>> getAll() {
         return ResponseEntity.ok(scorecardTemplateService.getAll());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER', 'HR', 'INTERVIEWER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'INTERVIEWER')")
     public ResponseEntity<ScorecardTemplateResponse> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(scorecardTemplateService.getById(id));
     }
 
     @GetMapping("/department/{departmentId}")
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER', 'HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<List<ScorecardTemplateResponse>> getByDepartment(
             @PathVariable UUID departmentId) {
         return ResponseEntity.ok(scorecardTemplateService.getByDepartment(departmentId));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER', 'HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<ScorecardTemplateResponse> update(
             @PathVariable UUID id,
             @Valid @RequestBody CreateScorecardTemplateRequest request) {
@@ -58,7 +58,7 @@ public class ScorecardTemplateController {
     }
 
     @DeleteMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR_MANAGER')")
     public ResponseEntity<Void> delete(@PathVariable UUID id) {
         scorecardTemplateService.delete(id);
         return ResponseEntity.noContent().build();

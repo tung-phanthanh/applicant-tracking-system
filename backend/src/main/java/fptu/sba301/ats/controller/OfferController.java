@@ -28,7 +28,7 @@ public class OfferController {
     private final OfferService offerService;
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<OfferResponse> createDraft(
             @Valid @RequestBody CreateOfferRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
@@ -36,7 +36,7 @@ public class OfferController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<OfferResponse> updateDraft(
             @PathVariable UUID id,
             @Valid @RequestBody CreateOfferRequest request) {
@@ -44,25 +44,25 @@ public class OfferController {
     }
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<List<OfferResponse>> getAllOffers() {
         return ResponseEntity.ok(offerService.getAllOffers());
     }
 
     @GetMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<OfferResponse> getOffer(@PathVariable UUID id) {
         return ResponseEntity.ok(offerService.getOffer(id));
     }
 
     @PatchMapping("/{id}/submit")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<OfferResponse> submitForApproval(@PathVariable UUID id) {
         return ResponseEntity.ok(offerService.submitForApproval(id));
     }
 
     @PostMapping("/{id}/approval")
-    @PreAuthorize("hasAnyAuthority('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<OfferApprovalResponse> approveOrReject(
             @PathVariable UUID id,
             @Valid @RequestBody OfferApprovalRequest request,
@@ -71,13 +71,13 @@ public class OfferController {
     }
 
     @GetMapping({"/{id}/approvals", "/{id}/history"})
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<List<OfferApprovalResponse>> getApprovalHistory(@PathVariable UUID id) {
         return ResponseEntity.ok(offerService.getApprovalHistory(id));
     }
 
     @GetMapping("/{id}/pdf")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<byte[]> getOfferPdf(@PathVariable UUID id) {
         byte[] pdfBytes = offerService.generateOfferPdf(id);
         HttpHeaders headers = new HttpHeaders();

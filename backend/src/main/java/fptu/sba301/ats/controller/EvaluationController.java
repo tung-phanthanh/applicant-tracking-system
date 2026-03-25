@@ -21,14 +21,14 @@ public class EvaluationController {
     private final EvaluationService evaluationService;
 
     @GetMapping("/applications/{applicationId}/evaluation")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'INTERVIEWER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'INTERVIEWER')")
     public ResponseEntity<CandidateEvaluationResponse> getEvaluationSummary(
             @PathVariable UUID applicationId) {
         return ResponseEntity.ok(evaluationService.getEvaluationSummary(applicationId));
     }
 
     @GetMapping("/jobs/{jobId}/ranking")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<List<CandidateRankingResponse>> getCandidateRanking(
             @PathVariable UUID jobId) {
         return ResponseEntity.ok(evaluationService.getCandidateRanking(jobId));

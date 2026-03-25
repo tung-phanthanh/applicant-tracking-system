@@ -69,8 +69,8 @@ function App() {
                 <Route path="/offers/:id" element={<OfferDetailPage />} />
                 <Route path="/offers/:id/edit" element={<OfferFormPage />} />
                 <Route path="/onboarding-list" element={<OnboardingListPage />} />
-                <Route path="/onboarding/:id" element={<OnboardingPage />} />
                 <Route path="/onboarding/application/:applicationId" element={<OnboardingPage />} />
+                <Route path="/onboarding/:id" element={<OnboardingPage />} />
               </Route>
 
               {/* Admin-only routes — SYSTEM_ADMIN only */}

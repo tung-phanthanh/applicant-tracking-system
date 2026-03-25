@@ -276,7 +276,7 @@ public class DemoDataSeederService {
             // Scores for Interview 1 (High scores: 9, 8, 9)
             InterviewScore score1_1 = new InterviewScore();
             score1_1.setInterview(interview1);
-            score1_1.setUserId(hr.getId());
+            score1_1.setInterviewer(hr);
             score1_1.setCriterion(criteria1.get(0)); // React JS
             score1_1.setScore(9);
             score1_1.setCreatedBy(hr.getId());
@@ -284,7 +284,7 @@ public class DemoDataSeederService {
 
             InterviewScore score1_2 = new InterviewScore();
             score1_2.setInterview(interview1);
-            score1_2.setUserId(hr.getId());
+            score1_2.setInterviewer(hr);
             score1_2.setCriterion(criteria1.get(1)); // CSS/UX
             score1_2.setScore(8);
             score1_2.setCreatedBy(hr.getId());
@@ -292,7 +292,7 @@ public class DemoDataSeederService {
 
             InterviewScore score1_3 = new InterviewScore();
             score1_3.setInterview(interview1);
-            score1_3.setUserId(hr.getId());
+            score1_3.setInterviewer(hr);
             score1_3.setCriterion(criteria1.get(2)); // Communication
             score1_3.setScore(9);
             score1_3.setCreatedBy(hr.getId());
@@ -321,7 +321,7 @@ public class DemoDataSeederService {
             // Scores for Interview 2 (Medium: 7, 6, 7)
             InterviewScore score2_1 = new InterviewScore();
             score2_1.setInterview(interview2);
-            score2_1.setUserId(hr.getId());
+            score2_1.setInterviewer(hr);
             score2_1.setCriterion(criteria1.get(0));
             score2_1.setScore(7);
             score2_1.setCreatedBy(hr.getId());
@@ -329,7 +329,7 @@ public class DemoDataSeederService {
 
             InterviewScore score2_2 = new InterviewScore();
             score2_2.setInterview(interview2);
-            score2_2.setUserId(hr.getId());
+            score2_2.setInterviewer(hr);
             score2_2.setCriterion(criteria1.get(1));
             score2_2.setScore(6);
             score2_2.setCreatedBy(hr.getId());
@@ -337,7 +337,7 @@ public class DemoDataSeederService {
 
             InterviewScore score2_3 = new InterviewScore();
             score2_3.setInterview(interview2);
-            score2_3.setUserId(hr.getId());
+            score2_3.setInterviewer(hr);
             score2_3.setCriterion(criteria1.get(2));
             score2_3.setScore(7);
             score2_3.setCreatedBy(hr.getId());

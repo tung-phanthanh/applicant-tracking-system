@@ -17,7 +17,7 @@ public class InterviewScorecardResponse {
     private UUID interviewId;
     private UUID participantUserId;
     private String participantName;
-    private Integer overallScore;
+    private BigDecimal overallScore;
     private String feedback;
     private List<ScoreDetail> scores;
 

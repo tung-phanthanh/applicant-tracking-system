@@ -12,4 +12,5 @@ import java.util.UUID;
 public interface InterviewParticipantRepository extends JpaRepository<InterviewParticipant, InterviewParticipant.InterviewParticipantId> {
     List<InterviewParticipant> findByIdInterviewId(UUID interviewId);
     Optional<InterviewParticipant> findByIdInterviewIdAndIdUserId(UUID interviewId, UUID userId);
+    Optional<InterviewParticipant> findByInterviewIdAndUserId(UUID interviewId, UUID userId);
 }

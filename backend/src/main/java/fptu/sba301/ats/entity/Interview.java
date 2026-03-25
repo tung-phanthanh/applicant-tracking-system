@@ -32,6 +32,10 @@ public class Interview extends BaseEntity {
     @JoinColumn(name = "application_id", nullable = false)
     private Application application;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "template_id", nullable = false)
+    private ScorecardTemplate template;
+
     @Column(name = "scheduled_at", nullable = false)
     private Instant scheduledAt;
 

@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
@@ -37,7 +38,7 @@ public class InterviewParticipant {
     private String feedback;
     
     @Column(name = "overall_score")
-    private Integer overallScore;
+    private BigDecimal overallScore;
 
     @Embeddable
     @Getter
