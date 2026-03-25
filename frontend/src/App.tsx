@@ -1,8 +1,11 @@
 import { Navigate, BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "sonner";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminRoute from "@/routes/AdminRoute";
 import HrRoute from "@/routes/HrRoute";
+import HrOrAdminRoute from "@/routes/HrOrAdminRoute";
+import InterviewRoute from "@/routes/InterviewRoute";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -16,6 +19,9 @@ import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
 import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 import CandidateScheduleInterviewsPage from "@/pages/recruiter/CandidateScheduleInterviewsPage";
+import InterviewCalendarPage from "@/pages/interview/InterviewCalendarPage";
+import InterviewFeedbackPage from "@/pages/interview/InterviewFeedbackPage";
+import InterviewCandidateEvaluationPage from "@/pages/interview/CandidateEvaluationPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
@@ -45,6 +51,7 @@ function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Toaster position="top-right" expand={false} richColors />
         <Routes>
           {/* Public auth routes (centered card layout) */}
           <Route element={<AuthLayout />}>
@@ -80,8 +87,17 @@ function App() {
                 <Route path="/jobs/:jobId" element={<JobDetailPage />} />
               </Route>
 
-              {/* Placeholder routes */}
-              <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
+              {/* Interview routes (HR, Admin, Interviewer) */}
+              <Route element={<InterviewRoute />}>
+                <Route path="/interviews" element={<InterviewCalendarPage />} />
+                <Route path="/interviews/:id" element={<InterviewFeedbackPage />} />
+                <Route path="/interviews/applications/:applicationId/evaluation" element={<InterviewCandidateEvaluationPage />} />
+              </Route>
+
+              {/* Evaluation summary (HR, Admin) */}
+              <Route element={<HrOrAdminRoute />}>
+                <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
+              </Route>
 
               {/* HR-only route */}
               <Route element={<HrRoute />}>
@@ -89,7 +105,6 @@ function App() {
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
                 <Route path="/candidates/:candidateId/schedule-interviews" element={<CandidateScheduleInterviewsPage />} />
                 <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
-                <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
                 <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
                 <Route path="/offers" element={<OffersListPage />} />
                 <Route path="/offers/new" element={<OfferFormPage />} />
@@ -119,14 +134,6 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-  );
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="flex h-64 items-center justify-center text-muted-foreground">
-      <p className="text-lg font-medium">{title} — Coming Soon</p>
-    </div>
   );
 }
 

@@ -6,13 +6,17 @@ import fptu.sba301.ats.enums.NotificationType;
 import fptu.sba301.ats.event.SystemEvent;
 import fptu.sba301.ats.repository.NotificationRepository;
 import fptu.sba301.ats.repository.UserRepository;
+import fptu.sba301.ats.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.UUID;
 
 @Component
 @RequiredArgsConstructor
@@ -27,12 +31,19 @@ public class NotificationEventListener {
     public void handleSystemEvent(SystemEvent event) {
         log.info("Received SystemEvent: {} - {}", event.getTitle(), event.getContent());
 
-        List<User> users = userRepository.findAll();
+        UUID currentUserId = getCurrentUserId();
 
         NotificationType notificationType = resolveType(event.getType());
         String message = buildMessage(event);
 
+        List<User> users = userRepository.findByDeletedFalse();
+
+        int sentCount = 0;
         for (User user : users) {
+            if (currentUserId != null && user.getId().equals(currentUserId)) {
+                continue;
+            }
+
             Notification notification = Notification.builder()
                     .userId(user.getId())
                     .title(event.getTitle())
@@ -41,9 +52,22 @@ public class NotificationEventListener {
                     .isRead(false)
                     .build();
             notificationRepository.save(notification);
+            sentCount++;
         }
 
-        log.info("Notifications dispatched for SystemEvent");
+        log.info("Notifications dispatched to {} other users for SystemEvent", sentCount);
+    }
+
+    private UUID getCurrentUserId() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            if (auth != null && auth.getPrincipal() instanceof UserPrincipal principal) {
+                return principal.getId();
+            }
+        } catch (Exception e) {
+            log.debug("Could not determine current user for event filtering: {}", e.getMessage());
+        }
+        return null;
     }
 
     private static NotificationType resolveType(String type) {

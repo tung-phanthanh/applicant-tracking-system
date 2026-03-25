@@ -68,7 +68,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public Page<Notification> getMyNotifications(String email, Pageable pageable) {
         User user = findUserOrThrow(email);
-        return notificationRepository.findByUserId(user.getId(), pageable);
+        return notificationRepository.findByUserIdOrderByCreatedAtDesc(user.getId(), pageable);
     }
 
     @Override
@@ -101,7 +101,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Transactional(readOnly = true)
     public long getUnreadCount(String email) {
         User user = findUserOrThrow(email);
-        return notificationRepository.findByUserIdAndIsReadFalse(user.getId()).size();
+        return notificationRepository.countByUserIdAndIsReadFalse(user.getId());
     }
 
     @Override
@@ -116,7 +116,7 @@ public class NotificationServiceImpl implements NotificationService {
     @Override
     @Transactional(readOnly = true)
     public Page<Notification> getAllNotifications(Pageable pageable) {
-        return notificationRepository.findAll(pageable);
+        return notificationRepository.findAllByOrderByCreatedAtDesc(pageable);
     }
 
     @Override

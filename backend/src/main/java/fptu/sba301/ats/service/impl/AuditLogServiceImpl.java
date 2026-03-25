@@ -25,14 +25,14 @@ public class AuditLogServiceImpl implements AuditLogService {
     @Override
     @SuppressWarnings("null")
     public Page<AuditLogResponseDTO> getAllLogs(Pageable pageable) {
-        return auditLogRepository.findAll(pageable)
+        return auditLogRepository.findAllByOrderByCreatedAtDesc(pageable)
                 .map(this::mapToDTO);
     }
 
     @Override
     @SuppressWarnings("null")
     public Page<AuditLogResponseDTO> getLogsByAction(String action, Pageable pageable) {
-        return auditLogRepository.findByAction(action, pageable)
+        return auditLogRepository.findByActionOrderByCreatedAtDesc(action, pageable)
                 .map(this::mapToDTO);
     }
 

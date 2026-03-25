@@ -5,7 +5,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,11 +13,13 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class CandidateEvaluationResponse {
+
     private UUID applicationId;
     private UUID candidateId;
     private String candidateName;
     private String jobTitle;
-    private double overallScore;
+    private Double overallScore;
+
     private List<InterviewEvaluation> interviews;
 
     @Data
@@ -27,10 +28,10 @@ public class CandidateEvaluationResponse {
     @AllArgsConstructor
     public static class InterviewEvaluation {
         private UUID interviewId;
-        private Instant scheduledAt;
+        private java.time.LocalDateTime scheduledAt;
         private String type;
         private String status;
-        private double averageScore;
+        private Double averageScore;
         private int interviewerCount;
         private List<InterviewScorecardResponse> scorecards;
     }

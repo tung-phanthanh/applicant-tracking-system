@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -255,7 +255,7 @@ public class DemoDataSeederService {
             // Interview for Candidate 1 (High scores)
             Interview interview1 = new Interview();
             interview1.setApplication(app1);
-            interview1.setScheduledAt(Instant.now().minus(2, ChronoUnit.DAYS));
+            interview1.setScheduledAt(LocalDateTime.now().minus(2, ChronoUnit.DAYS));
             interview1.setLocation("Google Meet");
             interview1.setMeetingLink("https://meet.google.com/abc-defg-hij");
             interview1.setDurationMinutes(60);
@@ -301,7 +301,7 @@ public class DemoDataSeederService {
             // Interview for Candidate 2 (Medium scores)
             Interview interview2 = new Interview();
             interview2.setApplication(app2);
-            interview2.setScheduledAt(Instant.now().minus(1, ChronoUnit.DAYS));
+            interview2.setScheduledAt(LocalDateTime.now().minus(1, ChronoUnit.DAYS));
             interview2.setLocation("Zoom");
             interview2.setMeetingLink("https://zoom.us/j/123456789");
             interview2.setDurationMinutes(45);
@@ -346,7 +346,7 @@ public class DemoDataSeederService {
             // Interview for Candidate 3 (Low scores)
             Interview interview3 = new Interview();
             interview3.setApplication(app3);
-            interview3.setScheduledAt(Instant.now().plus(1, ChronoUnit.DAYS));
+            interview3.setScheduledAt(LocalDateTime.now().plus(1, ChronoUnit.DAYS));
             interview3.setLocation("Office - Room 301");
             interview3.setDurationMinutes(30);
             interview3.setType(InterviewType.OFFLINE);
