@@ -8,6 +8,9 @@ import fptu.sba301.ats.dto.request.SetPasswordRequest;
 import fptu.sba301.ats.dto.request.UpdateUserRequest;
 import fptu.sba301.ats.dto.response.UserResponse;
 
+import org.springframework.data.domain.Page;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -15,9 +18,10 @@ public interface UserService {
     // Current user
     UserResponse getCurrentUserByEmail(String email);
     void changePassword(String email, ChangePasswordRequest request);
+    String uploadAvatar(String email, MultipartFile file);
 
     // Admin - CRUD
-    List<UserResponse> getAllUsers();
+    Page<UserResponse> getAllUsers(UUID departmentId, int page, int size);
     UserResponse getUserById(UUID id);
     UserResponse createUser(CreateUserRequest request);
     UserResponse updateUser(UUID id, UpdateUserRequest request);

@@ -5,7 +5,6 @@ import {
     Briefcase,
     Calendar,
     LayoutDashboard,
-    User,
     Users,
     ShieldCheck,
     Building2,
@@ -20,7 +19,6 @@ const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
-    { to: "/profile", icon: User, label: "My Profile" },
 ];
 
 const adminNavItems = [

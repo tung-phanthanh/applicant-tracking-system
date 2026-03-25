@@ -8,6 +8,8 @@ export interface UserRecord {
     active: boolean;
     accountLocked: boolean;
     department?: string;
+    departmentId?: string;
+    avatarUrl?: string;
     createdAt?: string;
 }
 
