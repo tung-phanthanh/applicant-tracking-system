@@ -40,19 +40,19 @@ public class CandidateController {
     // ───────────── Existing endpoints ─────────────
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
     public ResponseEntity<List<CandidateListResponse>> getCandidateList() {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
     @GetMapping("/{candidateId}")
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateDetail(candidateId));
     }
 
     @PatchMapping("/{candidateId}/stage")
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> updateCandidateStage(
             @PathVariable UUID candidateId,
             @Valid @RequestBody CandidateStageUpdateRequest request
@@ -69,7 +69,7 @@ public class CandidateController {
      *   - documents (optional, multiple files): CV / supporting documents to upload to Cloudinary
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> createCandidate(
             @RequestPart("request") @Valid CreateCandidateRequest request,
             @RequestPart(value = "documents", required = false) List<MultipartFile> documents
@@ -90,7 +90,7 @@ public class CandidateController {
      *   - cvFiles (optional, multiple files): PDF CV files whose names match the 'cvFileName' column in CSV
      */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
     public ResponseEntity<BulkImportResponse> importCandidates(
             @RequestPart("csv") MultipartFile csvFile,
             @RequestPart(value = "cvFiles", required = false) List<MultipartFile> cvFiles

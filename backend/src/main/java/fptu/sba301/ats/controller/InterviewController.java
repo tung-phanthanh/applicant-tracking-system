@@ -23,13 +23,13 @@ public class InterviewController {
     private final InterviewService interviewService;
 
     @GetMapping
-//    @PreAuthorize("hasAnyAuthority('INTERVIEWER')")
+//    @PreAuthorize("hasRole('INTERVIEWER')")
     public ResponseEntity<List<InterviewResponse>> getAllInterviews() {
         return ResponseEntity.ok(interviewService.getAllInterviews());
     }
 
     @PostMapping("/feedback")
-//    @PreAuthorize("hasAnyAuthority('INTERVIEWER')")
+//    @PreAuthorize("hasRole('INTERVIEWER')")
     public ResponseEntity<String> submitFeedback(
             @RequestBody SubmitFeedbackRequest request
     ) {
@@ -38,7 +38,7 @@ public class InterviewController {
     }
 
     @GetMapping("/{interviewId}/final-score")
-//    @PreAuthorize("hasAnyAuthority('INTERVIEWER')")
+//    @PreAuthorize("hasRole('INTERVIEWER')")
     public ResponseEntity<BigDecimal> getFinalScore(
             @PathVariable UUID interviewId
     ) {
