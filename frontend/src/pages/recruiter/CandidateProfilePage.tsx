@@ -112,6 +112,11 @@ export default function CandidateProfilePage() {
     }
   };
 
+  const handleMoveToInterview = () => {
+    if (!candidateId) return;
+    navigate(`/candidates/${candidateId}/schedule-interviews`);
+  };
+
   if (loading) {
     return <p className="text-sm text-muted-foreground">Loading candidate profile...</p>;
   }
@@ -171,7 +176,7 @@ export default function CandidateProfilePage() {
                 Reject
               </Button>
               <Button
-                onClick={() => void handleStageUpdate("INTERVIEW")}
+                onClick={handleMoveToInterview}
                 disabled={updatingStage}
               >
                 Move to Interview

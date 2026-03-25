@@ -15,6 +15,7 @@ import ProfilePage from "@/pages/recruiter/ProfilePage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
 import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
+import CandidateScheduleInterviewsPage from "@/pages/recruiter/CandidateScheduleInterviewsPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
@@ -61,6 +62,7 @@ function App() {
               <Route element={<HrRoute />}>
                 <Route path="/candidates" element={<CandidateListPage />} />
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
+                <Route path="/candidates/:candidateId/schedule-interviews" element={<CandidateScheduleInterviewsPage />} />
                 <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
                 <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
                 <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />

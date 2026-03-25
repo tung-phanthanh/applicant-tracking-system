@@ -29,6 +29,7 @@ export interface CandidateDocumentItem {
 
 export interface CandidateDetailItem {
   candidateId: string;
+  applicationId?: string | null;
   fullName: string;
   email: string;
   phone: string;
@@ -50,4 +51,32 @@ export interface BulkImportResult {
   successCount: number;
   failCount: number;
   errors: string[];
+}
+
+export type InterviewType = "ONLINE" | "OFFLINE";
+
+export interface InterviewerOptionItem {
+  id: string;
+  fullName: string;
+  email: string;
+}
+
+export interface ScheduleInterviewSlotInput {
+  scheduledAt: string;
+  type: InterviewType;
+  location: string | null;
+  meetingLink: string | null;
+  interviewerIds: string[];
+}
+
+export interface ScheduleCandidateInterviewsRequest {
+  interviews: ScheduleInterviewSlotInput[];
+}
+
+export interface ScheduleCandidateInterviewsResult {
+  candidateId: string;
+  applicationId: string;
+  stage: CandidateStage;
+  totalInterviewsCreated: number;
+  interviewIds: string[];
 }

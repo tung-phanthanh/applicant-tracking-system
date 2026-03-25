@@ -4,23 +4,33 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import fptu.sba301.ats.dto.request.CreateCandidateRequest;
 import fptu.sba301.ats.dto.request.CsvCandidateRow;
+import fptu.sba301.ats.dto.request.ScheduleCandidateInterviewsRequest;
 import fptu.sba301.ats.dto.response.BulkImportResponse;
 import fptu.sba301.ats.dto.response.CandidateDetailResponse;
 import fptu.sba301.ats.dto.response.CandidateDocumentResponse;
 import fptu.sba301.ats.dto.response.CandidateHistoryResponse;
 import fptu.sba301.ats.dto.response.CandidateListResponse;
+import fptu.sba301.ats.dto.response.InterviewerOptionResponse;
+import fptu.sba301.ats.dto.response.ScheduleCandidateInterviewsResponse;
 import fptu.sba301.ats.entity.Application;
 import fptu.sba301.ats.entity.Candidate;
 import fptu.sba301.ats.entity.CandidateDocument;
 import fptu.sba301.ats.entity.CandidateStageHistory;
+import fptu.sba301.ats.entity.Interview;
+import fptu.sba301.ats.entity.InterviewParticipant;
 import fptu.sba301.ats.entity.Job;
+import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.enums.ApplicationStage;
 import fptu.sba301.ats.enums.ApplicationStatus;
+import fptu.sba301.ats.enums.ParticipantRole;
+import fptu.sba301.ats.enums.Role;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.repository.ApplicationRepository;
 import fptu.sba301.ats.repository.CandidateDocumentRepository;
 import fptu.sba301.ats.repository.CandidateRepository;
 import fptu.sba301.ats.repository.CandidateStageHistoryRepository;
+import fptu.sba301.ats.repository.InterviewParticipantRepository;
+import fptu.sba301.ats.repository.InterviewRepository;
 import fptu.sba301.ats.repository.JobRepository;
 import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
@@ -43,6 +53,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -59,6 +70,8 @@ public class CandidateServiceImpl implements CandidateService {
     private final CandidateDocumentRepository candidateDocumentRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
+    private final InterviewRepository interviewRepository;
+    private final InterviewParticipantRepository interviewParticipantRepository;
     private final CloudinaryService cloudinaryService;
 
     // ─────────────────────────── Existing methods ───────────────────────────
@@ -138,6 +151,89 @@ public class CandidateServiceImpl implements CandidateService {
                     .changedAt(h.getCreatedAt())
                     .build();
         }).collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<InterviewerOptionResponse> getInterviewerOptions() {
+        return userRepository.findByRoleAndDeletedFalse(Role.INTERVIEWER).stream()
+                .filter(User::isActive)
+                .map(user -> InterviewerOptionResponse.builder()
+                        .id(user.getId())
+                        .fullName(user.getFullName())
+                        .email(user.getEmail())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public ScheduleCandidateInterviewsResponse scheduleCandidateInterviews(
+            UUID candidateId,
+            ScheduleCandidateInterviewsRequest request
+    ) {
+        Application application = findLatestActiveApplication(candidateId);
+
+        if (application.getStage() != ApplicationStage.APPLIED
+                && application.getStage() != ApplicationStage.SCREENING
+                && application.getStage() != ApplicationStage.INTERVIEW) {
+            throw new BusinessException(
+                    "Only candidates in APPLIED, SCREENING, or INTERVIEW can be scheduled",
+                    HttpStatus.BAD_REQUEST
+            );
+        }
+
+        if (application.getStage() != ApplicationStage.INTERVIEW) {
+            transitionStage(application, ApplicationStage.INTERVIEW);
+        }
+
+        List<UUID> interviewIds = new ArrayList<>();
+
+        for (ScheduleCandidateInterviewsRequest.InterviewSlot slot : request.getInterviews()) {
+            Interview interview = interviewRepository.save(Interview.builder()
+                    .application(application)
+                    .template(null)
+                    .scheduledAt(slot.getScheduledAt())
+                    .type(slot.getType())
+                    .location(slot.getLocation())
+                    .meetingLink(slot.getMeetingLink())
+                    .build());
+
+            interviewIds.add(interview.getId());
+
+            Set<UUID> uniqueInterviewerIds = Set.copyOf(slot.getInterviewerIds());
+            List<User> interviewers = userRepository.findAllById(uniqueInterviewerIds);
+
+            if (interviewers.size() != uniqueInterviewerIds.size()) {
+                throw new BusinessException("One or more interviewers not found", HttpStatus.BAD_REQUEST);
+            }
+
+            boolean hasInvalidRole = interviewers.stream()
+                    .anyMatch(user -> user.getRole() != Role.INTERVIEWER || user.isDeleted());
+
+            if (hasInvalidRole) {
+                throw new BusinessException("All assigned users must be active INTERVIEWER", HttpStatus.BAD_REQUEST);
+            }
+
+            List<InterviewParticipant> participants = interviewers.stream()
+                    .map(user -> InterviewParticipant.builder()
+                            .id(new InterviewParticipant.InterviewParticipantId(interview.getId(), user.getId()))
+                            .interview(interview)
+                            .user(user)
+                            .role(ParticipantRole.INTERVIEWER)
+                            .build())
+                    .collect(Collectors.toList());
+
+            interviewParticipantRepository.saveAll(participants);
+        }
+
+        return ScheduleCandidateInterviewsResponse.builder()
+                .candidateId(candidateId)
+                .applicationId(application.getId())
+                .stage(application.getStage().name())
+                .totalInterviewsCreated(interviewIds.size())
+                .interviewIds(interviewIds)
+                .build();
     }
 
     // ─────────────────────────── New: Single Candidate Add ───────────────────────────
