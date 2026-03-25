@@ -2,9 +2,12 @@ package fptu.sba301.ats.controller;
 
 import fptu.sba301.ats.dto.request.CandidateStageUpdateRequest;
 import fptu.sba301.ats.dto.request.CreateCandidateRequest;
+import fptu.sba301.ats.dto.request.ScheduleCandidateInterviewsRequest;
 import fptu.sba301.ats.dto.response.BulkImportResponse;
 import fptu.sba301.ats.dto.response.CandidateDetailResponse;
 import fptu.sba301.ats.dto.response.CandidateListResponse;
+import fptu.sba301.ats.dto.response.InterviewerOptionResponse;
+import fptu.sba301.ats.dto.response.ScheduleCandidateInterviewsResponse;
 import fptu.sba301.ats.service.CandidateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +47,12 @@ public class CandidateController {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
+    @GetMapping("/interviewers")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<InterviewerOptionResponse>> getInterviewerOptions() {
+        return ResponseEntity.ok(candidateService.getInterviewerOptions());
+    }
+
     @GetMapping("/{candidateId}")
     @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
@@ -65,6 +74,16 @@ public class CandidateController {
     ) {
         return ResponseEntity.ok(candidateService.getStageHistory(candidateId));
     }
+
+        @PostMapping("/{candidateId}/interviews/schedule")
+        @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
+        public ResponseEntity<ScheduleCandidateInterviewsResponse> scheduleCandidateInterviews(
+            @PathVariable UUID candidateId,
+            @Valid @RequestBody ScheduleCandidateInterviewsRequest request
+        ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(candidateService.scheduleCandidateInterviews(candidateId, request));
+        }
 
     // ───────────── New: Single Candidate Add ─────────────
 

@@ -1,5 +1,13 @@
 import api from "@/lib/api";
-import type { CandidateDetailItem, CandidateListItem, CandidateStage, BulkImportResult } from "@/types/candidate";
+import type {
+  CandidateDetailItem,
+  CandidateListItem,
+  CandidateStage,
+  BulkImportResult,
+  InterviewerOptionItem,
+  ScheduleCandidateInterviewsRequest,
+  ScheduleCandidateInterviewsResult,
+} from "@/types/candidate";
 
 export const candidateService = {
   async getCandidates(): Promise<CandidateListItem[]> {
@@ -12,8 +20,24 @@ export const candidateService = {
     return data;
   },
 
+  async getInterviewerOptions(): Promise<InterviewerOptionItem[]> {
+    const { data } = await api.get<InterviewerOptionItem[]>("/candidates/interviewers");
+    return data;
+  },
+
   async updateCandidateStage(candidateId: string, stage: CandidateStage): Promise<CandidateDetailItem> {
     const { data } = await api.patch<CandidateDetailItem>(`/candidates/${candidateId}/stage`, { stage });
+    return data;
+  },
+
+  async scheduleCandidateInterviews(
+    candidateId: string,
+    payload: ScheduleCandidateInterviewsRequest,
+  ): Promise<ScheduleCandidateInterviewsResult> {
+    const { data } = await api.post<ScheduleCandidateInterviewsResult>(
+      `/candidates/${candidateId}/interviews/schedule`,
+      payload,
+    );
     return data;
   },
 
