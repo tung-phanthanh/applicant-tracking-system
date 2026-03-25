@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ public class ScheduleCandidateInterviewsRequest {
     public static class InterviewSlot {
 
         @NotNull(message = "scheduledAt is required")
-        private Instant scheduledAt;
+        private LocalDateTime scheduledAt;
 
         @NotNull(message = "type is required")
         private InterviewType type;

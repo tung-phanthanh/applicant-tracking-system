@@ -8,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +18,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class InterviewDetailResponse {
     private UUID id;
-    private Instant scheduledAt;
+    private LocalDateTime scheduledAt;
     private Instant startedAt;
     private Instant endedAt;
     private String location;
