@@ -4,12 +4,15 @@ import fptu.sba301.ats.entity.InterviewScore;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
-public interface InterviewScoreRepository
-        extends JpaRepository<InterviewScore, UUID> {
-
+@Repository
+public interface InterviewScoreRepository extends JpaRepository<InterviewScore, UUID> {
+    List<InterviewScore> findByInterviewId(UUID interviewId);
+    List<InterviewScore> findByInterview_IdAndInterviewer_Id(UUID interviewId, UUID userId);
     @Modifying
     @Query("""
         DELETE FROM InterviewScore s

@@ -32,10 +32,6 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new LockedException("Account locked");
         }
 
-        return new org.springframework.security.core.userdetails.User(
-                user.getEmail(),
-                user.getPasswordHash(),
-                List.of(new SimpleGrantedAuthority(user.getRole().name()))
-        );
+        return UserPrincipal.create(user);
     }
 }

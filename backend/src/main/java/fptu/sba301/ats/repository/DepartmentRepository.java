@@ -11,4 +11,8 @@ import java.util.UUID;
 public interface DepartmentRepository extends JpaRepository<Department, UUID> {
 
     Optional<Department> findByNameIgnoreCase(String name);
+
+    Optional<Department> findByName(String name);
+
+    boolean existsByName(String name);
 }

@@ -2,12 +2,21 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Search, Plus, Shield, Lock, Unlock, Trash2, Pencil,
-    Users, RefreshCw, AlertTriangle
+    Users, RefreshCw, AlertTriangle, Download, FileSpreadsheet, FileText,
+    ChevronLeft, ChevronRight
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { userService } from "@/services/userService";
+import { adminService } from "@/services/adminService";
 import type { UserRecord, UserRole } from "@/types/user";
+import type { Department } from "@/types/admin";
 
 const ROLE_LABELS: Record<UserRole, string> = {
     SYSTEM_ADMIN: "Admin",
@@ -52,20 +61,38 @@ export default function AdminUsersPage() {
     const [search, setSearch] = useState("");
     const [roleFilter, setRoleFilter] = useState<UserRole | "">("");
     const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
+    const [departmentFilter, setDepartmentFilter] = useState("");
+    const [departments, setDepartments] = useState<Department[]>([]);
+    
+    // Pagination
+    const [page, setPage] = useState(0);
+    const [size] = useState(10);
+    const [totalPages, setTotalPages] = useState(0);
+    const [totalElements, setTotalElements] = useState(0);
+
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const loadUsers = useCallback(async () => {
         setIsLoading(true);
         setError("");
         try {
-            const data = await userService.getUsers();
-            setUsers(data);
+            const data = await userService.getUsers(page, size, departmentFilter || undefined);
+            setUsers(data.content);
+            setTotalPages(data.totalPages);
+            setTotalElements(data.totalElements);
         } catch {
             setError("Failed to load users. Please try again.");
         } finally {
             setIsLoading(false);
         }
+    }, [page, size, departmentFilter]);
+
+    useEffect(() => {
+        adminService.getDepartments(0, 100)
+            .then((data) => setDepartments(data.content))
+            .catch(() => {});
     }, []);
 
     useEffect(() => {
@@ -114,6 +141,25 @@ export default function AdminUsersPage() {
         return matchSearch && matchRole && matchStatus;
     });
 
+    const handleExport = async (format: "csv" | "excel") => {
+        setIsExporting(true);
+        try {
+            const blob = await adminService.exportUsers(format);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `users.${format === "csv" ? "csv" : "xlsx"}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch {
+            // handle error if needed
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -130,6 +176,25 @@ export default function AdminUsersPage() {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={isExporting}>
+                                {isExporting ? <RefreshCw className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
+                                Export
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 border-border/50 bg-card/95 backdrop-blur-xl">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleExport("csv")}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Export as CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleExport("excel")}>
+                                <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                                Export as Excel
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <Button variant="outline" size="sm" onClick={loadUsers} disabled={isLoading}>
                         <RefreshCw className={`mr-1.5 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                         Refresh
@@ -171,6 +236,19 @@ export default function AdminUsersPage() {
                     <option value="active">Active</option>
                     <option value="locked">Locked</option>
                     <option value="inactive">Inactive</option>
+                </select>
+                <select
+                    className="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+                    value={departmentFilter}
+                    onChange={(e) => {
+                        setDepartmentFilter(e.target.value);
+                        setPage(0); // reset to first page on filter
+                    }}
+                >
+                    <option value="">All Departments</option>
+                    {departments.map((d) => (
+                        <option key={d.id} value={d.id}>{d.name}</option>
+                    ))}
                 </select>
             </div>
 
@@ -330,11 +408,36 @@ export default function AdminUsersPage() {
                 )}
             </div>
 
-            {/* Summary */}
-            {!isLoading && filtered.length > 0 && (
-                <p className="text-right text-xs text-muted-foreground">
-                    Showing {filtered.length} of {users.length} users
-                </p>
+            {/* Summary & Pagination */}
+            {!isLoading && (
+                <div className="flex flex-col items-center justify-between gap-4 sm:flex-row">
+                    <p className="text-sm text-muted-foreground">
+                        Showing <span className="font-medium">{users.length}</span> of <span className="font-medium">{totalElements}</span> users
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={page === 0}
+                            onClick={() => setPage((p) => Math.max(0, p - 1))}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                            Previous
+                        </Button>
+                        <span className="text-sm text-muted-foreground px-2">
+                            Page {page + 1} of {Math.max(1, totalPages)}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            disabled={page >= totalPages - 1}
+                            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                        >
+                            Next
+                            <ChevronRight className="h-4 w-4" />
+                        </Button>
+                    </div>
+                </div>
             )}
         </div>
     );

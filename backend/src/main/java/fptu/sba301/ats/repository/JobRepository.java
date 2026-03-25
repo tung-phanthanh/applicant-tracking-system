@@ -19,4 +19,8 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
 
     @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.department WHERE j.id = :id")
     Optional<Job> findByIdWithDepartment(@Param("id") UUID id);
+
+    long countByStatus(JobStatus status);
+
+    long countByDepartment_IdAndStatusNot(UUID departmentId, JobStatus status);
 }

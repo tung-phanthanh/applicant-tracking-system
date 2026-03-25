@@ -2,9 +2,12 @@ package fptu.sba301.ats.controller;
 
 import fptu.sba301.ats.dto.request.CandidateStageUpdateRequest;
 import fptu.sba301.ats.dto.request.CreateCandidateRequest;
+import fptu.sba301.ats.dto.request.ScheduleCandidateInterviewsRequest;
 import fptu.sba301.ats.dto.response.BulkImportResponse;
 import fptu.sba301.ats.dto.response.CandidateDetailResponse;
 import fptu.sba301.ats.dto.response.CandidateListResponse;
+import fptu.sba301.ats.dto.response.InterviewerOptionResponse;
+import fptu.sba301.ats.dto.response.ScheduleCandidateInterviewsResponse;
 import fptu.sba301.ats.service.CandidateService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -18,7 +21,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -40,44 +42,66 @@ public class CandidateController {
     // ───────────── Existing endpoints ─────────────
 
     @GetMapping
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<List<CandidateListResponse>> getCandidateList() {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
+    @GetMapping("/interviewers")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<InterviewerOptionResponse>> getInterviewerOptions() {
+        return ResponseEntity.ok(candidateService.getInterviewerOptions());
+    }
+
     @GetMapping("/{candidateId}")
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateDetail(candidateId));
     }
 
     @PatchMapping("/{candidateId}/stage")
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> updateCandidateStage(
             @PathVariable UUID candidateId,
-            @Valid @RequestBody CandidateStageUpdateRequest request
-    ) {
+            @Valid @RequestBody CandidateStageUpdateRequest request) {
         return ResponseEntity.ok(candidateService.updateCandidateStage(candidateId, request.getStage()));
     }
+
+    @GetMapping("/{candidateId}/history")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<fptu.sba301.ats.dto.response.CandidateHistoryResponse>> getStageHistory(
+            @PathVariable UUID candidateId
+    ) {
+        return ResponseEntity.ok(candidateService.getStageHistory(candidateId));
+    }
+
+        @PostMapping("/{candidateId}/interviews/schedule")
+        @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
+        public ResponseEntity<ScheduleCandidateInterviewsResponse> scheduleCandidateInterviews(
+            @PathVariable UUID candidateId,
+            @Valid @RequestBody ScheduleCandidateInterviewsRequest request
+        ) {
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(candidateService.scheduleCandidateInterviews(candidateId, request));
+        }
 
     // ───────────── New: Single Candidate Add ─────────────
 
     /**
      * Add a single candidate.
      * Request: multipart/form-data
-     *   - request  (application/json part): candidate fields
-     *   - documents (optional, multiple files): CV / supporting documents to upload to Cloudinary
+     * - request (application/json part): candidate fields
+     * - documents (optional, multiple files): CV / supporting documents to upload
+     * to Cloudinary
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> createCandidate(
             @RequestPart("request") @Valid CreateCandidateRequest request,
-            @RequestPart(value = "documents", required = false) List<MultipartFile> documents
-    ) {
+            @RequestPart(value = "documents", required = false) List<MultipartFile> documents) {
         CandidateDetailResponse response = candidateService.createCandidate(
                 request,
-                documents != null ? documents : Collections.emptyList()
-        );
+                documents != null ? documents : Collections.emptyList());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -86,19 +110,18 @@ public class CandidateController {
     /**
      * Bulk-import candidates from a CSV file.
      * Request: multipart/form-data
-     *   - csv     (required): CSV file with header row
-     *   - cvFiles (optional, multiple files): PDF CV files whose names match the 'cvFileName' column in CSV
+     * - csv (required): CSV file with header row
+     * - cvFiles (optional, multiple files): PDF CV files whose names match the
+     * 'cvFileName' column in CSV
      */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasAnyAuthority('HR')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<BulkImportResponse> importCandidates(
             @RequestPart("csv") MultipartFile csvFile,
-            @RequestPart(value = "cvFiles", required = false) List<MultipartFile> cvFiles
-    ) {
+            @RequestPart(value = "cvFiles", required = false) List<MultipartFile> cvFiles) {
         BulkImportResponse response = candidateService.importCandidatesFromCsv(
                 csvFile,
-                cvFiles != null ? cvFiles : Collections.emptyList()
-        );
+                cvFiles != null ? cvFiles : Collections.emptyList());
         return ResponseEntity.ok(response);
     }
 }

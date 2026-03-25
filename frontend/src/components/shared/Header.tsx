@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { LogOut, User } from "lucide-react";
+import api from "@/lib/api";
+import { LogOut, User, Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -40,6 +41,14 @@ export default function Header() {
     const location = useLocation();
     const navigate = useNavigate();
     const [open, setOpen] = useState(false);
+    const [unreadCount, setUnreadCount] = useState(0);
+
+    useEffect(() => {
+        if (!user) return;
+        api.get<number>("/notifications/unread-count")
+            .then((res) => setUnreadCount(res.data))
+            .catch(() => {});
+    }, [user]);
 
     const pageTitle = resolvePageTitle(location.pathname);
     const displayName =
@@ -63,14 +72,26 @@ export default function Header() {
 
             {user && (
                 <DropdownMenu open={open} onOpenChange={setOpen}>
+                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground mr-2 cursor-pointer hover:bg-accent relative">
+                        <Bell className="h-4 w-4" />
+                        {unreadCount > 0 && (
+                            <span className="absolute top-0 right-0 flex h-3 w-3 rounded-full bg-destructive text-[8px] text-destructive-foreground items-center justify-center font-bold">
+                                {unreadCount > 9 ? "9+" : unreadCount}
+                            </span>
+                        )}
+                    </div>
                     <DropdownMenuTrigger asChild>
                         <Button
                             variant="ghost"
                             className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-accent"
                         >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
-                                {initials}
-                            </div>
+                            {user?.avatarUrl ? (
+                                <img src={user.avatarUrl} alt={displayName} className="h-8 w-8 rounded-full object-cover" />
+                            ) : (
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
+                                    {initials}
+                                </div>
+                            )}
                             <span className="text-sm font-medium text-foreground">
                                 {displayName}
                             </span>
