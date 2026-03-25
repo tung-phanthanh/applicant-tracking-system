@@ -2,19 +2,13 @@ package fptu.sba301.ats.repository;
 
 import fptu.sba301.ats.entity.InterviewScore;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.UUID;
 
-public interface InterviewScoreRepository
-        extends JpaRepository<InterviewScore, UUID> {
-
-    @Modifying
-    @Query("""
-        DELETE FROM InterviewScore s
-        WHERE s.interview.id = :interviewId
-        AND s.interviewer.id = :userId
-    """)
-    void deleteOld(UUID interviewId, UUID userId);
+@Repository
+public interface InterviewScoreRepository extends JpaRepository<InterviewScore, UUID> {
+    List<InterviewScore> findByInterviewId(UUID interviewId);
+    List<InterviewScore> findByInterviewIdAndUserId(UUID interviewId, UUID userId);
 }

@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public interface CandidateDetailProjection {
     String getCandidateId();
+    String getApplicationId();
     String getFullName();
     String getEmail();
     String getPhone();

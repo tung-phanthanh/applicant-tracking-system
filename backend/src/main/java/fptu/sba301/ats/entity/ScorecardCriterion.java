@@ -6,7 +6,6 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -19,14 +18,17 @@ public class ScorecardCriterion extends BaseEntity {
 
     @Id
     @UuidGenerator
-    private UUID id;
+    @Column(name = "id", updatable = false, nullable = false)
+    private java.util.UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "template_id", nullable = false)
+    @JoinColumn(name = "template_id")
     private ScorecardTemplate template;
 
+    @Column(name = "name", nullable = false)
     private String name;
 
+    @Column(name = "weight", precision = 5, scale = 2)
     @Builder.Default
     private BigDecimal weight = new BigDecimal("1.00");
 }
