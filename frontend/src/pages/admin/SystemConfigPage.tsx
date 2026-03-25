@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
     Settings, Save, RefreshCw, AlertTriangle, Key
 } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminService } from "@/services/adminService";
@@ -9,30 +10,37 @@ import type { SystemConfig } from "@/types/admin";
 
 export default function SystemConfigPage() {
     const [configs, setConfigs] = useState<SystemConfig[]>([]);
+    const [page, setPage] = useState(0);
+    const [pageSize] = useState(50);
+    const [totalElements, setTotalElements] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState<string | null>(null);
 
-    const loadConfigs = useCallback(async () => {
+    const loadConfigs = useCallback(async (p: number) => {
         setIsLoading(true);
         try {
-            const data = await adminService.getConfigs();
-            setConfigs(data);
+            const data = await adminService.getConfigs(p, pageSize);
+            setConfigs(data.content);
+            setTotalElements(data.totalElements);
+            setTotalPages(data.totalPages);
+            setPage(data.number);
         } catch {
             // Silently handle error
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [pageSize]);
 
     useEffect(() => {
-        loadConfigs();
-    }, [loadConfigs]);
+        loadConfigs(page);
+    }, [loadConfigs, page]);
 
     const handleSave = async (key: string, value: string) => {
         setIsSaving(key);
         try {
             await adminService.updateConfig({ configKey: key, value });
-            await loadConfigs();
+            await loadConfigs(page);
         } catch {
             // Silently handle error
         } finally {
@@ -53,7 +61,7 @@ export default function SystemConfigPage() {
                         <p className="text-sm text-muted-foreground">Adjust system-wide settings and parameters</p>
                     </div>
                 </div>
-                <Button variant="outline" size="sm" onClick={loadConfigs} disabled={isLoading} className="rounded-full bg-background/50">
+                <Button variant="outline" size="sm" onClick={() => loadConfigs(page)} disabled={isLoading} className="rounded-full bg-background/50">
                     <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                     Refresh
                 </Button>
@@ -114,6 +122,15 @@ export default function SystemConfigPage() {
                             </div>
                         ))
                     )}
+                </div>
+                <div className="mt-8 flex justify-center pb-6">
+                    <Pagination 
+                        currentPage={page} 
+                        totalPages={totalPages} 
+                        totalElements={totalElements} 
+                        pageSize={pageSize} 
+                        onPageChange={setPage}
+                    />
                 </div>
             </div>
 

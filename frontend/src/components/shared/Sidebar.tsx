@@ -40,9 +40,9 @@ export default function Sidebar() {
     const [appName, setAppName] = useState("Enterprise ATS");
 
     useEffect(() => {
-        adminService.getConfigs()
-            .then(configs => {
-                const nameConfig = configs.find((c: any) => c.key === "APP_NAME" || c.configKey === "APP_NAME");
+        adminService.getConfigs(0, 100)
+            .then(data => {
+                const nameConfig = data.content.find((c: any) => c.key === "APP_NAME" || c.configKey === "APP_NAME");
                 if (nameConfig?.value) {
                     setAppName(nameConfig.value);
                 }

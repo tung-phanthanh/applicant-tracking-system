@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import {
     Search, Plus, Building2, Pencil, Trash2, RefreshCw, Users, Briefcase, Info, X, Check
 } from "lucide-react";
+import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { adminService } from "@/services/adminService";
@@ -19,6 +20,10 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function DepartmentsPage() {
     const [departments, setDepartments] = useState<Department[]>([]);
+    const [page, setPage] = useState(0);
+    const [pageSize] = useState(6);
+    const [totalElements, setTotalElements] = useState(0);
+    const [totalPages, setTotalPages] = useState(0);
     const [isLoading, setIsLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [search, setSearch] = useState("");
@@ -28,21 +33,24 @@ export default function DepartmentsPage() {
     const [editingDept, setEditingDept] = useState<Department | null>(null);
     const [formData, setFormData] = useState({ name: "", description: "" });
 
-    const loadDepartments = useCallback(async () => {
+    const loadDepartments = useCallback(async (p: number) => {
         setIsLoading(true);
         try {
-            const data = await adminService.getDepartments();
-            setDepartments(data);
+            const data = await adminService.getDepartments(p, pageSize);
+            setDepartments(data.content);
+            setTotalElements(data.totalElements);
+            setTotalPages(data.totalPages);
+            setPage(data.number);
         } catch {
             // Silently fail
         } finally {
             setIsLoading(false);
         }
-    }, []);
+    }, [pageSize]);
 
     useEffect(() => {
-        loadDepartments();
-    }, [loadDepartments]);
+        loadDepartments(page);
+    }, [loadDepartments, page]);
 
     const handleOpenModal = (dept: Department | null = null) => {
         if (dept) {
@@ -67,7 +75,7 @@ export default function DepartmentsPage() {
                 await adminService.createDepartment(formData);
             }
             setIsModalOpen(false);
-            loadDepartments();
+            loadDepartments(page);
         } catch (error) {
             console.error("Failed to save department", error);
         } finally {
@@ -80,7 +88,7 @@ export default function DepartmentsPage() {
         
         try {
             await adminService.deleteDepartment(id);
-            loadDepartments();
+            loadDepartments(page);
         } catch (error) {
             console.error("Failed to delete department", error);
         }
@@ -107,7 +115,7 @@ export default function DepartmentsPage() {
                     </div>
                 </div>
                 <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={loadDepartments} disabled={isLoading} className="rounded-full">
+                    <Button variant="outline" size="sm" onClick={() => loadDepartments(page)} disabled={isLoading} className="rounded-full">
                         <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                         Refresh
                     </Button>
@@ -189,9 +197,9 @@ export default function DepartmentsPage() {
                             </div>
 
                             <div className="mt-6 pt-4 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground">
-                                <span className={`flex items-center gap-1.5 ${dept.status ? 'text-emerald-500 font-medium' : 'text-muted-foreground'}`}>
-                                    <div className={`w-1.5 h-1.5 rounded-full ${dept.status ? 'bg-emerald-500' : 'bg-muted-foreground'}`} /> 
-                                    {dept.status ? 'Active' : 'Inactive'}
+                                <span className={`flex items-center gap-1.5 ${dept.status ? "text-emerald-500 font-medium" : "text-muted-foreground"}`}>
+                                    <div className={`w-1.5 h-1.5 rounded-full ${dept.status ? "bg-emerald-500" : "bg-muted-foreground"}`} /> 
+                                    {dept.status ? "Active" : "Inactive"}
                                 </span>
                                 <span className="flex items-center gap-1">
                                     <Info className="h-3 w-3" />
@@ -201,6 +209,16 @@ export default function DepartmentsPage() {
                         </div>
                     ))
                 )}
+            </div>
+
+            <div className="mt-8 flex justify-center">
+                <Pagination 
+                    currentPage={page} 
+                    totalPages={totalPages} 
+                    totalElements={totalElements} 
+                    pageSize={pageSize} 
+                    onPageChange={setPage}
+                />
             </div>
 
             {/* Add/Edit Modal */}

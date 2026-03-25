@@ -3,12 +3,13 @@ package fptu.sba301.ats.service;
 import fptu.sba301.ats.dto.request.DepartmentRequestDTO;
 import fptu.sba301.ats.dto.response.DepartmentResponseDTO;
 
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.UUID;
 
 public interface DepartmentService {
-    List<DepartmentResponseDTO> getAllDepartments();
+    Page<DepartmentResponseDTO> getAllDepartments(Pageable pageable);
 
     DepartmentResponseDTO getDepartmentById(UUID id);
 

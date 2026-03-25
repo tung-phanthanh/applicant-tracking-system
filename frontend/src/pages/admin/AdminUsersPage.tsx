@@ -2,11 +2,18 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import {
     Search, Plus, Shield, Lock, Unlock, Trash2, Pencil,
-    Users, RefreshCw, AlertTriangle
+    Users, RefreshCw, AlertTriangle, Download, FileSpreadsheet, FileText
 } from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { userService } from "@/services/userService";
+import { adminService } from "@/services/adminService";
 import type { UserRecord, UserRole } from "@/types/user";
 
 const ROLE_LABELS: Record<UserRole, string> = {
@@ -54,6 +61,7 @@ export default function AdminUsersPage() {
     const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
     const [actionLoading, setActionLoading] = useState<string | null>(null);
     const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+    const [isExporting, setIsExporting] = useState(false);
 
     const loadUsers = useCallback(async () => {
         setIsLoading(true);
@@ -114,6 +122,25 @@ export default function AdminUsersPage() {
         return matchSearch && matchRole && matchStatus;
     });
 
+    const handleExport = async (format: "csv" | "excel") => {
+        setIsExporting(true);
+        try {
+            const blob = await adminService.exportUsers(format);
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `users.${format === "csv" ? "csv" : "xlsx"}`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch {
+            // handle error if needed
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -130,6 +157,25 @@ export default function AdminUsersPage() {
                     </div>
                 </div>
                 <div className="flex gap-2">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm" disabled={isExporting}>
+                                {isExporting ? <RefreshCw className="mr-1.5 h-4 w-4 animate-spin" /> : <Download className="mr-1.5 h-4 w-4" />}
+                                Export
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-40 border-border/50 bg-card/95 backdrop-blur-xl">
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleExport("csv")}>
+                                <FileText className="mr-2 h-4 w-4" />
+                                Export as CSV
+                            </DropdownMenuItem>
+                            <DropdownMenuItem className="cursor-pointer" onClick={() => handleExport("excel")}>
+                                <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
+                                Export as Excel
+                            </DropdownMenuItem>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+
                     <Button variant="outline" size="sm" onClick={loadUsers} disabled={isLoading}>
                         <RefreshCw className={`mr-1.5 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                         Refresh

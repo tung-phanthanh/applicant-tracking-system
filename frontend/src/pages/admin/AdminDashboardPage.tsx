@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from "react";
 import {
     Users, Building2, ShieldCheck, Mail, Activity,
-    TrendingUp, CheckCircle2
+    TrendingUp, CheckCircle2, Database, Download, RefreshCw
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { adminService } from "@/services/adminService";
@@ -16,6 +16,7 @@ export default function AdminDashboardPage() {
         unreadNotifications: 0
     });
     const [isLoading, setIsLoading] = useState(true);
+    const [isExportingSql, setIsExportingSql] = useState(false);
 
     const loadStats = useCallback(async () => {
         setIsLoading(true);
@@ -27,10 +28,10 @@ export default function AdminDashboardPage() {
                 adminService.getNotifications()
             ]);
             setStats({
-                totalUsers: users.length,
-                totalDepartments: depts.length,
-                totalAuditLogs: logs.length,
-                unreadNotifications: notifs.filter(n => !n.read).length
+                totalUsers: users.length, // userService.getUsers still returns array
+                totalDepartments: depts.totalElements,
+                totalAuditLogs: logs.totalElements,
+                unreadNotifications: notifs.content.filter((n: any) => !n.read).length
             });
         } catch {
             // Silently handle error
@@ -42,6 +43,25 @@ export default function AdminDashboardPage() {
     useEffect(() => {
         loadStats();
     }, [loadStats]);
+
+    const handleExportSql = async () => {
+        setIsExportingSql(true);
+        try {
+            const blob = await adminService.exportDatabaseSql();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.href = url;
+            a.download = `database_backup.sql`;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch {
+            // handle error if needed
+        } finally {
+            setIsExportingSql(false);
+        }
+    };
 
     return (
         <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
@@ -84,7 +104,7 @@ export default function AdminDashboardPage() {
             </div>
 
             {/* Bottom Grid */}
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
                 {/* System Health */}
                 <div className="glass-morphism rounded-2xl border border-border/50 bg-card/60 p-6 backdrop-blur-md transition-all hover:shadow-lg">
                     <div className="flex items-center justify-between mb-6">
@@ -130,6 +150,32 @@ export default function AdminDashboardPage() {
                     </p>
                     <Button variant="ghost" className="mt-6 rounded-full text-xs underline decoration-primary/30 underline-offset-4">
                         View Detailed Analytics
+                    </Button>
+                </div>
+
+                {/* Database Backup */}
+                <div className="glass-morphism rounded-2xl border border-border/50 bg-card/60 p-6 backdrop-blur-md transition-all hover:shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div className="flex items-center justify-between mb-6">
+                            <h3 className="text-lg font-semibold text-foreground flex items-center gap-2">
+                                <Database className="h-4 w-4 text-primary" />
+                                Data Backup
+                            </h3>
+                            <span className="inline-flex rounded-full bg-blue-500/10 text-blue-600 px-2 py-0.5 text-xs font-semibold border border-blue-500/20">
+                                SQL Dump
+                            </span>
+                        </div>
+                        <p className="text-sm text-muted-foreground mb-6">
+                            Export a full SQL dump of the system database, including structure and data records for safe keeping and recovery.
+                        </p>
+                    </div>
+                    <Button 
+                        onClick={handleExportSql} 
+                        disabled={isExportingSql}
+                        className="w-full self-start shadow-sm"
+                    >
+                        {isExportingSql ? <RefreshCw className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}
+                        Download SQL Backup
                     </Button>
                 </div>
             </div>

@@ -1,11 +1,12 @@
 package fptu.sba301.ats.service;
 
 import fptu.sba301.ats.dto.response.SystemConfigResponseDTO;
-import java.util.List;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import java.util.Map;
 
 public interface SystemConfigService {
-    List<SystemConfigResponseDTO> getAllConfigs();
+    Page<SystemConfigResponseDTO> getAllConfigs(Pageable pageable);
 
     void updateConfigs(Map<String, String> configs);
 

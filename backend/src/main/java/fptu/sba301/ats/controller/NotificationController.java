@@ -1,5 +1,6 @@
 package fptu.sba301.ats.controller;
 
+import fptu.sba301.ats.entity.Notification;
 import fptu.sba301.ats.annotation.LogAudit;
 import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.request.NotificationRequest;
@@ -11,11 +12,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping(AppConstant.BASE_URL + "/notifications")
@@ -26,20 +26,20 @@ public class NotificationController {
     private final fptu.sba301.ats.service.SystemConfigService systemConfigService;
 
     @GetMapping
-    public ResponseEntity<List<NotificationResponseDTO>> getUserNotifications(
+    public ResponseEntity<Page<NotificationResponseDTO>> getUserNotifications(
             @AuthenticationPrincipal UserPrincipal principal,
-            @RequestParam(required = false) Boolean unreadOnly) {
-        List<NotificationResponseDTO> responses = notificationService.getAllMyNotifications(principal.getEmail(), unreadOnly)
-                .stream()
-                .map(n -> NotificationResponseDTO.builder()
-                        .id(n.getId().toString())
-                        .title(n.getTitle())
-                        .message(n.getMessage())
-                        .read(n.isRead())
-                        .createdAt(n.getCreatedAt())
-                        .build())
-                .toList();
-        return ResponseEntity.ok(responses);
+            @RequestParam(required = false) Boolean unreadOnly,
+            Pageable pageable) {
+        Page<Notification> notifications = notificationService.getMyNotifications(principal.getEmail(), pageable);
+        Page<NotificationResponseDTO> response = notifications.map(n -> NotificationResponseDTO.builder()
+                .id(n.getId().toString())
+                .title(n.getTitle())
+                .message(n.getMessage())
+                .read(n.isRead())
+                .type(n.getType() != null ? n.getType().name() : "SYSTEM_ALERT")
+                .createdAt(n.getCreatedAt())
+                .build());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/unread-count")
@@ -64,7 +64,7 @@ public class NotificationController {
     @LogAudit(action = "BROADCAST_NOTIFICATION", resource = "Notification")
     public ResponseEntity<Void> broadcast(@RequestBody NotificationRequest request) {
         if (!systemConfigService.getBoolean("NOTIFICATIONS_ENABLED", true)) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         notificationService.broadcast(
                 request.getType() != null ? request.getType() : NotificationType.ONBOARDING_ASSIGNED,
@@ -79,7 +79,7 @@ public class NotificationController {
     @LogAudit(action = "SEND_NOTIFICATION_ROLE", resource = "Notification")
     public ResponseEntity<Void> sendToRole(@RequestBody NotificationRequest request) {
         if (!systemConfigService.getBoolean("NOTIFICATIONS_ENABLED", true)) {
-            return ResponseEntity.status(org.springframework.http.HttpStatus.FORBIDDEN).build();
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
         notificationService.sendToRole(
                 request.getRole(),
