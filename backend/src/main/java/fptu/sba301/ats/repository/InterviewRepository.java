@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -16,4 +17,6 @@ public interface InterviewRepository extends JpaRepository<Interview, UUID> {
         where i.id = :interviewId
     """)
     Optional<Interview> findByIdWithParticipants(@Param("interviewId") UUID interviewId);
+
+    List<Interview> findByApplicationId(UUID applicationId);
 }

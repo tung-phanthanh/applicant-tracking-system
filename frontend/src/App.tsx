@@ -1,8 +1,11 @@
 import { Navigate, BrowserRouter, Route, Routes } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
+import { Toaster } from "sonner";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminRoute from "@/routes/AdminRoute";
 import HrRoute from "@/routes/HrRoute";
+import HrOrAdminRoute from "@/routes/HrOrAdminRoute";
+import InterviewRoute from "@/routes/InterviewRoute";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -14,14 +17,18 @@ import ProfilePage from "@/pages/recruiter/ProfilePage";
 import ChangePasswordPage from "@/pages/recruiter/ChangePasswordPage";
 import CandidateListPage from "@/pages/recruiter/CandidateListPage";
 import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
+import InterviewCalendarPage from "@/pages/interview/InterviewCalendarPage";
+import InterviewFeedbackPage from "@/pages/interview/InterviewFeedbackPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
+import CandidateEvaluationPage from "@/pages/interview/CandidateEvaluationPage";
 
 function App() {
   return (
     <BrowserRouter>
       <AuthProvider>
+        <Toaster position="top-right" expand={false} richColors />
         <Routes>
           {/* Public auth routes (centered card layout) */}
           <Route element={<AuthLayout />}>
@@ -42,7 +49,16 @@ function App() {
 
               {/* Placeholder routes */}
               <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
-              <Route path="/interviews" element={<ComingSoon title="Interviews" />} />
+               {/* Interview routes (HR, Admin, Interviewer) */}
+              <Route element={<InterviewRoute />}>
+                <Route path="/interviews" element={<InterviewCalendarPage />} />
+                <Route path="/interviews/:id" element={<InterviewFeedbackPage />} />
+              </Route>
+
+              {/* Evaluation summary (HR, Admin) */}
+              <Route element={<HrOrAdminRoute />}>
+                <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
+              </Route>
 
               {/* HR-only route */}
               <Route element={<HrRoute />}>
