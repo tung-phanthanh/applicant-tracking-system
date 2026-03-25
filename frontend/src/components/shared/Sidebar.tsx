@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import {
     Briefcase,
     Calendar,
+    ClipboardCheck,
     LayoutDashboard,
     User,
     Users,
@@ -25,6 +26,7 @@ export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
     const isHr = user?.role === "HR";
+    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -75,6 +77,25 @@ export default function Sidebar() {
                             >
                                 <Users className="h-4 w-4 shrink-0" />
                                 Candidates
+                            </NavLink>
+                        </li>
+                    )}
+
+                    {isHrManager && (
+                        <li>
+                            <NavLink
+                                to="/jobs/pending-approvals"
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        isActive
+                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    )
+                                }
+                            >
+                                <ClipboardCheck className="h-4 w-4 shrink-0" />
+                                Job approvals
                             </NavLink>
                         </li>
                     )}

@@ -2,6 +2,7 @@ package fptu.sba301.ats.event.listener;
 
 import fptu.sba301.ats.entity.Notification;
 import fptu.sba301.ats.entity.User;
+import fptu.sba301.ats.enums.NotificationType;
 import fptu.sba301.ats.event.SystemEvent;
 import fptu.sba301.ats.repository.NotificationRepository;
 import fptu.sba301.ats.repository.UserRepository;
@@ -26,26 +27,41 @@ public class NotificationEventListener {
     public void handleSystemEvent(SystemEvent event) {
         log.info("Received SystemEvent: {} - {}", event.getTitle(), event.getContent());
 
-        // For system config updates and similar global events, we notify all active
-        // admin users.
-        // In this implementation, let's assume we fetch all users with the "Admin"
-        // role.
-        // Or temporarily, all active users for testing purposes.
-        List<User> users = userRepository.findAll(); // Optimization: filter by role in DB
+        List<User> users = userRepository.findAll();
+
+        NotificationType notificationType = resolveType(event.getType());
+        String message = buildMessage(event);
 
         for (User user : users) {
             Notification notification = Notification.builder()
                     .userId(user.getId())
                     .title(event.getTitle())
-                    .content(event.getContent())
-                    .type(event.getType())
-                    .link(event.getLink())
+                    .message(message)
+                    .type(notificationType)
                     .isRead(false)
                     .build();
-            notificationRepository.save(java.util.Objects.requireNonNull(notification));
-
+            notificationRepository.save(notification);
         }
 
         log.info("Notifications dispatched for SystemEvent");
+    }
+
+    private static NotificationType resolveType(String type) {
+        if (type == null || type.isBlank()) {
+            return NotificationType.SYSTEM_ALERT;
+        }
+        try {
+            return NotificationType.valueOf(type.trim());
+        } catch (IllegalArgumentException ex) {
+            return NotificationType.SYSTEM_ALERT;
+        }
+    }
+
+    private static String buildMessage(SystemEvent event) {
+        String content = event.getContent() != null ? event.getContent() : "";
+        if (event.getLink() != null && !event.getLink().isBlank()) {
+            return content + "\n" + event.getLink();
+        }
+        return content;
     }
 }

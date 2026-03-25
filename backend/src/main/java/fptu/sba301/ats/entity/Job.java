@@ -28,6 +28,12 @@ public class Job extends BaseEntity {
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
 
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "salary")
+    private String salary;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")
     private Department department;
