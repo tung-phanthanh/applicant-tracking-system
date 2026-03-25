@@ -40,23 +40,22 @@ public class CandidateController {
     // ───────────── Existing endpoints ─────────────
 
     @GetMapping
-    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<List<CandidateListResponse>> getCandidateList() {
         return ResponseEntity.ok(candidateService.getCandidateList());
     }
 
     @GetMapping("/{candidateId}")
-    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> getCandidateDetail(@PathVariable UUID candidateId) {
         return ResponseEntity.ok(candidateService.getCandidateDetail(candidateId));
     }
 
     @PatchMapping("/{candidateId}/stage")
-    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> updateCandidateStage(
             @PathVariable UUID candidateId,
-            @Valid @RequestBody CandidateStageUpdateRequest request
-    ) {
+            @Valid @RequestBody CandidateStageUpdateRequest request) {
         return ResponseEntity.ok(candidateService.updateCandidateStage(candidateId, request.getStage()));
     }
 
@@ -65,19 +64,18 @@ public class CandidateController {
     /**
      * Add a single candidate.
      * Request: multipart/form-data
-     *   - request  (application/json part): candidate fields
-     *   - documents (optional, multiple files): CV / supporting documents to upload to Cloudinary
+     * - request (application/json part): candidate fields
+     * - documents (optional, multiple files): CV / supporting documents to upload
+     * to Cloudinary
      */
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<CandidateDetailResponse> createCandidate(
             @RequestPart("request") @Valid CreateCandidateRequest request,
-            @RequestPart(value = "documents", required = false) List<MultipartFile> documents
-    ) {
+            @RequestPart(value = "documents", required = false) List<MultipartFile> documents) {
         CandidateDetailResponse response = candidateService.createCandidate(
                 request,
-                documents != null ? documents : Collections.emptyList()
-        );
+                documents != null ? documents : Collections.emptyList());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -86,19 +84,18 @@ public class CandidateController {
     /**
      * Bulk-import candidates from a CSV file.
      * Request: multipart/form-data
-     *   - csv     (required): CSV file with header row
-     *   - cvFiles (optional, multiple files): PDF CV files whose names match the 'cvFileName' column in CSV
+     * - csv (required): CSV file with header row
+     * - cvFiles (optional, multiple files): PDF CV files whose names match the
+     * 'cvFileName' column in CSV
      */
     @PostMapping(value = "/import", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    @PreAuthorize("hasRole('HR') or hasRole('HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<BulkImportResponse> importCandidates(
             @RequestPart("csv") MultipartFile csvFile,
-            @RequestPart(value = "cvFiles", required = false) List<MultipartFile> cvFiles
-    ) {
+            @RequestPart(value = "cvFiles", required = false) List<MultipartFile> cvFiles) {
         BulkImportResponse response = candidateService.importCandidatesFromCsv(
                 csvFile,
-                cvFiles != null ? cvFiles : Collections.emptyList()
-        );
+                cvFiles != null ? cvFiles : Collections.emptyList());
         return ResponseEntity.ok(response);
     }
 }
