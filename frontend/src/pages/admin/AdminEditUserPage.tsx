@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { userService } from "@/services/userService";
+import { adminService } from "@/services/adminService";
 import type { UserRecord, UserRole, UpdateUserPayload } from "@/types/user";
+import type { Department } from "@/types/admin";
 import axios from "axios";
 
 const ROLES: UserRole[] = ["SYSTEM_ADMIN", "HR", "HR_MANAGER", "INTERVIEWER"];
@@ -19,6 +21,7 @@ const ROLE_LABELS: Record<UserRole, string> = {
 interface FormErrors {
     fullName?: string;
     role?: string;
+    departmentId?: string;
 }
 
 function resolveApiError(err: unknown): string {
@@ -43,6 +46,8 @@ export default function AdminEditUserPage() {
 
     const [fullName, setFullName] = useState("");
     const [role, setRole] = useState<UserRole>("HR");
+    const [departmentId, setDepartmentId] = useState("");
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
     const [apiError, setApiError] = useState("");
     const [isSaving, setIsSaving] = useState(false);
@@ -56,9 +61,14 @@ export default function AdminEditUserPage() {
                 setUser(u);
                 setFullName(u.fullName);
                 setRole(u.role);
+                if (u.departmentId) setDepartmentId(u.departmentId);
             })
             .catch(() => setLoadError("Failed to load user details."))
             .finally(() => setIsLoading(false));
+
+        adminService.getDepartments(0, 100)
+            .then((data) => setDepartments(data.content))
+            .catch(() => {});
     }, [id]);
 
     const validate = (): FormErrors => {
@@ -66,6 +76,9 @@ export default function AdminEditUserPage() {
         if (!fullName.trim()) errors.fullName = "Full name is required.";
         else if (fullName.length > 100) errors.fullName = "Full name must not exceed 100 characters.";
         if (!role) errors.role = "Role is required.";
+        if (role !== "SYSTEM_ADMIN" && !departmentId) {
+            errors.departmentId = "Department is required for this role.";
+        }
         return errors;
     };
 
@@ -82,7 +95,11 @@ export default function AdminEditUserPage() {
         setIsSaving(true);
 
         try {
-            const payload: UpdateUserPayload = { fullName, role };
+            const payload: UpdateUserPayload = { 
+                fullName, 
+                role,
+                ...(role !== "SYSTEM_ADMIN" && departmentId ? { departmentId } : {})
+             };
             const updated = await userService.updateUser(id!, payload);
             setUser(updated);
             setSaveSuccess(true);
@@ -208,13 +225,28 @@ export default function AdminEditUserPage() {
                         <p className="text-xs text-muted-foreground">Email cannot be changed.</p>
                     </div>
 
-                    {/* Department (read-only) */}
-                    <div className="space-y-1.5">
-                        <Label>Department</Label>
-                        <div className="rounded-md border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-                            {user.department || "—"}
+                    {/* Department */}
+                    {role !== "SYSTEM_ADMIN" && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="department">Department <span className="text-destructive">*</span></Label>
+                            <select
+                                id="department"
+                                className={`h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring ${fieldErrors.departmentId ? "border-destructive" : "border-input"}`}
+                                value={departmentId}
+                                onChange={(e) => {
+                                    setDepartmentId(e.target.value);
+                                    setFieldErrors((p) => ({ ...p, departmentId: undefined }));
+                                }}
+                                disabled={isSaving || departments.length === 0}
+                            >
+                                <option value="">Select a department</option>
+                                {departments.map((d) => (
+                                    <option key={d.id} value={d.id}>{d.name}</option>
+                                ))}
+                            </select>
+                            {fieldErrors.departmentId && <p className="text-xs text-destructive">{fieldErrors.departmentId}</p>}
                         </div>
-                    </div>
+                    )}
 
                     {/* Role */}
                     <div className="space-y-1.5">
