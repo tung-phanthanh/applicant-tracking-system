@@ -68,7 +68,7 @@ export default function CandidateEvaluationPage() {
         </div>
       </div>
 
-      <h2 className="text-xl font-semibold tracking-tight">Interview Rounds ({data.interviewCount})</h2>
+      <h2 className="text-xl font-semibold tracking-tight">Interview Rounds ({data.interviews.length})</h2>
 
       {data.interviews.length === 0 ? (
         <div className="rounded-lg border border-dashed border-border p-12 text-center text-muted-foreground">

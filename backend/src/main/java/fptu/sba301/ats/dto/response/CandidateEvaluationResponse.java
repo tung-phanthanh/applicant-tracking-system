@@ -15,6 +15,7 @@ import java.util.UUID;
 @AllArgsConstructor
 public class CandidateEvaluationResponse {
     private UUID applicationId;
+    private UUID candidateId;
     private String candidateName;
     private String jobTitle;
     private double overallScore;
@@ -30,6 +31,7 @@ public class CandidateEvaluationResponse {
         private String type;
         private String status;
         private double averageScore;
+        private int interviewerCount;
         private List<InterviewScorecardResponse> scorecards;
     }
 }

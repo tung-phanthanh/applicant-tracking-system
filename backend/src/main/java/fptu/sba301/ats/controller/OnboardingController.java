@@ -10,6 +10,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 import static fptu.sba301.ats.constant.AppConstant.BASE_URL;
@@ -27,6 +28,12 @@ public class OnboardingController {
             @Valid @RequestBody CreateOnboardingRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(onboardingService.create(request));
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    public ResponseEntity<List<OnboardingChecklistResponse>> getAll() {
+        return ResponseEntity.ok(onboardingService.getAll());
     }
 
     @GetMapping("/{id}")
@@ -58,3 +65,4 @@ public class OnboardingController {
         return ResponseEntity.ok(onboardingService.toggleTask(id, taskId));
     }
 }
+

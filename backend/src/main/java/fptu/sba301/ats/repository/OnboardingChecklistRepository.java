@@ -14,6 +14,8 @@ import java.util.UUID;
 public interface OnboardingChecklistRepository extends JpaRepository<OnboardingChecklist, UUID> {
     Optional<OnboardingChecklist> findByApplicationId(UUID applicationId);
 
+    List<OnboardingChecklist> findAllByOrderByCreatedAtDesc();
+
     @Query("SELECT o FROM OnboardingChecklist o " +
            "LEFT JOIN FETCH o.application app " +
            "LEFT JOIN FETCH app.candidate " +
@@ -21,3 +23,4 @@ public interface OnboardingChecklistRepository extends JpaRepository<OnboardingC
            "WHERE o.id = :id")
     Optional<OnboardingChecklist> findByIdWithDetails(@Param("id") UUID id);
 }
+
