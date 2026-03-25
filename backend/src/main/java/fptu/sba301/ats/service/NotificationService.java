@@ -23,5 +23,6 @@ public interface NotificationService {
     
     // CRUD for admin
     Page<Notification> getAllNotifications(Pageable pageable);
+    Page<fptu.sba301.ats.dto.response.NotificationResponseDTO> getAllNotificationsGrouped(Pageable pageable);
     void deleteNotification(Long id);
 }

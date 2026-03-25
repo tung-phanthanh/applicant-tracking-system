@@ -106,14 +106,7 @@ public class NotificationController {
     @GetMapping("/admin/all")
     @PreAuthorize("hasRole('SYSTEM_ADMIN')")
     public ResponseEntity<Page<NotificationResponseDTO>> getAllNotifications(Pageable pageable) {
-        return ResponseEntity.ok(notificationService.getAllNotifications(pageable)
-                .map(n -> NotificationResponseDTO.builder()
-                        .id(n.getId().toString())
-                        .title(n.getTitle())
-                        .message(n.getMessage())
-                        .read(n.isRead())
-                        .createdAt(n.getCreatedAt())
-                        .build()));
+        return ResponseEntity.ok(notificationService.getAllNotificationsGrouped(pageable));
     }
 
     @DeleteMapping("/{id}")

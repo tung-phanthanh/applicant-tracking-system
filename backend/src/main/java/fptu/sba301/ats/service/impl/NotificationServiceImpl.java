@@ -120,6 +120,23 @@ public class NotificationServiceImpl implements NotificationService {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<fptu.sba301.ats.dto.response.NotificationResponseDTO> getAllNotificationsGrouped(Pageable pageable) {
+        return notificationRepository.findGroupedNotifications(pageable).map(row -> {
+            fptu.sba301.ats.enums.NotificationType type = (fptu.sba301.ats.enums.NotificationType) row[3];
+            long count = ((Number) row[5]).longValue();
+            return fptu.sba301.ats.dto.response.NotificationResponseDTO.builder()
+                    .id(row[0].toString())
+                    .title(row[1].toString() + " (Sent to " + count + " users)")
+                    .message(row[2].toString())
+                    .type(type != null ? type.name() : "SYSTEM_ALERT")
+                    .read(true) // System log is already read inherently
+                    .createdAt((java.time.Instant) row[4])
+                    .build();
+        });
+    }
+
+    @Override
     @Transactional
     public void deleteNotification(Long id) {
         notificationRepository.deleteById(id);
