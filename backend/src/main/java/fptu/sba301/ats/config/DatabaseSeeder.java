@@ -37,7 +37,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -361,7 +360,7 @@ public class DatabaseSeeder implements CommandLineRunner {
             entityManager.persist(Interview.builder()
                     .application(applications.get(0))
                     .template(defaultTemplate)
-                    .scheduledAt(Instant.now().plusSeconds(3600 * 24))
+                    .scheduledAt(LocalDateTime.now().plusHours(24))
                     .location("Google Meet")
                     .type(InterviewType.ONLINE)
                     .status(InterviewStatus.SCHEDULED)
@@ -371,7 +370,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 entityManager.persist(Interview.builder()
                         .application(applications.get(1))
                         .template(defaultTemplate)
-                        .scheduledAt(Instant.now().minusSeconds(3600 * 24))
+                        .scheduledAt(LocalDateTime.now().minusHours(24))
                         .location("FPT Tower - Meeting Room 5")
                         .type(InterviewType.OFFLINE)
                         .status(InterviewStatus.COMPLETED)
