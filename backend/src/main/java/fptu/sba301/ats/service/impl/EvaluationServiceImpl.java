@@ -44,7 +44,11 @@ public class EvaluationServiceImpl implements EvaluationService {
 
                     return CandidateEvaluationResponse.InterviewEvaluation.builder()
                             .interviewId(interview.getId())
-                            .scheduledAt(interview.getScheduledAt())
+                            .scheduledAt(
+                                    interview.getScheduledAt() != null
+                                            ? interview.getScheduledAt().atZone(java.time.ZoneId.systemDefault()).toLocalDateTime()
+                                            : null
+                            )
                             .type(interview.getType() != null ? interview.getType().name() : null)
                             .status(interview.getStatus() != null ? interview.getStatus().name() : null)
                             .averageScore(avgScore)

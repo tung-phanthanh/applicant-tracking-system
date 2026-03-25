@@ -13,4 +13,5 @@ public interface ScorecardTemplateService {
     ScorecardTemplateResponse getById(UUID id);
     List<ScorecardTemplateResponse> getAll();
     List<ScorecardTemplateResponse> getByDepartment(UUID departmentId);
+    List<ScorecardTemplateResponse> getAllTemplates();
 }

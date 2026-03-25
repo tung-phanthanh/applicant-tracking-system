@@ -1,6 +1,7 @@
 package fptu.sba301.ats.service.impl;
 
 import fptu.sba301.ats.dto.request.CreateScorecardTemplateRequest;
+import fptu.sba301.ats.dto.response.ScorecardCriterionResponse;
 import fptu.sba301.ats.dto.response.ScorecardTemplateResponse;
 import fptu.sba301.ats.entity.Department;
 import fptu.sba301.ats.entity.ScorecardCriterion;
@@ -86,7 +87,31 @@ public class ScorecardTemplateServiceImpl implements ScorecardTemplateService {
 
         return toResponse(template, criteria);
     }
+    @Override
+    @Transactional(readOnly = true)
+    public List<ScorecardTemplateResponse> getAllTemplates() {
+        return templateRepository.findAll().stream()
+                .map(template -> {
+                    List<ScorecardCriterionResponse> criterionResponses =
+                            criterionRepository.findByTemplateId(template.getId())
+                                    .stream()
+                                    .map(c -> ScorecardCriterionResponse.builder()
+                                            .id(c.getId())
+                                            .name(c.getName())
+                                            .weight(c.getWeight())
+                                            .build())
+                                    .toList();
 
+                    return ScorecardTemplateResponse.builder()
+                            .id(template.getId())
+                            .name(template.getName())
+                            .departmentId(template.getDepartment() != null ? template.getDepartment().getId() : null)
+                            .departmentName(template.getDepartment() != null ? template.getDepartment().getName() : null)
+                            .criteria(criterionResponses)
+                            .build();
+                })
+                .toList();
+    }
     @Override
     @Transactional
     public void delete(UUID id) {
@@ -125,14 +150,13 @@ public class ScorecardTemplateServiceImpl implements ScorecardTemplateService {
                 .name(template.getName())
                 .departmentId(template.getDepartment() != null ? template.getDepartment().getId() : null)
                 .departmentName(template.getDepartment() != null ? template.getDepartment().getName() : null)
-                .createdAt(template.getCreatedAt())
                 .criteria(criteria.stream()
-                        .map(c -> ScorecardTemplateResponse.CriterionResponse.builder()
+                        .map(c -> ScorecardCriterionResponse.builder()
                                 .id(c.getId())
                                 .name(c.getName())
                                 .weight(c.getWeight())
                                 .build())
-                        .collect(Collectors.toList()))
+                        .toList())
                 .build();
     }
 }

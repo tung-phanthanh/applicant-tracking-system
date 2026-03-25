@@ -16,8 +16,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfigurationSource;
 
-import static fptu.sba301.ats.constant.AppConstant.BASE_URL;
-import static fptu.sba301.ats.constant.AppConstant.AUTH_CONTROLLER_URL;
+import static fptu.sba301.ats.constant.AppConstant.*;
 
 @Configuration
 @EnableWebSecurity
@@ -51,6 +50,8 @@ public class SecurityConfig {
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(BASE_URL + AUTH_CONTROLLER_URL + "/**").permitAll()
+                        .requestMatchers(BASE_URL + INTERVIEW_CONTROLLER_URL + "/**").permitAll()
+                        .requestMatchers(BASE_URL + "/templates").permitAll()
                         .requestMatchers(BASE_URL + "/seed-admin", BASE_URL + "/seed-demo-data").permitAll()
                         .anyRequest().authenticated()
                 )

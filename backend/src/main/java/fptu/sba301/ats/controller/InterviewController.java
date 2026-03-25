@@ -1,11 +1,12 @@
 package fptu.sba301.ats.controller;
 
 import fptu.sba301.ats.dto.request.SubmitFeedbackRequest;
-import fptu.sba301.ats.dto.response.InterviewResponse;
+import fptu.sba301.ats.dto.response.*;
 import fptu.sba301.ats.entity.Interview;
 import fptu.sba301.ats.service.InterviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,13 +24,14 @@ public class InterviewController {
     private final InterviewService interviewService;
 
     @GetMapping
-//    @PreAuthorize("hasRole('INTERVIEWER')")
-    public ResponseEntity<List<InterviewResponse>> getAllInterviews() {
-        return ResponseEntity.ok(interviewService.getAllInterviews());
+    @PreAuthorize("hasAnyRole('INTERVIEWER')")
+    public ResponseEntity<List<InterviewResponse>> getAllInterviews(Authentication authentication) {
+        String email = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(interviewService.getAllInterviews(email));
     }
 
     @PostMapping("/feedback")
-//    @PreAuthorize("hasRole('INTERVIEWER')")
+    @PreAuthorize("hasAnyRole('INTERVIEWER')")
     public ResponseEntity<String> submitFeedback(
             @RequestBody SubmitFeedbackRequest request
     ) {
@@ -37,13 +39,47 @@ public class InterviewController {
         return ResponseEntity.ok("Feedback submitted successfully");
     }
 
+    @GetMapping("/{interviewId}")
+    @PreAuthorize("hasAnyRole('INTERVIEWER')")
+    public ResponseEntity<InterviewDetailResponse> getInterviewDetail(
+            @PathVariable UUID interviewId,
+            Authentication authentication
+    ) {
+        String email = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(interviewService.getInterviewDetail(interviewId, email));
+    }
+
     @GetMapping("/{interviewId}/final-score")
-//    @PreAuthorize("hasRole('INTERVIEWER')")
+    @PreAuthorize("hasAnyRole('INTERVIEWER', 'HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<BigDecimal> getFinalScore(
             @PathVariable UUID interviewId
     ) {
         Interview interview = interviewService.getInterviewById(interviewId);
         BigDecimal result = interviewService.calculateFinalScore(interview);
         return ResponseEntity.ok(result);
+    }
+
+    @GetMapping("/{interviewId}/template")
+    @PreAuthorize("hasAnyRole('INTERVIEWER')")
+    public ResponseEntity<ScorecardTemplateResponse> getInterviewTemplate(
+            @PathVariable UUID interviewId
+    ) {
+        return ResponseEntity.ok(interviewService.getTemplateByInterviewId(interviewId));
+    }
+
+    @GetMapping("/{interviewId}/evaluation")
+    @PreAuthorize("hasAnyRole('INTERVIEWER', 'HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<InterviewEvaluationDetailResponse> getCandidateEvaluation(
+            @PathVariable UUID interviewId
+    ) {
+        return ResponseEntity.ok(interviewService.getInterviewEvaluationSummary(interviewId));
+    }
+
+    @GetMapping("/applications/{applicationId}/evaluation")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    public ResponseEntity<ApplicationEvaluationResponse> getApplicationEvaluation(
+            @PathVariable UUID applicationId
+    ) {
+        return ResponseEntity.ok(interviewService.getApplicationEvaluation(applicationId));
     }
 }
