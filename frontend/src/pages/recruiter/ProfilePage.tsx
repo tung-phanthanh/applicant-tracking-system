@@ -1,19 +1,45 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
 import { useAuth } from "@/hooks/useAuth";
-import { Lock, KeyRound } from "lucide-react";
+import { Lock, KeyRound, Camera } from "lucide-react";
+import { userService } from "@/services/userService";
 
 export default function ProfilePage() {
-    const { user } = useAuth();
+    const { user, updateUser } = useAuth();
     const navigate = useNavigate();
 
-    const [emailNotifications, setEmailNotifications] = useState(true);
-    const [darkMode, setDarkMode] = useState(false);
+    const [uploading, setUploading] = useState(false);
+    const [error, setError] = useState("");
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     if (!user) return null;
+
+    const handleAvatarClick = () => {
+        if (!uploading) fileInputRef.current?.click();
+    };
+
+    const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (file.size > 5 * 1024 * 1024) {
+            setError("Avatar file size must be less than 5MB.");
+            return;
+        }
+
+        setError("");
+        setUploading(true);
+        try {
+            const data = await userService.uploadAvatar(file);
+            updateUser({ avatarUrl: data.avatarUrl });
+        } catch (err: any) {
+            setError(err.response?.data?.message || "Failed to upload avatar. Please try again.");
+        } finally {
+            setUploading(false);
+        }
+    };
 
     return (
         <div className="mx-auto max-w-4xl space-y-6">
@@ -22,29 +48,49 @@ export default function ProfilePage() {
                 <div className="h-32 bg-gradient-to-r from-slate-700 to-slate-900" />
                 <div className="px-6 pb-6">
                     <div className="relative -mt-12 mb-4 flex items-end">
-                        <div className="flex h-24 w-24 items-center justify-center rounded-full bg-muted text-2xl font-bold text-muted-foreground ring-4 ring-card">
-                            {user.fullName
-                                .split(" ")
-                                .map((n) => n[0])
-                                .slice(0, 2)
-                                .join("")}
+                        <div
+                            className="group relative flex h-24 w-24 cursor-pointer items-center justify-center overflow-hidden rounded-full bg-muted text-2xl font-bold text-muted-foreground ring-4 ring-card"
+                            onClick={handleAvatarClick}
+                        >
+                            {user.avatarUrl ? (
+                                <img src={user.avatarUrl} alt={user.fullName} className="h-full w-full object-cover" />
+                            ) : (
+                                <span>
+                                    {user.fullName
+                                        .split(" ")
+                                        .map((n) => n[0])
+                                        .slice(0, 2)
+                                        .join("")}
+                                </span>
+                            )}
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+                                <Camera className="h-6 w-6 text-white" />
+                            </div>
                         </div>
-                        <div className="mb-1 ml-4">
+                        <input
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            ref={fileInputRef}
+                            onChange={handleFileChange}
+                        />
+                        <div className="mb-1 ml-4 flex flex-col justify-end">
                             <h2 className="text-2xl font-bold text-card-foreground">
                                 {user.fullName}
                             </h2>
                             <p className="text-sm text-muted-foreground">
                                 {user.role.replace(/_/g, " ")} {user.department ? `• ${user.department}` : ""}
                             </p>
+                            {uploading && <p className="text-xs text-blue-500 mt-1">Uploading avatar...</p>}
+                            {error && <p className="text-xs text-destructive mt-1">{error}</p>}
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Content Grid */}
-            <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-                {/* Left Column */}
-                <div className="space-y-6 md:col-span-2">
+            <div className="mx-auto max-w-2xl space-y-6">
+                <div className="space-y-6">
                     {/* Personal Information */}
                     <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
                         <h3 className="mb-4 text-lg font-medium text-card-foreground">
@@ -105,56 +151,6 @@ export default function ProfilePage() {
                     </div>
                 </div>
 
-                {/* Right Column */}
-                <div className="space-y-6">
-                    {/* Activity Overview */}
-                    <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-                        <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Activity Overview
-                        </h3>
-                        <ul className="space-y-4">
-                            {[
-                                { label: "Jobs Created", value: 12 },
-                                { label: "Interviews Conducted", value: 45 },
-                                { label: "Candidates Hired", value: 8 },
-                            ].map(({ label, value }) => (
-                                <li key={label} className="flex items-center justify-between">
-                                    <span className="text-sm text-muted-foreground">{label}</span>
-                                    <span className="text-sm font-bold text-foreground">{value}</span>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    {/* Preferences */}
-                    <div className="rounded-lg border border-border bg-card p-6 shadow-sm">
-                        <h3 className="mb-4 text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                            Preferences
-                        </h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="email-notifications" className="cursor-pointer text-sm text-foreground">
-                                    Email Notifications
-                                </Label>
-                                <Switch
-                                    id="email-notifications"
-                                    checked={emailNotifications}
-                                    onCheckedChange={setEmailNotifications}
-                                />
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Label htmlFor="dark-mode" className="cursor-pointer text-sm text-foreground">
-                                    Dark Mode
-                                </Label>
-                                <Switch
-                                    id="dark-mode"
-                                    checked={darkMode}
-                                    onCheckedChange={setDarkMode}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
     );

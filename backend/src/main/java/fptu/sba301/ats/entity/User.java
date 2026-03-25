@@ -11,6 +11,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Builder.Default;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -44,12 +45,15 @@ public class User extends BaseEntity {
     @Column(name = "avatar_url", length = 1000)
     private String avatarURL;
 
+    @Default
     @Column(name = "active", nullable = false)
     private boolean active = false;
 
+    @Default
     @Column(name = "deleted", nullable = false)
     private boolean deleted = false;
 
+    @Default
     @Column(name = "account_locked", nullable = false)
     private boolean accountLocked = false;
 

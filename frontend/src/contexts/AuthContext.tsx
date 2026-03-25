@@ -49,6 +49,7 @@ function buildUserFromStorage(): User | null {
             role: parsed.role,
             fullName,
             department: parsed.department,
+            avatarUrl: parsed.avatarUrl,
         };
     } catch {
         return null;
@@ -83,6 +84,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     fullName: response.fullName,
                     email: response.email,
                     role: response.role,
+                    department: response.department,
+                    avatarUrl: response.avatarUrl,
                 };
 
                 const storage = rememberMe ? localStorage : sessionStorage;
@@ -112,8 +115,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
     }, []);
 
+    const updateUser = useCallback((updates: Partial<User>) => {
+        setUser((prev) => {
+            if (!prev) return null;
+            const updated = { ...prev, ...updates };
+            if (localStorage.getItem("user")) localStorage.setItem("user", JSON.stringify(updated));
+            if (sessionStorage.getItem("user")) sessionStorage.setItem("user", JSON.stringify(updated));
+            return updated;
+        });
+    }, []);
+
     return (
-        <AuthContext.Provider value={{ user, isLoading, login, logout }}>
+        <AuthContext.Provider value={{ user, isLoading, login, logout, updateUser }}>
             {children}
         </AuthContext.Provider>
     );
