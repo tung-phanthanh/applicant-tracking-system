@@ -14,15 +14,20 @@ import fptu.sba301.ats.repository.DepartmentRepository;
 import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.service.EmailService;
 import fptu.sba301.ats.service.UserService;
+import fptu.sba301.ats.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.Instant;
-import java.util.List;
+import java.util.Map;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +37,7 @@ public class UserServiceImpl implements UserService {
     private final DepartmentRepository departmentRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmailService emailService;
+    private final CloudinaryService cloudinaryService;
 
     // ── Current user ──────────────────────────────────────────────────────────
 
@@ -59,13 +65,31 @@ public class UserServiceImpl implements UserService {
         userRepository.save(user);
     }
 
+    @Override
+    public String uploadAvatar(String email, MultipartFile file) {
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new BusinessException("Avatar file size exceeds 5MB limit", HttpStatus.BAD_REQUEST);
+        }
+        User user = findActiveUserByEmail(email);
+        Map<String, Object> result = cloudinaryService.uploadFile(file, "avatars");
+        String avatarUrl = (String) result.get("secure_url");
+        user.setAvatarURL(avatarUrl);
+        userRepository.save(user);
+        return avatarUrl;
+    }
+
     // ── Admin CRUD ────────────────────────────────────────────────────────────
 
     @Override
-    public List<UserResponse> getAllUsers() {
-        return userRepository.findByDeletedFalse().stream()
-                .map(this::toResponse)
-                .collect(Collectors.toList());
+    public Page<UserResponse> getAllUsers(UUID departmentId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+        Page<User> userPage;
+        if (departmentId != null) {
+            userPage = userRepository.findByDeletedFalseAndDepartmentId(departmentId, pageable);
+        } else {
+            userPage = userRepository.findByDeletedFalse(pageable);
+        }
+        return userPage.map(this::toResponse);
     }
 
     @Override
@@ -247,6 +271,8 @@ public class UserServiceImpl implements UserService {
                 .active(user.isActive())
                 .accountLocked(user.isAccountLocked())
                 .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .departmentId(user.getDepartment() != null ? user.getDepartment().getId() : null)
+                .avatarUrl(user.getAvatarURL())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

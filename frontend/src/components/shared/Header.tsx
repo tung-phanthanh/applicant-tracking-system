@@ -70,9 +70,13 @@ export default function Header() {
                             variant="ghost"
                             className="flex items-center gap-2 rounded-full p-1 pr-3 hover:bg-accent"
                         >
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
-                                {initials}
-                            </div>
+                            {user?.avatarUrl ? (
+                                <img src={user.avatarUrl} alt={displayName} className="h-8 w-8 rounded-full object-cover" />
+                            ) : (
+                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-bold text-muted-foreground">
+                                    {initials}
+                                </div>
+                            )}
                             <span className="text-sm font-medium text-foreground">
                                 {displayName}
                             </span>

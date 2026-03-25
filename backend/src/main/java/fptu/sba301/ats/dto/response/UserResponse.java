@@ -20,5 +20,7 @@ public class UserResponse {
     private boolean active;
     private boolean accountLocked;
     private String department;
+    private UUID departmentId;
+    private String avatarUrl;
     private LocalDateTime createdAt;
 }

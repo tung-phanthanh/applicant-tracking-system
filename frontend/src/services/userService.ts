@@ -5,10 +5,13 @@ import type {
     UpdateUserPayload,
     ChangePasswordPayload,
 } from "@/types/user";
+import type { PaginatedResponse } from "@/types/admin";
 
 export const userService = {
-    async getUsers(): Promise<UserRecord[]> {
-        const { data } = await api.get<UserRecord[]>("/users");
+    async getUsers(page = 0, size = 10, departmentId?: string): Promise<PaginatedResponse<UserRecord>> {
+        const { data } = await api.get<PaginatedResponse<UserRecord>>("/users", {
+            params: { page, size, departmentId }
+        });
         return data;
     },
 
@@ -43,5 +46,16 @@ export const userService = {
 
     async changePassword(payload: ChangePasswordPayload): Promise<void> {
         await api.post("/users/me/change-password", payload);
+    },
+
+    async uploadAvatar(file: File): Promise<{ avatarUrl: string }> {
+        const formData = new FormData();
+        formData.append("file", file);
+        const { data } = await api.post<{ avatarUrl: string }>("/users/me/avatar", formData, {
+            headers: {
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return data;
     },
 };

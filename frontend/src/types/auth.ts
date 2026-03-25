@@ -6,6 +6,7 @@ export interface User {
     email: string;
     role: UserRole;
     department?: string;
+    avatarUrl?: string;
 }
 
 export interface LoginCredentials {
@@ -21,6 +22,8 @@ export interface AuthApiResponse {
     fullName: string;
     email: string;
     role: UserRole;
+    department?: string;
+    avatarUrl?: string;
 }
 
 export interface AuthContextType {
@@ -28,5 +31,6 @@ export interface AuthContextType {
     isLoading: boolean;
     login: (credentials: LoginCredentials, rememberMe?: boolean) => Promise<void>;
     logout: () => Promise<void>;
+    updateUser: (updates: Partial<User>) => void;
 }
 

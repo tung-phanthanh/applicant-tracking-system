@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { ArrowLeft, UserPlus, CheckCircle2, Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { userService } from "@/services/userService";
+import { adminService } from "@/services/adminService";
 import type { CreateUserPayload, UserRole } from "@/types/user";
+import type { Department } from "@/types/admin";
 import axios from "axios";
 
 const ROLES: UserRole[] = ["SYSTEM_ADMIN", "HR", "HR_MANAGER", "INTERVIEWER"];
@@ -22,6 +24,7 @@ interface FormErrors {
     fullName?: string;
     email?: string;
     role?: string;
+    departmentId?: string;
 }
 
 function resolveApiError(err: unknown): string {
@@ -43,10 +46,18 @@ export default function AdminCreateUserPage() {
     const [fullName, setFullName] = useState("");
     const [email, setEmail] = useState("");
     const [role, setRole] = useState<UserRole>("HR");
+    const [departmentId, setDepartmentId] = useState("");
+    const [departments, setDepartments] = useState<Department[]>([]);
     const [fieldErrors, setFieldErrors] = useState<FormErrors>({});
     const [apiError, setApiError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [createdEmail, setCreatedEmail] = useState<string | null>(null);
+
+    useEffect(() => {
+        adminService.getDepartments(0, 100)
+            .then(data => setDepartments(data.content))
+            .catch(() => {});
+    }, []);
 
     const validate = (): FormErrors => {
         const errors: FormErrors = {};
@@ -58,6 +69,9 @@ export default function AdminCreateUserPage() {
             errors.email = "Please enter a valid email address.";
         }
         if (!role) errors.role = "Role is required.";
+        if (role !== "SYSTEM_ADMIN" && !departmentId) {
+            errors.departmentId = "Department is required for this role.";
+        }
         return errors;
     };
 
@@ -73,7 +87,12 @@ export default function AdminCreateUserPage() {
         setIsLoading(true);
 
         try {
-            const payload: CreateUserPayload = { fullName, email, role };
+            const payload: CreateUserPayload = { 
+                fullName, 
+                email, 
+                role,
+                ...(role !== "SYSTEM_ADMIN" && departmentId ? { departmentId } : {})
+            };
             await userService.createUser(payload);
             setCreatedEmail(email);
         } catch (err) {
@@ -104,7 +123,7 @@ export default function AdminCreateUserPage() {
                         The link expires in <strong>24 hours</strong>.
                     </p>
                     <div className="flex flex-col gap-2 sm:flex-row sm:justify-center">
-                        <Button onClick={() => { setCreatedEmail(null); setFullName(""); setEmail(""); setRole("HR"); }}>
+                        <Button onClick={() => { setCreatedEmail(null); setFullName(""); setEmail(""); setRole("HR"); setDepartmentId(""); }}>
                             <UserPlus className="mr-1.5 h-4 w-4" />
                             Add Another User
                         </Button>
@@ -190,6 +209,29 @@ export default function AdminCreateUserPage() {
                         </select>
                         {fieldErrors.role && <p className="text-xs text-destructive">{fieldErrors.role}</p>}
                     </div>
+
+                    {/* Department */}
+                    {role !== "SYSTEM_ADMIN" && (
+                        <div className="space-y-1.5">
+                            <Label htmlFor="department">Department <span className="text-destructive">*</span></Label>
+                            <select
+                                id="department"
+                                className={`h-10 w-full rounded-md border bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring ${fieldErrors.departmentId ? "border-destructive" : "border-input"}`}
+                                value={departmentId}
+                                onChange={(e) => {
+                                    setDepartmentId(e.target.value);
+                                    setFieldErrors((p) => ({ ...p, departmentId: undefined }));
+                                }}
+                                disabled={isLoading || departments.length === 0}
+                            >
+                                <option value="">Select a department</option>
+                                {departments.map((d) => (
+                                    <option key={d.id} value={d.id}>{d.name}</option>
+                                ))}
+                            </select>
+                            {fieldErrors.departmentId && <p className="text-xs text-destructive">{fieldErrors.departmentId}</p>}
+                        </div>
+                    )}
 
                     {/* Info banner */}
                     <div className="flex items-start gap-3 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-800 dark:bg-blue-950/20">
