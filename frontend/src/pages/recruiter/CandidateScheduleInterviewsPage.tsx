@@ -28,7 +28,7 @@ function createEmptySlot(): InterviewSlotForm {
 
 function toPayloadSlot(slot: InterviewSlotForm): ScheduleInterviewSlotInput {
   return {
-    scheduledAt: new Date(slot.scheduledAtLocal).toISOString(),
+    scheduledAt: slot.scheduledAtLocal,
     type: slot.type,
     location: slot.type === "OFFLINE" ? slot.location || null : null,
     meetingLink: slot.type === "ONLINE" ? slot.meetingLink || null : null,

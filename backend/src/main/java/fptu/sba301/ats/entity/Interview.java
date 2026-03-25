@@ -11,6 +11,7 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.UuidGenerator;
 
 import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +38,7 @@ public class Interview extends BaseEntity {
     private ScorecardTemplate template;
 
     @Column(name = "scheduled_at", nullable = false)
-    private Instant scheduledAt;
+    private LocalDateTime scheduledAt;
 
     @Column(name = "location")
     private String location;

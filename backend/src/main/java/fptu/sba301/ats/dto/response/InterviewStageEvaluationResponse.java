@@ -8,7 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -21,6 +21,6 @@ public class InterviewStageEvaluationResponse {
     private InterviewStatus status;
     private BigDecimal score;
     private String interviewerName;
-    private Instant scheduledAt;
+    private LocalDateTime scheduledAt;
     private String feedbackSnippet;
 }
