@@ -6,6 +6,7 @@ import fptu.sba301.ats.enums.ApplicationStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -14,4 +15,5 @@ public interface ApplicationRepository extends JpaRepository<Application, UUID> 
     Optional<Application> findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(UUID candidateId, ApplicationStatus status);
     long countByStatus(ApplicationStatus status);
     long countByStage(ApplicationStage stage);
+    long countByCreatedAtBetween(Instant startDate, Instant endDate);
 }
