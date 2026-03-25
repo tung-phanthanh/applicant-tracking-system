@@ -49,6 +49,7 @@ function buildUserFromStorage(): User | null {
             role: parsed.role,
             fullName,
             department: parsed.department,
+            departmentId: parsed.departmentId,
             avatarUrl: parsed.avatarUrl,
         };
     } catch {
@@ -85,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                     email: response.email,
                     role: response.role,
                     department: response.department,
+                    departmentId: response.departmentId,
                     avatarUrl: response.avatarUrl,
                 };
 

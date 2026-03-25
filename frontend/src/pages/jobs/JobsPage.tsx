@@ -3,6 +3,20 @@ import JobsTable from "@/pages/jobs/components/JobsTable";
 import JobsToolbar from "@/pages/jobs/components/JobsToolbar";
 import { useAuth } from "@/hooks/useAuth";
 import { useApprovedJobsQuery } from "@/services/jobs/queries";
+import type { User } from "@/types/auth";
+import type { JobDTO } from "@/types/job";
+
+function jobMatchesHrDepartment(u: User, job: JobDTO): boolean {
+    if (u.departmentId && job.departmentId) {
+        return u.departmentId === job.departmentId;
+    }
+    if (u.department && job.departmentName) {
+        return (
+            u.department.trim().toLowerCase() === job.departmentName.trim().toLowerCase()
+        );
+    }
+    return false;
+}
 
 export default function JobsPage() {
     const { user } = useAuth();
@@ -10,13 +24,17 @@ export default function JobsPage() {
     const [search, setSearch] = useState("");
     const [departmentFilter, setDepartmentFilter] = useState("");
 
-    const canPostJob =
-        user?.role === "HR" || user?.role === "SYSTEM_ADMIN";
+    const canPostJob = user?.role === "HR" || user?.role === "HR_MANAGER";
+    const showDepartmentFilter = user?.role !== "HR";
 
     const filtered = useMemo(() => {
         const list = data ?? [];
+        const scoped =
+            user?.role === "HR"
+                ? list.filter((job) => (user ? jobMatchesHrDepartment(user, job) : false))
+                : list;
         const q = search.trim().toLowerCase();
-        return list.filter((job) => {
+        return scoped.filter((job) => {
             const deptOk =
                 !departmentFilter ||
                 (job.departmentName ?? "").toLowerCase() ===
@@ -28,7 +46,7 @@ export default function JobsPage() {
                 (job.location ?? "").toLowerCase().includes(q);
             return deptOk && searchOk;
         });
-    }, [data, search, departmentFilter]);
+    }, [data, user, search, departmentFilter]);
 
     if (isLoading) {
         return (
@@ -54,6 +72,7 @@ export default function JobsPage() {
                 departmentFilter={departmentFilter}
                 onDepartmentFilterChange={setDepartmentFilter}
                 canPostJob={canPostJob}
+                showDepartmentFilter={showDepartmentFilter}
             />
             <JobsTable jobs={filtered} />
         </div>

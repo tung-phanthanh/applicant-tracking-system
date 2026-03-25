@@ -32,9 +32,8 @@ public class AuthServiceImpl implements AuthService {
                 )
         );
 
-        // Load user
         User user = userRepository
-                .findByEmailAndDeletedFalse(request.getEmail())
+                .findByEmailAndDeletedFalseWithDepartment(request.getEmail())
                 .orElseThrow();
 
         // Generate tokens
@@ -48,6 +47,9 @@ public class AuthServiceImpl implements AuthService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .departmentId(user.getDepartment() != null ? user.getDepartment().getId() : null)
+                .avatarUrl(user.getAvatarURL())
                 .build();
     }
 }

@@ -4,14 +4,14 @@ import { ArrowLeft } from "lucide-react";
 import axios from "axios";
 import { Button } from "@/components/ui/button";
 import CreateJobReviewPanel from "@/pages/jobs/components/CreateJobReviewPanel";
-import CreateJobStaticStep from "@/pages/jobs/components/CreateJobStaticStep";
 import CreateJobStepNav from "@/pages/jobs/components/CreateJobStepNav";
 import JobFormFields from "@/pages/jobs/components/JobFormFields";
 import { resolveApiError } from "@/lib/resolveApiError";
+import { useAuth } from "@/hooks/useAuth";
 import { useCreateJobMutation } from "@/services/jobs/queries";
 import type { JobFormValues } from "@/types/job";
 
-const TOTAL_STEPS = 4;
+const TOTAL_STEPS = 2;
 
 const initialValues: JobFormValues = {
     title: "",
@@ -23,6 +23,7 @@ const initialValues: JobFormValues = {
 
 export default function CreateJobPage() {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const createMutation = useCreateJobMutation();
     const [step, setStep] = useState(1);
     const [values, setValues] = useState<JobFormValues>(initialValues);
@@ -54,12 +55,23 @@ export default function CreateJobPage() {
             return;
         }
         try {
+            const isHr = user?.role === "HR";
+            const isHrManager = user?.role === "HR_MANAGER";
+            if (isHrManager && !values.departmentName.trim()) {
+                setApiError("Please select a department.");
+                setStep(1);
+                return;
+            }
             await createMutation.mutateAsync({
                 title: values.title.trim(),
                 description: values.description.trim() || undefined,
                 location: values.location.trim() || undefined,
                 salary: values.salary.trim() || undefined,
-                departmentName: values.departmentName.trim() || undefined,
+                ...(isHr && user.departmentId
+                    ? { departmentId: user.departmentId }
+                    : isHrManager
+                      ? { departmentName: values.departmentName.trim() }
+                      : { departmentName: values.departmentName.trim() || undefined }),
             });
             navigate("/jobs");
         } catch (err) {
@@ -82,7 +94,7 @@ export default function CreateJobPage() {
                 <div>
                     <h1 className="text-xl font-semibold text-foreground">Create new job</h1>
                     <p className="text-sm text-muted-foreground">
-                        Multi-step posting aligned with your ATS workflow.
+                        Enter job details, then review before submitting for approval.
                     </p>
                 </div>
             </div>
@@ -104,37 +116,20 @@ export default function CreateJobPage() {
                                 Basic information about the role.
                             </p>
                         </div>
-                        <JobFormFields values={values} onChange={patchValues} />
+                        <JobFormFields
+                            values={values}
+                            onChange={patchValues}
+                            hideDepartment={user?.role !== "HR_MANAGER"}
+                        />
                     </div>
                 )}
 
                 {step === 2 && (
-                    <CreateJobStaticStep
-                        title="Requirements"
-                        description="Define skills and experience (detailed screening criteria will tie into the candidates module later)."
-                    >
-                        <p className="text-sm text-muted-foreground">
-                            For now, include must-have skills and seniority in the job
-                            description on step 1. Structured skills and experience bands will
-                            be added in a follow-up iteration.
-                        </p>
-                    </CreateJobStaticStep>
+                    <CreateJobReviewPanel
+                        values={values}
+                        hrDepartmentName={user?.department ?? ""}
+                    />
                 )}
-
-                {step === 3 && (
-                    <CreateJobStaticStep
-                        title="Hiring workflow"
-                        description="Default pipeline stages apply to this posting."
-                    >
-                        <ul className="list-inside list-disc space-y-2 text-sm text-muted-foreground">
-                            <li>Screening</li>
-                            <li>Technical interview</li>
-                            <li>Culture fit</li>
-                        </ul>
-                    </CreateJobStaticStep>
-                )}
-
-                {step === 4 && <CreateJobReviewPanel values={values} />}
 
                 <div className="mt-8 flex flex-wrap items-center justify-between gap-3 border-t border-border pt-6">
                     <Button

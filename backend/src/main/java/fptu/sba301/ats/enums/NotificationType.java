@@ -1,6 +1,7 @@
 package fptu.sba301.ats.enums;
 
 public enum NotificationType {
+    JOB_APPROVAL_NEEDED,
     INTERVIEW_PENDING,
     OFFER_APPROVAL_NEEDED,
     OFFER_APPROVED,

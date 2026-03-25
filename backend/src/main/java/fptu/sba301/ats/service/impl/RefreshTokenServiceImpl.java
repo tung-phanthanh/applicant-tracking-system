@@ -4,6 +4,7 @@ import fptu.sba301.ats.dto.response.AuthResponse;
 import fptu.sba301.ats.entity.RefreshToken;
 import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.repository.RefreshTokenRepository;
+import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.security.JwtService;
 import fptu.sba301.ats.service.RefreshTokenService;
 import jakarta.transaction.Transactional;
@@ -21,6 +22,7 @@ import java.util.UUID;
 public class RefreshTokenServiceImpl implements RefreshTokenService {
 
     private final RefreshTokenRepository refreshTokenRepository;
+    private final UserRepository userRepository;
     private final JwtService jwtService;
 
     @Value("${jwt.refresh-token-expiration-ms}")
@@ -89,7 +91,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
 
         RefreshToken oldToken = verifyRefreshToken(refreshTokenStr);
 
-        User user = oldToken.getUser();
+        User user = userRepository
+                .findByIdAndDeletedFalseWithDepartment(oldToken.getUser().getId())
+                .orElseThrow();
 
         // Rotate token
         oldToken.setRevoked(true);
@@ -106,6 +110,9 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .departmentId(user.getDepartment() != null ? user.getDepartment().getId() : null)
+                .avatarUrl(user.getAvatarURL())
                 .build();
     }
 

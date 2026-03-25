@@ -48,8 +48,10 @@ export interface JobFormValues {
 
 export const JOB_DEPARTMENT_OPTIONS = [
     "Engineering",
+    "Human Resources",
     "Product",
     "Design",
+    "Operations",
     "Marketing",
     "Sales",
 ] as const;

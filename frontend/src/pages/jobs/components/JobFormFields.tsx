@@ -8,6 +8,12 @@ interface JobFormFieldsProps {
     onChange: (patch: Partial<JobFormValues>) => void;
     disabled?: boolean;
     className?: string;
+    /** Omit department row (e.g. create job — department set from HR on review/submit). */
+    hideDepartment?: boolean;
+    /** HR cannot choose another department — show read-only department. */
+    lockDepartment?: boolean;
+    /** Label shown when department is locked (falls back to values.departmentName). */
+    departmentDisplayLabel?: string;
 }
 
 const selectClassName = cn(
@@ -21,6 +27,9 @@ export default function JobFormFields({
     onChange,
     disabled,
     className,
+    hideDepartment,
+    lockDepartment,
+    departmentDisplayLabel,
 }: JobFormFieldsProps) {
     return (
         <div className={cn("grid grid-cols-1 gap-6 sm:grid-cols-6", className)}>
@@ -35,23 +44,40 @@ export default function JobFormFields({
                     disabled={disabled}
                 />
             </div>
-            <div className="sm:col-span-3">
-                <Label htmlFor="job-department">Department</Label>
-                <select
-                    id="job-department"
-                    className={cn("mt-1", selectClassName)}
-                    value={values.departmentName}
-                    onChange={(e) => onChange({ departmentName: e.target.value })}
-                    disabled={disabled}
-                >
-                    <option value="">Select department</option>
-                    {JOB_DEPARTMENT_OPTIONS.map((d) => (
-                        <option key={d} value={d}>
-                            {d}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            {!hideDepartment && (
+                <div className="sm:col-span-3">
+                    <Label htmlFor="job-department">Department</Label>
+                    {lockDepartment ? (
+                        <Input
+                            id="job-department"
+                            className="mt-1"
+                            readOnly
+                            value={
+                                departmentDisplayLabel?.trim() ||
+                                values.departmentName ||
+                                "—"
+                            }
+                            disabled={disabled}
+                            aria-readonly="true"
+                        />
+                    ) : (
+                        <select
+                            id="job-department"
+                            className={cn("mt-1", selectClassName)}
+                            value={values.departmentName}
+                            onChange={(e) => onChange({ departmentName: e.target.value })}
+                            disabled={disabled}
+                        >
+                            <option value="">Select department</option>
+                            {JOB_DEPARTMENT_OPTIONS.map((d) => (
+                                <option key={d} value={d}>
+                                    {d}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+                </div>
+            )}
             <div className="sm:col-span-3">
                 <Label htmlFor="job-location">Location</Label>
                 <Input

@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-/** Allows HR, HR_MANAGER, and SYSTEM_ADMIN to edit job postings (create is gated by CreateJobRoute). */
+/** Allows HR and HR_MANAGER to edit job postings (create is gated by CreateJobRoute). */
 export default function ManageJobsRoute() {
     const { user } = useAuth();
 
@@ -9,11 +9,7 @@ export default function ManageJobsRoute() {
         return <Navigate to="/login" replace />;
     }
 
-    if (
-        user.role !== "HR" &&
-        user.role !== "HR_MANAGER" &&
-        user.role !== "SYSTEM_ADMIN"
-    ) {
+    if (user.role !== "HR" && user.role !== "HR_MANAGER") {
         return <Navigate to="/jobs" replace />;
     }
 

@@ -31,13 +31,14 @@ public class JobController {
     private final JobService jobService;
 
     @PostMapping
-    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<JobDTO> create(@Valid @RequestBody CreateJobRequest request) {
         JobDTO created = jobService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
     @GetMapping
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'INTERVIEWER')")
     public ResponseEntity<List<JobDTO>> listApproved() {
         return ResponseEntity.ok(jobService.listApprovedJobs());
     }
@@ -49,12 +50,13 @@ public class JobController {
     }
 
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'INTERVIEWER')")
     public ResponseEntity<JobDTO> getById(@PathVariable UUID id, Authentication authentication) {
         return ResponseEntity.ok(jobService.getById(id, authentication));
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
     public ResponseEntity<JobDTO> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateJobRequest request

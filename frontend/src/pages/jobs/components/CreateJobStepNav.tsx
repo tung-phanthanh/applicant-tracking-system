@@ -2,9 +2,7 @@ import { cn } from "@/lib/utils";
 
 const STEPS = [
     { step: 1, label: "Job details", short: "Step 1" },
-    { step: 2, label: "Requirements", short: "Step 2" },
-    { step: 3, label: "Workflow", short: "Step 3" },
-    { step: 4, label: "Review", short: "Step 4" },
+    { step: 2, label: "Review", short: "Step 2" },
 ] as const;
 
 interface CreateJobStepNavProps {

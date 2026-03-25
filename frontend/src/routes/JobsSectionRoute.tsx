@@ -1,16 +1,16 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-/** HR and HR Manager may create job postings (pending HR Manager approval). */
-export default function CreateJobRoute() {
+/** SYSTEM_ADMIN cannot access job list, job detail, create, or edit. */
+export default function JobsSectionRoute() {
     const { user } = useAuth();
 
     if (!user) {
         return <Navigate to="/login" replace />;
     }
 
-    if (user.role !== "HR" && user.role !== "HR_MANAGER") {
-        return <Navigate to="/jobs" replace />;
+    if (user.role === "SYSTEM_ADMIN") {
+        return <Navigate to="/admin/dashboard" replace />;
     }
 
     return <Outlet />;

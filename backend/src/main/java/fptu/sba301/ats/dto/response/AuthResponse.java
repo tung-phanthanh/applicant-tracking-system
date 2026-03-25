@@ -17,6 +17,9 @@ public class AuthResponse {
     private String fullName;
     private String email;
     private Role role;
+    /** Department name for display */
     private String department;
+    /** User's department id when assigned */
+    private UUID departmentId;
     private String avatarUrl;
 }

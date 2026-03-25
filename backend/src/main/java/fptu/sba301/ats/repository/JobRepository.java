@@ -17,6 +17,11 @@ public interface JobRepository extends JpaRepository<Job, UUID> {
     @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.department WHERE j.status = :status ORDER BY j.createdAt DESC")
     List<Job> findAllByStatusWithDepartment(@Param("status") JobStatus status);
 
+    @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.department WHERE j.status = :status AND j.department.id = :departmentId ORDER BY j.createdAt DESC")
+    List<Job> findAllByStatusAndDepartmentIdWithDepartment(
+            @Param("status") JobStatus status,
+            @Param("departmentId") UUID departmentId);
+
     @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.department WHERE j.id = :id")
     Optional<Job> findByIdWithDepartment(@Param("id") UUID id);
 

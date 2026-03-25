@@ -11,6 +11,8 @@ interface JobsToolbarProps {
     departmentFilter: string;
     onDepartmentFilterChange: (value: string) => void;
     canPostJob: boolean;
+    /** When false, department dropdown is hidden (e.g. HR only sees their department). */
+    showDepartmentFilter?: boolean;
 }
 
 const selectClassName = cn(
@@ -24,6 +26,7 @@ export default function JobsToolbar({
     departmentFilter,
     onDepartmentFilterChange,
     canPostJob,
+    showDepartmentFilter = true,
 }: JobsToolbarProps) {
     return (
         <div className="space-y-6">
@@ -57,19 +60,21 @@ export default function JobsToolbar({
                         aria-label="Search jobs"
                     />
                 </div>
-                <select
-                    className={selectClassName}
-                    value={departmentFilter}
-                    onChange={(e) => onDepartmentFilterChange(e.target.value)}
-                    aria-label="Filter by department"
-                >
-                    <option value="">All departments</option>
-                    {JOB_DEPARTMENT_OPTIONS.map((d) => (
-                        <option key={d} value={d}>
-                            {d}
-                        </option>
-                    ))}
-                </select>
+                {showDepartmentFilter && (
+                    <select
+                        className={selectClassName}
+                        value={departmentFilter}
+                        onChange={(e) => onDepartmentFilterChange(e.target.value)}
+                        aria-label="Filter by department"
+                    >
+                        <option value="">All departments</option>
+                        {JOB_DEPARTMENT_OPTIONS.map((d) => (
+                            <option key={d} value={d}>
+                                {d}
+                            </option>
+                        ))}
+                    </select>
+                )}
             </div>
         </div>
     );

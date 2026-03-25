@@ -9,6 +9,8 @@ import fptu.sba301.ats.entity.JobApproval;
 import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.enums.ApprovalStatus;
 import fptu.sba301.ats.enums.JobStatus;
+import fptu.sba301.ats.enums.NotificationType;
+import fptu.sba301.ats.enums.Role;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.mapper.JobMapper;
 import fptu.sba301.ats.repository.DepartmentRepository;
@@ -17,6 +19,7 @@ import fptu.sba301.ats.repository.JobRepository;
 import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.security.UserPrincipal;
 import fptu.sba301.ats.service.JobService;
+import fptu.sba301.ats.service.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -38,16 +41,14 @@ public class JobServiceImpl implements JobService {
     private final JobApprovalRepository jobApprovalRepository;
     private final UserRepository userRepository;
     private final JobMapper jobMapper;
+    private final NotificationService notificationService;
 
     @Override
     @Transactional
     public JobDTO create(CreateJobRequest request) {
-        Department department = resolveDepartment(
-                request.getDepartmentId(),
-                request.getDepartmentName()
-        );
-        Job job = jobMapper.toNewEntity(request, department);
         User creator = currentUser();
+        Department department = departmentForNewJob(creator, request);
+        Job job = jobMapper.toNewEntity(request, department);
         if (creator != null) {
             job.setCreatedBy(creator.getId());
         }
@@ -58,12 +59,29 @@ public class JobServiceImpl implements JobService {
                 .approvedBy(null)
                 .createdBy(creator != null ? creator.getId() : null)
                 .build());
+        notificationService.sendToRole(
+                Role.HR_MANAGER,
+                NotificationType.JOB_APPROVAL_NEEDED,
+                "Job pending approval",
+                "A new job \"" + saved.getTitle() + "\" is waiting for HR Manager approval."
+        );
         return jobMapper.toDto(reloadWithDepartment(saved.getId()));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<JobDTO> listApprovedJobs() {
+        User viewer = currentUser();
+        if (isDepartmentScoped(viewer)) {
+            if (viewer.getDepartment() == null) {
+                return List.of();
+            }
+            return jobRepository
+                    .findAllByStatusAndDepartmentIdWithDepartment(JobStatus.APPROVED, viewer.getDepartment().getId())
+                    .stream()
+                    .map(jobMapper::toDto)
+                    .collect(Collectors.toList());
+        }
         return jobRepository.findAllByStatusWithDepartment(JobStatus.APPROVED).stream()
                 .map(jobMapper::toDto)
                 .collect(Collectors.toList());
@@ -83,6 +101,9 @@ public class JobServiceImpl implements JobService {
         Job job = jobRepository.findByIdWithDepartment(id)
                 .orElseThrow(() -> new BusinessException("Job not found", HttpStatus.NOT_FOUND));
 
+        User viewer = currentUser();
+        assertDepartmentAccess(viewer, job);
+
         if (job.getStatus() == JobStatus.APPROVED) {
             return jobMapper.toDto(job);
         }
@@ -100,10 +121,17 @@ public class JobServiceImpl implements JobService {
         Job job = jobRepository.findByIdWithDepartment(id)
                 .orElseThrow(() -> new BusinessException("Job not found", HttpStatus.NOT_FOUND));
 
-        Department department = resolveDepartment(
-                request.getDepartmentId(),
-                request.getDepartmentName()
-        );
+        User editor = currentUser();
+        Department department;
+        if (editor != null && editor.getRole() == Role.HR) {
+            assertDepartmentAccess(editor, job);
+            department = requireUserDepartmentEntity(editor);
+        } else {
+            department = resolveDepartment(
+                    request.getDepartmentId(),
+                    request.getDepartmentName()
+            );
+        }
         jobMapper.applyUpdate(job, request, department);
         jobRepository.save(job);
         return jobMapper.toDto(reloadWithDepartment(id));
@@ -182,6 +210,49 @@ public class JobServiceImpl implements JobService {
                 .orElseThrow(() -> new BusinessException("Job not found", HttpStatus.NOT_FOUND));
     }
 
+    private Department departmentForNewJob(User creator, CreateJobRequest request) {
+        if (creator == null) {
+            throw new BusinessException("You must be signed in to create jobs", HttpStatus.FORBIDDEN);
+        }
+        if (creator.getRole() == Role.HR) {
+            return requireUserDepartmentEntity(creator);
+        }
+        if (creator.getRole() == Role.HR_MANAGER) {
+            Department resolved = resolveDepartment(request.getDepartmentId(), request.getDepartmentName());
+            if (resolved != null) {
+                return resolved;
+            }
+            return requireUserDepartmentEntity(creator);
+        }
+        throw new BusinessException("Only HR or HR Manager can create jobs", HttpStatus.FORBIDDEN);
+    }
+
+    private Department requireUserDepartmentEntity(User user) {
+        if (user.getDepartment() == null) {
+            throw new BusinessException("You must be assigned to a department", HttpStatus.BAD_REQUEST);
+        }
+        return user.getDepartment();
+    }
+
+    private boolean isDepartmentScoped(User user) {
+        if (user == null || user.getRole() == null) {
+            return false;
+        }
+        return user.getRole() == Role.HR || user.getRole() == Role.INTERVIEWER;
+    }
+
+    private void assertDepartmentAccess(User viewer, Job job) {
+        if (!isDepartmentScoped(viewer)) {
+            return;
+        }
+        if (viewer.getDepartment() == null) {
+            throw new BusinessException("You must be assigned to a department", HttpStatus.FORBIDDEN);
+        }
+        if (job.getDepartment() == null || !viewer.getDepartment().getId().equals(job.getDepartment().getId())) {
+            throw new BusinessException("You cannot view this job", HttpStatus.FORBIDDEN);
+        }
+    }
+
     private Department resolveDepartment(UUID departmentId, String departmentName) {
         if (departmentId != null) {
             return departmentRepository.findById(departmentId)
@@ -202,7 +273,6 @@ public class JobServiceImpl implements JobService {
                 .anyMatch(a ->
                         "ROLE_HR".equals(a)
                                 || "ROLE_HR_MANAGER".equals(a)
-                                || "ROLE_SYSTEM_ADMIN".equals(a)
                 );
     }
 
@@ -211,6 +281,6 @@ public class JobServiceImpl implements JobService {
         if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
             return null;
         }
-        return userRepository.findById(principal.getId()).orElse(null);
+        return userRepository.findByIdAndDeletedFalseWithDepartment(principal.getId()).orElse(null);
     }
 }

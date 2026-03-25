@@ -16,10 +16,7 @@ export default function JobDetailPage() {
     const { data: job, isLoading, isError, error, refetch } = useJobQuery(jobId);
     const [tab, setTab] = useState<JobDetailTabId>("overview");
 
-    const canEdit =
-        user?.role === "HR" ||
-        user?.role === "HR_MANAGER" ||
-        user?.role === "SYSTEM_ADMIN";
+    const canEdit = user?.role === "HR" || user?.role === "HR_MANAGER";
 
     if (isLoading) {
         return (

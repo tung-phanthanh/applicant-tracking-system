@@ -74,7 +74,9 @@ export default function Sidebar() {
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <ul className="space-y-1">
-                    {navItems.map(({ to, icon: Icon, label }) => (
+                    {navItems
+                        .filter((item) => !(isAdmin && item.to === "/jobs"))
+                        .map(({ to, icon: Icon, label }) => (
                         <li key={to}>
                             <NavLink
                                 to={to}

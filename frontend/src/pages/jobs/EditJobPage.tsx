@@ -5,6 +5,7 @@ import axios from "axios";
 import { Button } from "@/components/ui/button";
 import JobFormFields from "@/pages/jobs/components/JobFormFields";
 import { resolveApiError } from "@/lib/resolveApiError";
+import { useAuth } from "@/hooks/useAuth";
 import { useJobQuery, useUpdateJobMutation } from "@/services/jobs/queries";
 import type { JobFormValues } from "@/types/job";
 
@@ -27,6 +28,7 @@ function jobToFormValues(job: {
 export default function EditJobPage() {
     const { jobId } = useParams<{ jobId: string }>();
     const navigate = useNavigate();
+    const { user } = useAuth();
     const { data: job, isLoading, isError, error } = useJobQuery(jobId);
     const updateMutation = useUpdateJobMutation();
     const [values, setValues] = useState<JobFormValues | null>(null);
@@ -57,7 +59,11 @@ export default function EditJobPage() {
                     description: values.description.trim() || undefined,
                     location: values.location.trim() || undefined,
                     salary: values.salary.trim() || undefined,
-                    departmentName: values.departmentName.trim() || undefined,
+                    ...(user?.role === "HR" && user.departmentId
+                        ? { departmentId: user.departmentId }
+                        : {
+                              departmentName: values.departmentName.trim() || undefined,
+                          }),
                 },
             });
             navigate(`/jobs/${jobId}`);
@@ -114,7 +120,12 @@ export default function EditJobPage() {
                             Update basic information about the role.
                         </p>
                     </div>
-                    <JobFormFields values={values} onChange={patchValues} />
+                    <JobFormFields
+                        values={values}
+                        onChange={patchValues}
+                        lockDepartment={user?.role === "HR"}
+                        departmentDisplayLabel={user?.department}
+                    />
                 </div>
 
                 <div className="mt-8 flex flex-wrap justify-end gap-3 border-t border-border pt-6">

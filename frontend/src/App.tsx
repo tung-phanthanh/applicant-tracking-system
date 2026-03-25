@@ -26,6 +26,7 @@ import EditJobPage from "@/pages/jobs/EditJobPage";
 import PendingJobsPage from "@/pages/jobs/PendingJobsPage";
 import ManageJobsRoute from "@/routes/ManageJobsRoute";
 import CreateJobRoute from "@/routes/CreateJobRoute";
+import JobsSectionRoute from "@/routes/JobsSectionRoute";
 import HrManagerRoute from "@/routes/HrManagerRoute";
 import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 import SystemConfigPage from "@/pages/admin/SystemConfigPage";
@@ -62,20 +63,22 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
-              <Route path="/jobs" element={<JobsPage />} />
-              <Route element={<CreateJobRoute />}>
-                <Route path="/jobs/create" element={<CreateJobPage />} />
+              <Route element={<JobsSectionRoute />}>
+                <Route path="/jobs" element={<JobsPage />} />
+                <Route element={<CreateJobRoute />}>
+                  <Route path="/jobs/create" element={<CreateJobPage />} />
+                </Route>
+                <Route element={<ManageJobsRoute />}>
+                  <Route path="/jobs/:jobId/edit" element={<EditJobPage />} />
+                </Route>
+                <Route element={<HrManagerRoute />}>
+                  <Route
+                    path="/jobs/pending-approvals"
+                    element={<PendingJobsPage />}
+                  />
+                </Route>
+                <Route path="/jobs/:jobId" element={<JobDetailPage />} />
               </Route>
-              <Route element={<ManageJobsRoute />}>
-                <Route path="/jobs/:jobId/edit" element={<EditJobPage />} />
-              </Route>
-              <Route element={<HrManagerRoute />}>
-                <Route
-                  path="/jobs/pending-approvals"
-                  element={<PendingJobsPage />}
-                />
-              </Route>
-              <Route path="/jobs/:jobId" element={<JobDetailPage />} />
 
               {/* Placeholder routes */}
               <Route path="/interviews" element={<ComingSoon title="Interviews" />} />

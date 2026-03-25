@@ -4,7 +4,9 @@ import fptu.sba301.ats.enums.ApprovalStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 
 
@@ -19,7 +21,8 @@ public class JobApproval extends BaseEntity {
 
     @Id
     @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "id", length = 36, updatable = false, nullable = false)
     private java.util.UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)

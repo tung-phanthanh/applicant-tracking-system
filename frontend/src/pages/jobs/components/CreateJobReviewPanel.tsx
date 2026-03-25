@@ -1,11 +1,15 @@
 import { AlertTriangle } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import type { JobFormValues } from "@/types/job";
 
 interface CreateJobReviewPanelProps {
     values: JobFormValues;
+    /** HR department — shown read-only (not editable). */
+    hrDepartmentName: string;
 }
 
-export default function CreateJobReviewPanel({ values }: CreateJobReviewPanelProps) {
+export default function CreateJobReviewPanel({ values, hrDepartmentName }: CreateJobReviewPanelProps) {
     return (
         <div className="space-y-6">
             <div>
@@ -22,9 +26,19 @@ export default function CreateJobReviewPanel({ values }: CreateJobReviewPanelPro
                     </p>
                 </div>
                 <div>
-                    <h3 className="text-sm font-medium text-muted-foreground">Department</h3>
-                    <p className="mt-1 text-sm text-foreground">
-                        {values.departmentName || "—"}
+                    <Label htmlFor="review-department" className="text-muted-foreground">
+                        Department
+                    </Label>
+                    <Input
+                        id="review-department"
+                        className="mt-1 bg-muted/50"
+                        readOnly
+                        tabIndex={-1}
+                        value={hrDepartmentName.trim() || "—"}
+                        aria-readonly="true"
+                    />
+                    <p className="mt-1 text-xs text-muted-foreground">
+                        Assigned from your HR profile and cannot be changed here.
                     </p>
                 </div>
                 <div>
