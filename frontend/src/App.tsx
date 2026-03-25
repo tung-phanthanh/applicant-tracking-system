@@ -21,6 +21,7 @@ import CandidateProfilePage from "@/pages/recruiter/CandidateProfilePage";
 import CandidateScheduleInterviewsPage from "@/pages/recruiter/CandidateScheduleInterviewsPage";
 import InterviewCalendarPage from "@/pages/interview/InterviewCalendarPage";
 import InterviewFeedbackPage from "@/pages/interview/InterviewFeedbackPage";
+import InterviewCandidateEvaluationPage from "@/pages/interview/CandidateEvaluationPage";
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
@@ -66,6 +67,7 @@ function App() {
               <Route element={<InterviewRoute />}>
                 <Route path="/interviews" element={<InterviewCalendarPage />} />
                 <Route path="/interviews/:id" element={<InterviewFeedbackPage />} />
+                <Route path="/interviews/applications/:applicationId/evaluation" element={<InterviewCandidateEvaluationPage />} />
               </Route>
 
               {/* Evaluation summary (HR, Admin) */}
