@@ -31,7 +31,7 @@ public class JobController {
     private final JobService jobService;
 
     @PostMapping
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasAnyRole('HR', 'SYSTEM_ADMIN')")
     public ResponseEntity<JobDTO> create(@Valid @RequestBody CreateJobRequest request) {
         JobDTO created = jobService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
@@ -43,7 +43,7 @@ public class JobController {
     }
 
     @GetMapping("/pending")
-    @PreAuthorize("hasAuthority('HR_MANAGER')")
+    @PreAuthorize("hasRole('HR_MANAGER')")
     public ResponseEntity<List<JobDTO>> listPending() {
         return ResponseEntity.ok(jobService.listPendingJobs());
     }
@@ -54,7 +54,7 @@ public class JobController {
     }
 
     @PutMapping("/{id}")
-    @PreAuthorize("hasAnyAuthority('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<JobDTO> update(
             @PathVariable UUID id,
             @Valid @RequestBody UpdateJobRequest request
@@ -63,13 +63,13 @@ public class JobController {
     }
 
     @PutMapping("/{id}/approve")
-    @PreAuthorize("hasAuthority('HR_MANAGER')")
+    @PreAuthorize("hasRole('HR_MANAGER')")
     public ResponseEntity<JobDTO> approve(@PathVariable UUID id) {
         return ResponseEntity.ok(jobService.approve(id));
     }
 
     @PutMapping("/{id}/reject")
-    @PreAuthorize("hasAuthority('HR_MANAGER')")
+    @PreAuthorize("hasRole('HR_MANAGER')")
     public ResponseEntity<JobDTO> reject(@PathVariable UUID id) {
         return ResponseEntity.ok(jobService.reject(id));
     }

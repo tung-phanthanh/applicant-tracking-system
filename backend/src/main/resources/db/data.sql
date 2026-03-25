@@ -1,6 +1,6 @@
 -- admin@example.com / admin123
 -- manager@example.com / manager123
--- hr@example.com / hr123
+-- hr@example.com / hr12345
 
 USE applicant_tracking;
 
@@ -13,15 +13,16 @@ INSERT INTO departments (id,name,description) VALUES
 -- Users
 INSERT INTO users (id,email,password_hash,full_name,avatar_url,active,deleted,account_locked,role,department_id,created_by,created_at)
 VALUES
-('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','admin@example.com','$2a$10$EIXw5b4becP2K1p8mqLr7uCKsZmfjC4iV8oOqfpx0WcPLTIzY3kG6','Admin User','','1','0','0','ADMIN','11111111-1111-1111-1111-111111111111',NULL,NOW()),
+('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa','admin@example.com','$2a$10$EIXw5b4becP2K1p8mqLr7uCKsZmfjC4iV8oOqfpx0WcPLTIzY3kG6','Admin User','','1','0','0','SYSTEM_ADMIN','11111111-1111-1111-1111-111111111111',NULL,NOW()),
 ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','manager@example.com','$2a$10$e0NRcaKcOZAPIiZNjMTpUOCIYBmqJ6D/m5N/t3WbS3hL2VyNGrJnW','HR Manager','','1','0','0','HR_MANAGER','11111111-1111-1111-1111-111111111111',NULL,NOW()),
-('dddddddd-dddd-dddd-dddd-dddddddddddd','hr@example.com','$2a$10$J9nw5rsP.8ZGOiY90VMC6.ZyIGPj1G9f8g6v3TpaJB3Djikx97C4i','HR User','','1','0','0','HR','33333333-3333-3333-3333-333333333333',NULL,NOW());
+('dddddddd-dddd-dddd-dddd-dddddddddddd','hr@example.com','$2b$10$oR2oSLtQI6bYr55TZjaBFe97Se.p8y1mtGmeOazj/wFuVlkvNvX2e','HR User','','1','0','0','HR','33333333-3333-3333-3333-333333333333',NULL,NOW());
 
 -- Jobs
 INSERT INTO jobs (id,title,description,location,salary,department_id,hiring_manager_id,status,headcount,created_by,created_at)
 VALUES
-('10101010-1010-1010-1010-101010101010','Senior Backend Engineer','Design backend services','Ho Chi Minh','$45k-$60k','11111111-1111-1111-1111-111111111111','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','OPEN',2,'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',NOW()),
-('12121212-1212-1212-1212-121212121212','Product Owner','Own product roadmap','Ho Chi Minh','$40k-$55k','22222222-2222-2222-2222-222222222222','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','OPEN',1,'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',NOW());
+('10101010-1010-1010-1010-101010101010','Senior Backend Engineer','Design backend services','Ho Chi Minh','$45k-$60k','11111111-1111-1111-1111-111111111111','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','APPROVED',2,'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',NOW()),
+('12121212-1212-1212-1212-121212121212','Product Owner','Own product roadmap','Ho Chi Minh','$40k-$55k','22222222-2222-2222-2222-222222222222','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','APPROVED',1,'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',NOW()),
+('13131313-1313-1313-1313-131313131313','DevOps Engineer','CI/CD and cloud infrastructure','Ho Chi Minh','$35k-$50k','11111111-1111-1111-1111-111111111111','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','PENDING_APPROVAL',1,'dddddddd-dddd-dddd-dddd-dddddddddddd',NOW());
 
 -- Candidates
 INSERT INTO candidates (id,full_name,email,phone,current_company,source,location,experience_years,summary,created_by,created_at)
@@ -85,7 +86,8 @@ VALUES
 -- Job approvals
 INSERT INTO job_approvals (id,job_id,approved_by,status,comment,created_by,created_at)
 VALUES
-('n1n1n1n1-n1n1-n1n1-n1n1-n1n1n1n1n1n1','10101010-1010-1010-1010-101010101010','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','PENDING','Awaiting review','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',NOW());
+('n1n1n1n1-n1n1-n1n1-n1n1-n1n1n1n1n1n1','10101010-1010-1010-1010-101010101010','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb','APPROVED','Approved for posting','bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',NOW()),
+('n2n2n2n2-n2n2-n2n2-n2n2-n2n2n2n2n2n2','13131313-1313-1313-1313-131313131313',NULL,'PENDING','Submitted for HR Manager review','dddddddd-dddd-dddd-dddd-dddddddddddd',NOW());
 
 -- Offer approvals
 INSERT INTO offer_approvals (id,offer_id,approved_by,status,comment,created_by,created_at)

@@ -5,16 +5,23 @@ import fptu.sba301.ats.dto.request.CreateJobRequest;
 import fptu.sba301.ats.dto.request.UpdateJobRequest;
 import fptu.sba301.ats.entity.Department;
 import fptu.sba301.ats.entity.Job;
+import fptu.sba301.ats.entity.JobApproval;
+import fptu.sba301.ats.entity.User;
+import fptu.sba301.ats.enums.ApprovalStatus;
 import fptu.sba301.ats.enums.JobStatus;
 import fptu.sba301.ats.exception.BusinessException;
 import fptu.sba301.ats.mapper.JobMapper;
 import fptu.sba301.ats.repository.DepartmentRepository;
+import fptu.sba301.ats.repository.JobApprovalRepository;
 import fptu.sba301.ats.repository.JobRepository;
+import fptu.sba301.ats.repository.UserRepository;
+import fptu.sba301.ats.security.UserPrincipal;
 import fptu.sba301.ats.service.JobService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,6 +35,8 @@ public class JobServiceImpl implements JobService {
 
     private final JobRepository jobRepository;
     private final DepartmentRepository departmentRepository;
+    private final JobApprovalRepository jobApprovalRepository;
+    private final UserRepository userRepository;
     private final JobMapper jobMapper;
 
     @Override
@@ -38,7 +47,17 @@ public class JobServiceImpl implements JobService {
                 request.getDepartmentName()
         );
         Job job = jobMapper.toNewEntity(request, department);
+        User creator = currentUser();
+        if (creator != null) {
+            job.setCreatedBy(creator.getId());
+        }
         Job saved = jobRepository.save(job);
+        jobApprovalRepository.save(JobApproval.builder()
+                .job(saved)
+                .status(ApprovalStatus.PENDING)
+                .approvedBy(null)
+                .createdBy(creator != null ? creator.getId() : null)
+                .build());
         return jobMapper.toDto(reloadWithDepartment(saved.getId()));
     }
 
@@ -102,6 +121,25 @@ public class JobServiceImpl implements JobService {
 
         job.setStatus(JobStatus.APPROVED);
         jobRepository.save(job);
+        User approver = currentUser();
+        if (approver != null) {
+            jobApprovalRepository.findTopByJob_IdAndStatusOrderByCreatedAtDesc(id, ApprovalStatus.PENDING)
+                    .ifPresentOrElse(
+                            row -> {
+                                row.setStatus(ApprovalStatus.APPROVED);
+                                row.setApprovedBy(approver);
+                                row.setModifiedBy(approver.getId());
+                                jobApprovalRepository.save(row);
+                            },
+                            () -> jobApprovalRepository.save(JobApproval.builder()
+                                    .job(job)
+                                    .status(ApprovalStatus.APPROVED)
+                                    .approvedBy(approver)
+                                    .comment("Approved")
+                                    .createdBy(approver.getId())
+                                    .build())
+                    );
+        }
         return jobMapper.toDto(reloadWithDepartment(id));
     }
 
@@ -117,6 +155,25 @@ public class JobServiceImpl implements JobService {
 
         job.setStatus(JobStatus.REJECTED);
         jobRepository.save(job);
+        User reviewer = currentUser();
+        if (reviewer != null) {
+            jobApprovalRepository.findTopByJob_IdAndStatusOrderByCreatedAtDesc(id, ApprovalStatus.PENDING)
+                    .ifPresentOrElse(
+                            row -> {
+                                row.setStatus(ApprovalStatus.REJECTED);
+                                row.setApprovedBy(reviewer);
+                                row.setModifiedBy(reviewer.getId());
+                                jobApprovalRepository.save(row);
+                            },
+                            () -> jobApprovalRepository.save(JobApproval.builder()
+                                    .job(job)
+                                    .status(ApprovalStatus.REJECTED)
+                                    .approvedBy(reviewer)
+                                    .comment("Rejected")
+                                    .createdBy(reviewer.getId())
+                                    .build())
+                    );
+        }
         return jobMapper.toDto(reloadWithDepartment(id));
     }
 
@@ -143,9 +200,17 @@ public class JobServiceImpl implements JobService {
         return authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .anyMatch(a ->
-                        "HR".equals(a)
-                                || "HR_MANAGER".equals(a)
-                                || "SYSTEM_ADMIN".equals(a)
+                        "ROLE_HR".equals(a)
+                                || "ROLE_HR_MANAGER".equals(a)
+                                || "ROLE_SYSTEM_ADMIN".equals(a)
                 );
+    }
+
+    private User currentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth == null || !(auth.getPrincipal() instanceof UserPrincipal principal)) {
+            return null;
+        }
+        return userRepository.findById(principal.getId()).orElse(null);
     }
 }

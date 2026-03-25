@@ -10,7 +10,8 @@ export default function JobsPage() {
     const [search, setSearch] = useState("");
     const [departmentFilter, setDepartmentFilter] = useState("");
 
-    const canPostJob = user?.role === "HR" || user?.role === "HR_MANAGER";
+    const canPostJob =
+        user?.role === "HR" || user?.role === "SYSTEM_ADMIN";
 
     const filtered = useMemo(() => {
         const list = data ?? [];

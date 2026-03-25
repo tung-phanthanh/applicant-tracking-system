@@ -25,6 +25,7 @@ import CreateJobPage from "@/pages/jobs/CreateJobPage";
 import EditJobPage from "@/pages/jobs/EditJobPage";
 import PendingJobsPage from "@/pages/jobs/PendingJobsPage";
 import ManageJobsRoute from "@/routes/ManageJobsRoute";
+import CreateJobRoute from "@/routes/CreateJobRoute";
 import HrManagerRoute from "@/routes/HrManagerRoute";
 import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 import SystemConfigPage from "@/pages/admin/SystemConfigPage";
@@ -62,8 +63,10 @@ function App() {
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
               <Route path="/jobs" element={<JobsPage />} />
-              <Route element={<ManageJobsRoute />}>
+              <Route element={<CreateJobRoute />}>
                 <Route path="/jobs/create" element={<CreateJobPage />} />
+              </Route>
+              <Route element={<ManageJobsRoute />}>
                 <Route path="/jobs/:jobId/edit" element={<EditJobPage />} />
               </Route>
               <Route element={<HrManagerRoute />}>

@@ -100,6 +100,29 @@ public class DataSeeder implements CommandLineRunner {
                 .headcount(1)
                 .build());
 
+        Job pendingJob = Job.builder()
+                .id(UUID.fromString("13131313-1313-1313-1313-131313131313"))
+                .title("DevOps Engineer")
+                .description("CI/CD and cloud infrastructure")
+                .location("Ho Chi Minh")
+                .salary("$35k-$50k")
+                .department(engineering)
+                .hiringManager(hrManager)
+                .status(fptu.sba301.ats.enums.JobStatus.PENDING_APPROVAL)
+                .headcount(1)
+                .build();
+        pendingJob.setCreatedBy(hrUser.getId());
+        pendingJob = jobRepository.save(pendingJob);
+
+        jobApprovalRepository.save(JobApproval.builder()
+                .id(UUID.fromString("n2n2n2n2-n2n2-n2n2-n2n2-n2n2n2n2n2n2"))
+                .job(pendingJob)
+                .status(ApprovalStatus.PENDING)
+                .approvedBy(null)
+                .comment("Submitted for HR Manager review")
+                .createdBy(hrUser.getId())
+                .build());
+
         Candidate alice = candidateRepository.save(Candidate.builder()
                 .id(UUID.fromString("d1d1d1d1-d1d1-d1d1-d1d1-d1d1d1d1d1d1"))
                 .fullName("Alice Nguyen")

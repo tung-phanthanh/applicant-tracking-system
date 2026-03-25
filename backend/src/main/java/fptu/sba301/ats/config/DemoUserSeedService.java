@@ -40,7 +40,7 @@ public class DemoUserSeedService {
 
         createUserIfAbsent(
                 UUID.fromString("dddddddd-dddd-dddd-dddd-dddddddddddd"),
-                "hr@example.com", "hr123",
+                "hr@example.com", "hr12345",
                 "HR User", Role.HR, hr);
     }
 
