@@ -33,9 +33,11 @@ public class InterviewController {
     @PostMapping("/feedback")
     @PreAuthorize("hasAnyRole('INTERVIEWER')")
     public ResponseEntity<String> submitFeedback(
-            @RequestBody SubmitFeedbackRequest request
+            @RequestBody SubmitFeedbackRequest request,
+            Authentication authentication
     ) {
-        interviewService.submitFeedback(request);
+        String email = authentication != null ? authentication.getName() : null;
+        interviewService.submitFeedback(request, email);
         return ResponseEntity.ok("Feedback submitted successfully");
     }
 
@@ -76,10 +78,12 @@ public class InterviewController {
     }
 
     @GetMapping("/applications/{applicationId}/evaluation")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
+    @PreAuthorize("hasAnyRole('INTERVIEWER', 'HR', 'HR_MANAGER', 'SYSTEM_ADMIN')")
     public ResponseEntity<ApplicationEvaluationResponse> getApplicationEvaluation(
-            @PathVariable UUID applicationId
+            @PathVariable UUID applicationId,
+            Authentication authentication
     ) {
-        return ResponseEntity.ok(interviewService.getApplicationEvaluation(applicationId));
+        String email = authentication != null ? authentication.getName() : null;
+        return ResponseEntity.ok(interviewService.getApplicationEvaluation(applicationId, email));
     }
 }

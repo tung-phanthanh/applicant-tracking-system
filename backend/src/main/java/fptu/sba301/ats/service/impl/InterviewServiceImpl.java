@@ -226,9 +226,16 @@ public class InterviewServiceImpl implements InterviewService {
     }
     @Transactional
     @Override
-    public void submitFeedback(SubmitFeedbackRequest req) {
+        public void submitFeedback(SubmitFeedbackRequest req, String email) {
+                if (email == null || email.isBlank()) {
+                        throw new BusinessException("Unauthorized", HttpStatus.UNAUTHORIZED);
+                }
+
+                User authenticatedUser = userRepository.findByEmailAndDeletedFalse(email)
+                                .orElseThrow(() -> new BusinessException("User not found", HttpStatus.UNAUTHORIZED));
+
         InterviewParticipant p = participantRepository
-                .findByInterviewIdAndUserId(req.getInterviewId(), req.getInterviewerId())
+                                .findByInterviewIdAndUserId(req.getInterviewId(), authenticatedUser.getId())
                 .orElseThrow(() -> new BusinessException("Not participant", HttpStatus.FORBIDDEN));
 
         if (p.getRole() != ParticipantRole.INTERVIEWER) {
@@ -440,11 +447,24 @@ public class InterviewServiceImpl implements InterviewService {
     }
 
     @Override
-    public ApplicationEvaluationResponse getApplicationEvaluation(UUID applicationId) {
+        public ApplicationEvaluationResponse getApplicationEvaluation(UUID applicationId, String email) {
         Application app = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new BusinessException("Application not found", HttpStatus.NOT_FOUND));
 
         List<Interview> interviews = interviewRepository.findByApplicationId(applicationId);
+
+                if (email != null) {
+                        User user = userRepository.findByEmailAndDeletedFalse(email).orElse(null);
+                        if (user != null && user.getRole().name().equals("INTERVIEWER")) {
+                                boolean canAccess = interviews.stream().anyMatch(interview ->
+                                                participantRepository.findByInterviewIdAndUserId(interview.getId(), user.getId()).isPresent()
+                                );
+
+                                if (!canAccess) {
+                                        throw new BusinessException("You are not allowed to view this evaluation", HttpStatus.FORBIDDEN);
+                                }
+                        }
+                }
 
         List<InterviewStageEvaluationResponse> stages = new ArrayList<>();
         BigDecimal totalScore = BigDecimal.ZERO;

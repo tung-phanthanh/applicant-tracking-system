@@ -37,11 +37,18 @@ const InterviewFeedbackPage = () => {
     const fetchData = async () => {
       if (!id) return;
       try {
-        const [detailData, templateData, templatesListData] = await Promise.all([
+        const [detailData, templatesListData] = await Promise.all([
           interviewService.getInterviewById(id),
-          interviewService.getTemplate(id),
           interviewService.getAllTemplates()
         ]);
+
+        let templateData: ScorecardTemplateResponse | null = null;
+        try {
+          templateData = await interviewService.getTemplate(id);
+        } catch {
+          templateData = templatesListData[0] ?? null;
+        }
+
         setInterview(detailData);
         setTemplate(templateData);
         setAllTemplates(templatesListData);
@@ -92,9 +99,16 @@ const InterviewFeedbackPage = () => {
       await interviewService.submitFeedback(payload);
       toast.success('Feedback submitted successfully');
       navigate('/interviews');
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Error submitting feedback:', error);
-      toast.error('Failed to submit feedback');
+      const message =
+        typeof error === 'object' &&
+        error !== null &&
+        'response' in error &&
+        typeof (error as { response?: { data?: { message?: unknown } } }).response?.data?.message === 'string'
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message ?? 'Failed to submit feedback'
+          : 'Failed to submit feedback';
+      toast.error(message);
     } finally {
       setSubmitting(false);
     }
@@ -214,7 +228,7 @@ const InterviewFeedbackPage = () => {
             <Button 
               variant="link" 
               className="p-0 h-auto text-indigo-600 font-bold mt-6 hover:text-indigo-700 flex items-center group/eval"
-              onClick={() => navigate(`/applications/${interview.applicationId}/evaluation`)}
+              onClick={() => navigate(`/interviews/applications/${interview.applicationId}/evaluation`)}
             >
               View Full Evaluation History
               <ChevronRight className="w-4 h-4 ml-1 transition-transform group-hover/eval:translate-x-1" />

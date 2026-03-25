@@ -15,11 +15,11 @@ public interface InterviewService {
     List<InterviewScorecardResponse> getAllScorecards(UUID interviewId);
     List<InterviewResponse> getAllInterviews(String email);
     InterviewDetailResponse getInterviewDetail(UUID interviewId, String email);
-    void submitFeedback(SubmitFeedbackRequest req);
+    void submitFeedback(SubmitFeedbackRequest req, String email);
     BigDecimal calculateFinalScore(Interview interview);
     Interview getInterviewById(UUID interviewId);
     ScorecardTemplateResponse getTemplateByInterviewId(UUID interviewId);
 
     InterviewEvaluationDetailResponse getInterviewEvaluationSummary(UUID interviewId);
-    ApplicationEvaluationResponse getApplicationEvaluation(UUID applicationId);
+    ApplicationEvaluationResponse getApplicationEvaluation(UUID applicationId, String email);
 }
