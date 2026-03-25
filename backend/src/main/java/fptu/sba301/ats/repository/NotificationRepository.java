@@ -22,4 +22,10 @@ public interface NotificationRepository extends JpaRepository<Notification, Long
     long countByUserIdAndIsReadFalse(UUID userId);
 
     Page<Notification> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    @org.springframework.data.jpa.repository.Query("SELECT MIN(n.id) as id, n.title as title, n.message as message, n.type as type, MAX(n.createdAt) as createdAt, COUNT(n.id) as count " +
+           "FROM Notification n " +
+           "GROUP BY n.title, n.message, n.type " +
+           "ORDER BY MAX(n.createdAt) DESC")
+    Page<Object[]> findGroupedNotifications(Pageable pageable);
 }

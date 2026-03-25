@@ -6,6 +6,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { adminService } from "@/services/adminService";
 import { userService } from "@/services/userService";
+import api from "@/lib/api";
 import StatCard from "@/components/shared/StatCard";
 
 export default function AdminDashboardPage() {
@@ -19,17 +20,17 @@ export default function AdminDashboardPage() {
 
     const loadStats = useCallback(async () => {
         try {
-            const [users, depts, logs, notifs] = await Promise.all([
+            const [users, depts, logs, unreadRes] = await Promise.all([
                 userService.getUsers(),
                 adminService.getDepartments(),
                 adminService.getAuditLogs(),
-                adminService.getNotifications()
+                api.get<number>("/notifications/unread-count")
             ]);
             setStats({
                 totalUsers: users.totalElements, 
                 totalDepartments: depts.totalElements,
                 totalAuditLogs: logs.totalElements,
-                unreadNotifications: notifs.content.filter((n: any) => !n.read).length
+                unreadNotifications: unreadRes.data
             });
         } catch {
             // Silently handle error

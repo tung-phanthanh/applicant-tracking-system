@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import {
-    Bell, CheckCheck, RefreshCw, Clock, Inbox, Info, AlertTriangle, CheckCircle2, MoreVertical
+    Bell, CheckCheck, RefreshCw, Clock, Inbox, Info, AlertTriangle, CheckCircle2, MoreVertical, Database
 } from "lucide-react";
 import { Pagination } from "@/components/ui/pagination";
 import { Button } from "@/components/ui/button";
@@ -52,10 +52,15 @@ export default function NotificationPage() {
     const [selectedRole, setSelectedRole] = useState("RECRUITER");
     const [notifType, setNotifType] = useState("SYSTEM_ALERT");
 
-    const loadNotifications = useCallback(async (p: number) => {
+    const [activeTab, setActiveTab] = useState<"personal" | "system">("personal");
+
+    const loadNotifications = useCallback(async (p: number, tab?: "personal" | "system") => {
+        const currentTab = tab || activeTab;
         setIsLoading(true);
         try {
-            const data = await adminService.getAllNotificationsAdmin(p, pageSize);
+            const data = currentTab === "personal" 
+                ? await adminService.getNotifications(p, pageSize)
+                : await adminService.getAllNotificationsAdmin(p, pageSize);
             setNotifications(data.content);
             setTotalElements(data.totalElements);
             setTotalPages(data.totalPages);
@@ -65,7 +70,13 @@ export default function NotificationPage() {
         } finally {
             setIsLoading(false);
         }
-    }, [pageSize]);
+    }, [pageSize, activeTab]);
+
+    const handleTabChange = (tab: "personal" | "system") => {
+        setActiveTab(tab);
+        setPage(0);
+        loadNotifications(0, tab);
+    };
 
     useEffect(() => {
         loadNotifications(page);
@@ -271,11 +282,35 @@ export default function NotificationPage() {
                         <RefreshCw className={`mr-2 h-4 w-4 ${isLoading ? "animate-spin" : ""}`} />
                         Refresh
                     </Button>
-                    <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="rounded-full border-primary/20 text-primary hover:bg-primary/5">
-                        <CheckCheck className="mr-2 h-4 w-4" />
-                        Mark all as read
-                    </Button>
+                    {activeTab === "personal" && (
+                        <Button variant="outline" size="sm" onClick={handleMarkAllRead} className="rounded-full border-primary/20 text-primary hover:bg-primary/5">
+                            <CheckCheck className="mr-2 h-4 w-4" />
+                            Mark all as read
+                        </Button>
+                    )}
                 </div>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex bg-muted/50 p-1.5 rounded-xl w-fit mb-6 border border-border/50">
+                <Button 
+                    variant={activeTab === "personal" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    onClick={() => handleTabChange("personal")}
+                    className={`rounded-lg transition-all ${activeTab === "personal" ? "shadow-sm bg-background" : ""}`}
+                >
+                    <Inbox className="mr-2 h-4 w-4" />
+                    My Inbox
+                </Button>
+                <Button 
+                    variant={activeTab === "system" ? "secondary" : "ghost"} 
+                    size="sm" 
+                    onClick={() => handleTabChange("system")}
+                    className={`rounded-lg transition-all ${activeTab === "system" ? "shadow-sm bg-background" : ""}`}
+                >
+                    <Database className="mr-2 h-4 w-4" />
+                    System Sent Log
+                </Button>
             </div>
 
             {/* List */}
@@ -297,8 +332,12 @@ export default function NotificationPage() {
                                 <Inbox className="h-20 w-20 opacity-5" />
                                 <Badge className="absolute -top-1 -right-1 h-6 w-6 rounded-full flex items-center justify-center p-0">0</Badge>
                             </div>
-                            <p className="text-xl font-semibold opacity-40 italic">Your inbox is empty</p>
-                            <p className="text-sm opacity-30 mt-1 uppercase tracking-tighter font-mono">No new alerts found</p>
+                            <p className="text-xl font-semibold opacity-40 italic">
+                                {activeTab === "personal" ? "Your inbox is empty" : "No system notifications found"}
+                            </p>
+                            <p className="text-sm opacity-30 mt-1 uppercase tracking-tighter font-mono">
+                                No new alerts found
+                            </p>
                             <Button variant="ghost" className="mt-6 rounded-full opacity-40 hover:opacity-100" onClick={() => loadNotifications(page)}>
                                 <RefreshCw className="mr-2 h-4 w-4" /> Check again
                             </Button>
@@ -325,7 +364,7 @@ export default function NotificationPage() {
                                         <p className={`mt-1 text-sm leading-relaxed ${n.read ? 'text-muted-foreground' : 'text-foreground/80'}`}>
                                             {n.message}
                                         </p>
-                                        {!n.read && (
+                                        {!n.read && activeTab === "personal" && (
                                             <div className="mt-4 flex items-center gap-3">
                                                 <Button 
                                                     size="sm" 
@@ -374,7 +413,7 @@ export default function NotificationPage() {
             {/* Footer Tip */}
             {!isLoading && notifications.length > 0 && (
                 <p className="text-center text-[10px] text-muted-foreground uppercase tracking-widest font-medium opacity-50">
-                    Showing latest system notifications for your account
+                    Showing {activeTab === "personal" ? "latest system notifications for your account" : "all notifications dispatched by the system"}
                 </p>
             )}
         </div>
