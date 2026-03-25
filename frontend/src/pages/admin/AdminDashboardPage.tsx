@@ -15,11 +15,9 @@ export default function AdminDashboardPage() {
         totalAuditLogs: 0,
         unreadNotifications: 0
     });
-    const [isLoading, setIsLoading] = useState(true);
     const [isExportingSql, setIsExportingSql] = useState(false);
 
     const loadStats = useCallback(async () => {
-        setIsLoading(true);
         try {
             const [users, depts, logs, notifs] = await Promise.all([
                 userService.getUsers(),
@@ -28,7 +26,7 @@ export default function AdminDashboardPage() {
                 adminService.getNotifications()
             ]);
             setStats({
-                totalUsers: users.length, // userService.getUsers still returns array
+                totalUsers: users.totalElements, 
                 totalDepartments: depts.totalElements,
                 totalAuditLogs: logs.totalElements,
                 unreadNotifications: notifs.content.filter((n: any) => !n.read).length
@@ -36,7 +34,6 @@ export default function AdminDashboardPage() {
         } catch {
             // Silently handle error
         } finally {
-            setIsLoading(false);
         }
     }, []);
 
