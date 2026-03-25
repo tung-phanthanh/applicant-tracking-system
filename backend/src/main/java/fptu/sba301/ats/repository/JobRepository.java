@@ -1,12 +1,22 @@
 package fptu.sba301.ats.repository;
 
 import fptu.sba301.ats.entity.Job;
+import fptu.sba301.ats.enums.JobStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
 public interface JobRepository extends JpaRepository<Job, UUID> {
-    // Additional query methods can be added later (search, filtering, etc.)
+
+    @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.department WHERE j.status = :status ORDER BY j.createdAt DESC")
+    List<Job> findAllByStatusWithDepartment(@Param("status") JobStatus status);
+
+    @Query("SELECT DISTINCT j FROM Job j LEFT JOIN FETCH j.department WHERE j.id = :id")
+    Optional<Job> findByIdWithDepartment(@Param("id") UUID id);
 }

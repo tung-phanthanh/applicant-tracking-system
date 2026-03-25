@@ -2,6 +2,7 @@ import { NavLink } from "react-router-dom";
 import {
     Briefcase,
     Calendar,
+    ClipboardCheck,
     LayoutDashboard,
     User,
     Users,
@@ -10,23 +11,10 @@ import {
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
 
-const recruiterItems = [
+const navItems = [
     { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
     { to: "/jobs", icon: Briefcase, label: "Jobs" },
-    { to: "/candidates", icon: Users, label: "Candidates" },
     { to: "/interviews", icon: Calendar, label: "Interviews" },
-];
-
-const adminItems = [
-    { to: "/admin/dashboard", icon: LayoutDashboard, label: "Admin Dashboard" },
-    { to: "/admin/roles", icon: Shield, label: "Roles & Permissions" },
-    { to: "/admin/departments", icon: Building2, label: "Departments" },
-    { to: "/admin/system-config", icon: Settings, label: "System Config" },
-    { to: "/admin/audit-logs", icon: History, label: "Audit Logs" },
-];
-
-const commonItems = [
-    { to: "/notifications", icon: Bell, label: "Notifications" },
     { to: "/profile", icon: User, label: "My Profile" },
 ];
 
@@ -37,6 +25,8 @@ const adminNavItems = [
 export default function Sidebar() {
     const { user } = useAuth();
     const isAdmin = user?.role === "SYSTEM_ADMIN";
+    const isHr = user?.role === "HR";
+    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -51,9 +41,9 @@ export default function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 overflow-y-auto px-3 py-4 space-y-6">
+            <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <ul className="space-y-1">
-                    {primaryNavItems.map(({ to, icon: Icon, label }) => (
+                    {navItems.map(({ to, icon: Icon, label }) => (
                         <li key={to}>
                             <NavLink
                                 to={to}
@@ -71,6 +61,44 @@ export default function Sidebar() {
                             </NavLink>
                         </li>
                     ))}
+
+                    {isHr && (
+                        <li>
+                            <NavLink
+                                to="/candidates"
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        isActive
+                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    )
+                                }
+                            >
+                                <Users className="h-4 w-4 shrink-0" />
+                                Candidates
+                            </NavLink>
+                        </li>
+                    )}
+
+                    {isHrManager && (
+                        <li>
+                            <NavLink
+                                to="/jobs/pending-approvals"
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        isActive
+                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    )
+                                }
+                            >
+                                <ClipboardCheck className="h-4 w-4 shrink-0" />
+                                Job approvals
+                            </NavLink>
+                        </li>
+                    )}
 
                     {/* Admin section */}
                     {isAdmin && (
@@ -101,32 +129,6 @@ export default function Sidebar() {
                         </>
                     )}
                 </ul>
-
-                <div>
-                    <h4 className="mb-2 px-3 text-xs font-semibold uppercase tracking-wider text-sidebar-foreground/50">
-                        Account
-                    </h4>
-                    <ul className="space-y-1">
-                        {commonItems.map(({ to, icon: Icon, label }) => (
-                            <li key={to}>
-                                <NavLink
-                                    to={to}
-                                    className={({ isActive }) =>
-                                        cn(
-                                            "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-                                            isActive
-                                                ? "bg-sidebar-primary text-sidebar-primary-foreground"
-                                                : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
-                                        )
-                                    }
-                                >
-                                    <Icon className="h-4 w-4 shrink-0" />
-                                    {label}
-                                </NavLink>
-                            </li>
-                        ))}
-                    </ul>
-                </div>
             </nav>
 
             {/* Footer */}

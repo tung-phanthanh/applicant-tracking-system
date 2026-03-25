@@ -1,18 +1,19 @@
 package fptu.sba301.ats.repository;
 
 import fptu.sba301.ats.entity.Interview;
-import fptu.sba301.ats.enums.InterviewStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 
-import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
-@Repository
-public interface InterviewRepository extends JpaRepository<Interview, Long> {
-
-    List<Interview> findByApplicationId(Long applicationId);
-
-    List<Interview> findByApplicationIdAndStatus(Long applicationId, InterviewStatus status);
-
-    List<Interview> findByApplicationIdIn(List<Long> applicationIds);
+public interface InterviewRepository extends JpaRepository<Interview, UUID> {
+    @Query("""
+        select distinct i
+        from Interview i
+        left join fetch i.participants p
+        where i.id = :interviewId
+    """)
+    Optional<Interview> findByIdWithParticipants(@Param("interviewId") UUID interviewId);
 }

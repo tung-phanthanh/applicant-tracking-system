@@ -3,42 +3,38 @@ package fptu.sba301.ats.entity;
 import fptu.sba301.ats.enums.ApprovalStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
-@Table(name = "offer_approvals")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OfferApproval {
+@Table(name = "offer_approvals")
+public class OfferApproval extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private java.util.UUID id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "offer_id", nullable = false)
+    @JoinColumn(name = "offer_id")
     private Offer offer;
 
-    @Column(name = "approved_by", nullable = false)
-    private Long approvedBy;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "approved_by")
+    private User approvedBy;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
+    @Column(name = "status")
     private ApprovalStatus status;
 
     @Column(name = "comment", columnDefinition = "TEXT")
     private String comment;
 
-    @Column(name = "approved_at", nullable = false, updatable = false)
-    private Instant approvedAt;
-
-    @PrePersist
-    protected void onCreate() {
-        this.approvedAt = Instant.now();
-    }
 }

@@ -14,7 +14,7 @@ import java.util.UUID;
 @Table(name = "system_configs")
 public class SystemConfig {
     @Id
-    @Column(name = "key", length = 100, nullable = false)
+    @Column(name = "config_key", length = 100, nullable = false)
     private String key;
 
     @Column(name = "value", columnDefinition = "TEXT", nullable = false)

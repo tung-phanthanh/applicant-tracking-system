@@ -3,73 +3,39 @@ package fptu.sba301.ats.entity;
 import fptu.sba301.ats.enums.OfferStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
 import java.math.BigDecimal;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
+
 
 @Entity
-@Table(name = "offers")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Offer {
+@Table(name = "offers")
+public class Offer extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private java.util.UUID id;
 
-    @Column(name = "application_id", nullable = false)
-    private Long applicationId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "application_id")
+    private Application application;
 
     @Column(name = "salary", precision = 15, scale = 2)
     private BigDecimal salary;
 
-    @Column(name = "position_title", length = 255)
+    @Column(name = "position_title")
     private String positionTitle;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
-    private OfferStatus status;
-
-    @Column(name = "start_date")
-    private LocalDate startDate;
-
-    @Column(name = "expiry_date")
-    private LocalDate expiryDate;
-
-    @Column(name = "notes", columnDefinition = "TEXT")
-    private String notes;
-
-    @Column(name = "created_by")
-    private Long createdBy;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
-
-    @OneToMany(mappedBy = "offer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @Column(name = "status")
     @Builder.Default
-    private List<OfferApproval> approvals = new ArrayList<>();
+    private OfferStatus status = OfferStatus.DRAFT;
 
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = Instant.now();
-        this.updatedAt = Instant.now();
-        if (this.status == null) {
-            this.status = OfferStatus.DRAFT;
-        }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = Instant.now();
-    }
 }

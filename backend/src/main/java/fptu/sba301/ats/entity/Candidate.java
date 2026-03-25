@@ -2,35 +2,47 @@ package fptu.sba301.ats.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+
 
 @Entity
-@Table(name = "candidates")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Candidate {
+@Table(name = "candidates")
+public class Candidate extends BaseEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private java.util.UUID id;
 
-    @Column(name = "full_name", nullable = false, length = 255)
+    @Column(name = "full_name", nullable = false)
     private String fullName;
 
-    @Column(name = "email", length = 255)
+    @Column(name = "email")
     private String email;
 
     @Column(name = "phone", length = 50)
     private String phone;
 
-    @Column(name = "current_company", length = 255)
+    @Column(name = "current_company")
     private String currentCompany;
 
-    @Column(name = "created_at", updatable = false)
-    private Instant createdAt;
+    @Column(name = "source")
+    private String source;
+
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "experience_years")
+    private Integer experienceYears;
+
+    @Column(name = "summary", columnDefinition = "TEXT")
+    private String summary;
+
 }

@@ -1,30 +1,34 @@
-import { apiFetch } from "@/lib/api";
-import type {
-    EvaluationSummaryResponse,
-    CandidateRankingResponse,
-    Candidate
-} from "@/types/models";
+import api from "@/lib/api";
+import type { CandidateDetailItem, CandidateListItem, CandidateStage, BulkImportResult } from "@/types/candidate";
 
 export const candidateService = {
-    getAllCandidates() {
-        return apiFetch<Candidate[]>("/candidates");
-    },
+  async getCandidates(): Promise<CandidateListItem[]> {
+    const { data } = await api.get<CandidateListItem[]>("/candidates");
+    return data;
+  },
 
-    getCandidateById(id: number) {
-        return apiFetch<Candidate>(`/candidates/${id}`);
-    },
+  async getCandidateDetail(candidateId: string): Promise<CandidateDetailItem> {
+    const { data } = await api.get<CandidateDetailItem>(`/candidates/${candidateId}`);
+    return data;
+  },
 
-    getTotalCount() {
-        return apiFetch<number>("/candidates/count");
-    },
+  async updateCandidateStage(candidateId: string, stage: CandidateStage): Promise<CandidateDetailItem> {
+    const { data } = await api.patch<CandidateDetailItem>(`/candidates/${candidateId}/stage`, { stage });
+    return data;
+  },
 
-    getEvaluation(applicationId: number) {
-        return apiFetch<EvaluationSummaryResponse>(
-            `/applications/${applicationId}/evaluation`,
-        );
-    },
+  async createCandidate(formData: FormData): Promise<CandidateDetailItem> {
+    const { data } = await api.post<CandidateDetailItem>("/candidates", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
 
-    getRanking(jobId: number) {
-        return apiFetch<CandidateRankingResponse>(`/jobs/${jobId}/ranking`);
-    },
+  async importCandidates(formData: FormData): Promise<BulkImportResult> {
+    const { data } = await api.post<BulkImportResult>("/candidates/import", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return data;
+  },
 };
+

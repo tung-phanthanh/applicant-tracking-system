@@ -5,7 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 
@@ -20,5 +20,5 @@ public class UserResponse {
     private boolean active;
     private boolean accountLocked;
     private String department;
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 }

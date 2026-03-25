@@ -1,23 +1,13 @@
-import { apiFetch } from "@/lib/api";
-import type { Job } from "@/types/models";
+import api from "@/lib/api";
+import type { JobDTO, JobOption } from "@/types/job";
 
 export const jobService = {
-    getAllJobs() {
-        return apiFetch<Job[]>("/jobs");
+    async getJobs(): Promise<JobOption[]> {
+        const { data } = await api.get<JobDTO[]>("/jobs");
+        return data.map((job) => ({
+            jobId: job.id,
+            title: job.title,
+            status: job.status,
+        }));
     },
-
-    getJobById(id: number) {
-        return apiFetch<Job>(`/jobs/${id}`);
-    },
-
-    getActiveJobsCount() {
-        return apiFetch<number>("/jobs/active/count");
-    },
-
-    createJob(jobData: Partial<Job>) {
-        return apiFetch<Job>("/jobs", {
-            method: "POST",
-            body: jobData
-        });
-    }
 };

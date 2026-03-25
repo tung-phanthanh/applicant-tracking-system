@@ -4,34 +4,47 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.UUID;
 
 @MappedSuperclass
+@Getter
+@Setter
+@SuperBuilder
+@NoArgsConstructor
+@AllArgsConstructor
 public abstract class BaseEntity {
+
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Column(name = "created_by")
     private UUID createdBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
+    private LocalDateTime createdAt;
 
     @Column(name = "modified_by")
     private UUID modifiedBy;
 
     @Column(name = "last_modified_date")
-    private Instant lastModifiedDate;
+    private LocalDateTime lastModifiedDate;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = Instant.now();
-        lastModifiedDate = Instant.now();
+        createdAt = LocalDateTime.now(APP_ZONE);
+        lastModifiedDate = LocalDateTime.now(APP_ZONE);
     }
 
     @PreUpdate
     protected void onUpdate() {
-        lastModifiedDate = Instant.now();
+        lastModifiedDate = LocalDateTime.now(APP_ZONE);
     }
 
     public UUID getCreatedBy() {
@@ -42,11 +55,11 @@ public abstract class BaseEntity {
         this.createdBy = createdBy;
     }
 
-    public Instant getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 
@@ -58,11 +71,11 @@ public abstract class BaseEntity {
         this.modifiedBy = modifiedBy;
     }
 
-    public Instant getLastModifiedDate() {
+    public LocalDateTime getLastModifiedDate() {
         return lastModifiedDate;
     }
 
-    public void setLastModifiedDate(Instant lastModifiedDate) {
+    public void setLastModifiedDate(LocalDateTime lastModifiedDate) {
         this.lastModifiedDate = lastModifiedDate;
     }
 }

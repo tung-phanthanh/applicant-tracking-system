@@ -4,51 +4,61 @@ import fptu.sba301.ats.enums.ApplicationStage;
 import fptu.sba301.ats.enums.ApplicationStatus;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.UuidGenerator;
 
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.List;
+
 
 @Entity
-@Table(name = "applications")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Application {
+@Table(name = "applications", uniqueConstraints = {
+        @UniqueConstraint(columnNames = { "candidate_id", "job_id" })
+})
+public class Application extends BaseEntity {
+
+    private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @UuidGenerator
     @Column(name = "id", updatable = false, nullable = false)
-    private Long id;
+    private java.util.UUID id;
 
-    @Column(name = "candidate_id", nullable = false)
-    private Long candidateId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "candidate_id")
+    private Candidate candidate;
 
-    @Column(name = "job_id", nullable = false)
-    private Long jobId;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "stage", nullable = false, length = 50)
-    private ApplicationStage stage;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "job_id")
+    private Job job;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "status", nullable = false, length = 50)
-    private ApplicationStatus status;
+    @Column(name = "stage")
+    @Builder.Default
+    private ApplicationStage stage = ApplicationStage.APPLIED;
 
-    @Column(name = "applied_at", updatable = false)
-    private Instant appliedAt;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status")
+    @Builder.Default
+    private ApplicationStatus status = ApplicationStatus.ACTIVE;
 
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @Column(name = "applied_at")
+    private LocalDateTime appliedAt;
 
     @PrePersist
-    protected void onCreate() {
-        this.appliedAt = Instant.now();
-        this.updatedAt = Instant.now();
+    protected void setAppliedAtIfMissing() {
+        if (appliedAt == null) {
+            appliedAt = LocalDateTime.now(APP_ZONE);
+        }
     }
 
-    @PreUpdate
-    protected void onUpdate() {
-        this.updatedAt = Instant.now();
-    }
+    @OneToMany(mappedBy = "application")
+    private List<Interview> interviews;
+
 }

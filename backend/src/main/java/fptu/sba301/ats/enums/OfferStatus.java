@@ -5,8 +5,5 @@ public enum OfferStatus {
     PENDING_APPROVAL,
     APPROVED,
     REJECTED,
-    SENT,
-    ACCEPTED,
-    DECLINED,
-    NEGOTIATING
+    SENT
 }

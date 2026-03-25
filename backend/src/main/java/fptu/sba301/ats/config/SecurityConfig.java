@@ -1,7 +1,6 @@
 package fptu.sba301.ats.config;
 
 import fptu.sba301.ats.security.JwtAuthFilter;
-import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -23,11 +22,16 @@ import static fptu.sba301.ats.constant.AppConstant.AUTH_CONTROLLER_URL;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
-@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final CorsConfigurationSource corsConfigurationSource;
     private final JwtAuthFilter jwtAuthFilter;
+
+    public SecurityConfig(CorsConfigurationSource corsConfigurationSource,
+                          JwtAuthFilter jwtAuthFilter) {
+        this.corsConfigurationSource = corsConfigurationSource;
+        this.jwtAuthFilter = jwtAuthFilter;
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {

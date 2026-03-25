@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Job Detail - Enterprise ATS</title>
+    <link href="./dist/css/output.css" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-btn.active {
+            border-bottom-color: #0f172a;
+            color: #0f172a;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 font-sans text-slate-900">
+    <div id="app" data-title="Job Details">
+        <!-- Header -->
+        <div class="bg-white shadow rounded-lg mb-6">
+            <div class="px-4 py-5 sm:px-6 flex justify-between items-start">
+                <div>
+                    <h3 class="text-2xl font-bold leading-6 text-gray-900">Senior Frontend Developer</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">Engineering &bull; Remote &bull; Posted on Oct 15,
+                        2023</p>
+                    <div class="mt-2 flex items-center space-x-2">
+                        <span
+                            class="inline-flex rounded-full bg-green-100 px-2.5 py-0.5 text-xs font-medium text-green-800">Published</span>
+                        <span class="text-sm text-gray-500">12 Candidates</span>
+                    </div>
+                </div>
+                <div class="flex space-x-3">
+                    <button type="button"
+                        class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <i data-lucide="share-2" class="inline w-4 h-4 mr-1"></i> Share
+                    </button>
+                    <a href="edit-job.html"
+                        class="rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50">
+                        <i data-lucide="edit-2" class="inline w-4 h-4 mr-1"></i> Edit
+                    </a>
+                    <button type="button"
+                        class="rounded-md bg-slate-900 px-3 py-2 text-sm font-semibold text-white shadow-sm hover:bg-slate-800">
+                        <i data-lucide="plus" class="inline w-4 h-4 mr-1"></i> Add Candidate
+                    </button>
+                </div>
+            </div>
+
+            <!-- Tabs -->
+            <div class="border-t border-gray-200">
+                <nav class="-mb-px flex px-6 space-x-8" aria-label="Tabs">
+                    <button
+                        class="tab-btn active whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="overview">
+                        Overview
+                    </button>
+                    <button
+                        class="tab-btn whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="candidates">
+                        Candidates
+                        <span
+                            class="ml-2 rounded-full bg-gray-100 px-2.5 py-0.5 text-xs font-medium text-gray-900">12</span>
+                    </button>
+                    <button
+                        class="tab-btn whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="workflow">
+                        Workflow
+                    </button>
+                    <button
+                        class="tab-btn whitespace-nowrap border-b-2 border-transparent py-4 px-1 text-sm font-medium text-gray-500 hover:border-gray-300 hover:text-gray-700"
+                        data-tab="team">
+                        Hiring Team
+                    </button>
+                </nav>
+            </div>
+        </div>
+
+        <!-- Tab Contents -->
+        <div class="space-y-6">
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active bg-white shadow rounded-lg p-6">
+                <div class="prose max-w-none text-slate-800">
+                    <h4 class="text-lg font-bold mb-2">Description</h4>
+                    <p class="mb-4">We are looking for a Senior Frontend Developer to join our Engineering team. You
+                        will be responsible for building high-quality, responsive web applications using React and
+                        TypeScript.</p>
+
+                    <h4 class="text-lg font-bold mb-2">Responsibilities</h4>
+                    <ul class="list-disc pl-5 mb-4 space-y-1">
+                        <li>Develop new user-facing features</li>
+                        <li>Build reusable code and libraries for future use</li>
+                        <li>Ensure the technical feasibility of UI/UX designs</li>
+                        <li>Optimize application for maximum speed and scalability</li>
+                    </ul>
+
+                    <h4 class="text-lg font-bold mb-2">Requirements</h4>
+                    <ul class="list-disc pl-5 mb-4 space-y-1">
+                        <li>5+ years of experience in frontend development</li>
+                        <li>Proficiency in React, TypeScript, and Tailwind CSS</li>
+                        <li>Experience with state management libraries (Redux, Zustand)</li>
+                        <li>Strong understanding of web performance optimization</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Candidates Tab (Preview) -->
+            <div id="candidates" class="tab-content">
+                <div class="bg-white shadow rounded-lg overflow-hidden">
+                    <ul role="list" class="divide-y divide-gray-100">
+                        <li class="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 sm:px-6 cursor-pointer"
+                            onclick="window.location.href='candidate-detail.html'">
+                            <div class="flex min-w-0 gap-x-4">
+                                <div
+                                    class="h-12 w-12 flex-none rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                                    JS</div>
+                                <div class="min-w-0 flex-auto">
+                                    <p class="text-sm font-semibold leading-6 text-gray-900">
+                                        <a href="#">
+                                            <span class="absolute inset-x-0 -top-px bottom-0"></span>
+                                            John Smith
+                                        </a>
+                                    </p>
+                                    <p class="mt-1 flex text-xs leading-5 text-gray-500">
+                                        <a href="mailto:john.smith@example.com"
+                                            class="relative truncate hover:underline">john.smith@example.com</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-x-4">
+                                <div class="hidden sm:flex sm:flex-col sm:items-end">
+                                    <p class="text-sm leading-6 text-gray-900">Screening</p>
+                                    <p class="mt-1 text-xs leading-5 text-gray-500">Applied 2d ago</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="h-5 w-5 flex-none text-gray-400"></i>
+                            </div>
+                        </li>
+                        <li class="relative flex justify-between gap-x-6 px-4 py-5 hover:bg-gray-50 sm:px-6 cursor-pointer"
+                            onclick="window.location.href='candidate-detail.html'">
+                            <div class="flex min-w-0 gap-x-4">
+                                <div
+                                    class="h-12 w-12 flex-none rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                                    AL</div>
+                                <div class="min-w-0 flex-auto">
+                                    <p class="text-sm font-semibold leading-6 text-gray-900">
+                                        <a href="#">
+                                            <span class="absolute inset-x-0 -top-px bottom-0"></span>
+                                            Alice Lee
+                                        </a>
+                                    </p>
+                                    <p class="mt-1 flex text-xs leading-5 text-gray-500">
+                                        <a href="mailto:alice.lee@example.com"
+                                            class="relative truncate hover:underline">alice.lee@example.com</a>
+                                    </p>
+                                </div>
+                            </div>
+                            <div class="flex shrink-0 items-center gap-x-4">
+                                <div class="hidden sm:flex sm:flex-col sm:items-end">
+                                    <p class="text-sm leading-6 text-gray-900">Technical Interview</p>
+                                    <p class="mt-1 text-xs leading-5 text-gray-500">Applied 5d ago</p>
+                                </div>
+                                <i data-lucide="chevron-right" class="h-5 w-5 flex-none text-gray-400"></i>
+                            </div>
+                        </li>
+                    </ul>
+                    <div class="border-t border-gray-200 bg-gray-50 px-4 py-3 text-center sm:px-6">
+                        <a href="candidates-list.html"
+                            class="text-sm font-semibold leading-6 text-slate-600 hover:text-slate-500">View all
+                            candidates</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Workflow Tab -->
+            <div id="workflow" class="tab-content bg-white shadow rounded-lg p-6">
+                <h4 class="text-lg font-bold mb-4">Hiring Workflow</h4>
+                <div class="relative">
+                    <div class="absolute top-0 bottom-0 left-6 w-0.5 bg-gray-200"></div>
+                    <div class="space-y-8">
+                        <div class="relative flex items-center">
+                            <div
+                                class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center ring-8 ring-white z-10">
+                                <span class="text-blue-600 font-bold">1</span>
+                            </div>
+                            <div class="ml-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1">
+                                <h5 class="font-bold text-gray-900">Screening</h5>
+                                <p class="text-sm text-gray-500">Initial review of the CV and application.</p>
+                            </div>
+                        </div>
+                        <div class="relative flex items-center">
+                            <div
+                                class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center ring-8 ring-white z-10">
+                                <span class="text-blue-600 font-bold">2</span>
+                            </div>
+                            <div class="ml-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1">
+                                <h5 class="font-bold text-gray-900">Technical Interview</h5>
+                                <p class="text-sm text-gray-500">1 hour coding session with Senior Engineer.</p>
+                            </div>
+                        </div>
+                        <div class="relative flex items-center">
+                            <div
+                                class="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center ring-8 ring-white z-10">
+                                <span class="text-blue-600 font-bold">3</span>
+                            </div>
+                            <div class="ml-4 bg-white p-4 rounded-lg border border-gray-200 shadow-sm flex-1">
+                                <h5 class="font-bold text-gray-900">Culture Fit</h5>
+                                <p class="text-sm text-gray-500">30 min chat with Hiring Manager.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Hiring Team Tab -->
+            <div id="team" class="tab-content bg-white shadow rounded-lg p-6">
+                <h4 class="text-lg font-bold mb-4">Hiring Team</h4>
+                <div class="flex items-center space-x-4 mb-4">
+                    <div
+                        class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                        JD</div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">John Doe</p>
+                        <p class="text-xs text-gray-500">Recruiter</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 mb-4">
+                    <div
+                        class="h-10 w-10 rounded-full bg-slate-200 flex items-center justify-center font-bold text-slate-600">
+                        AS</div>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">Alice Smith</p>
+                        <p class="text-xs text-gray-500">Hiring Manager</p>
+                    </div>
+                </div>
+                <button type="button" class="mt-2 text-sm text-blue-600 hover:text-blue-500 font-medium">
+                    + Add Member
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script src="./src/js/layout.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const tabs = document.querySelectorAll('.tab-btn');
+            const contents = document.querySelectorAll('.tab-content');
+
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const target = tab.dataset.tab;
+
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+
+                    contents.forEach(c => c.classList.remove('active'));
+                    document.getElementById(target).classList.add('active');
+                });
+            });
+        });
+    </script>
+</body>
+
+</html>
