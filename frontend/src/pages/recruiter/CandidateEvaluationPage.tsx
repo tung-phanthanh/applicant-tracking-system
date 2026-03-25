@@ -89,7 +89,7 @@ export default function CandidateEvaluationPage() {
                 </div>
               </div>
               
-              <div className="mb-6 space-y-2 text-sm text-muted-foreground">
+              <div className="mb-4 space-y-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-2">
                   <Calendar className="h-4 w-4" />
                   <span>{new Date(iv.scheduledAt).toLocaleDateString()} at {new Date(iv.scheduledAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
@@ -100,15 +100,19 @@ export default function CandidateEvaluationPage() {
                 </div>
               </div>
 
-              <div className="mt-auto pt-4 border-t border-border">
-                <Button 
-                  variant="secondary" 
-                  className="w-full" 
-                  onClick={() => navigate(`/interviews/${iv.interviewId}/scores`)}
-                >
-                  View Scorecards
-                </Button>
-              </div>
+              {iv.scorecards && iv.scorecards.length > 0 && (
+                <div className="mt-auto border-t border-border pt-3 space-y-2">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Scorecards</p>
+                  {iv.scorecards.map((sc) => (
+                    <div key={sc.scorecardId} className="flex items-center justify-between text-sm">
+                      <span className="text-foreground truncate max-w-[60%]">{sc.interviewerName ?? 'Unknown'}</span>
+                      <span className={`font-semibold ${sc.overallScore != null && sc.overallScore >= 7 ? 'text-green-600' : sc.overallScore != null && sc.overallScore >= 4 ? 'text-yellow-600' : 'text-red-500'}`}>
+                        {sc.overallScore != null ? sc.overallScore : '—'}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
             </div>
           ))}
         </div>
