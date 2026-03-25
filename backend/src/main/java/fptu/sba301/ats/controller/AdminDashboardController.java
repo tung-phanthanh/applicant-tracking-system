@@ -1,6 +1,5 @@
 package fptu.sba301.ats.controller;
 
-import fptu.sba301.ats.annotation.LogAudit;
 import fptu.sba301.ats.constant.AdminConstants;
 import fptu.sba301.ats.constant.AppConstant;
 import fptu.sba301.ats.dto.response.AdminAnalyticsDTO;
@@ -26,7 +25,6 @@ public class AdminDashboardController {
      * @return analytics data for dashboard
      */
     @GetMapping("/analytics")
-    @LogAudit(action = "VIEW", resource = "AdminDashboard")
     public ResponseEntity<AdminAnalyticsDTO> getAnalytics(
             @RequestParam(defaultValue = "30days") String period) {
         return ResponseEntity.ok(adminDashboardService.getAnalytics(period));

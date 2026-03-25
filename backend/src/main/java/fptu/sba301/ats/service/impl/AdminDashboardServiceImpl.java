@@ -101,6 +101,7 @@ public class AdminDashboardServiceImpl implements AdminDashboardService {
 
         return AdminAnalyticsDTO.builder()
                 .totalApplications(totalApplications)
+                .totalUsers(userRepository.countByDeletedFalse())
                 .newApplicationsThisMonth(newApplicationsThisMonth)
                 .conversionRate(conversionRate)
                 .timeToHireAverage(timeToHireAverage)

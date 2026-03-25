@@ -9,6 +9,7 @@ import java.util.List;
 @Builder
 public class AdminAnalyticsDTO {
     private long totalApplications;
+    private long totalUsers;
     private long newApplicationsThisMonth;
     private double conversionRate;
     private double timeToHireAverage;
