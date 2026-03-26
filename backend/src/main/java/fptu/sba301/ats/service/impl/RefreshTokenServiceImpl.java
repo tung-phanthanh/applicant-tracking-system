@@ -106,6 +106,8 @@ public class RefreshTokenServiceImpl implements RefreshTokenService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .avatarUrl(user.getAvatarURL())
                 .build();
     }
 

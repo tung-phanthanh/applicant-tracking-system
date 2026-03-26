@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/hooks/useAuth";
 import { interviewService } from "@/services/interviewService";
 import type { InterviewResponse } from "@/types/interview";
 
@@ -51,10 +52,12 @@ const getTitleByType = (type: string) => {
 };
 
 export default function InterviewCalendarPage() {
+  const { user } = useAuth();
   const [currentWeekStart, setCurrentWeekStart] = useState(getStartOfWeek(new Date()));
   const [interviews, setInterviews] = useState<InterviewResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const showScheduleButton = user?.role !== "INTERVIEWER";
 
   const fetchInterviews = async () => {
     try {
@@ -119,10 +122,12 @@ export default function InterviewCalendarPage() {
               Month
             </button>
           </div>
-          <button className="flex items-center space-x-1 rounded-md bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 shadow-sm">
-            <Plus className="h-4 w-4" />
-            <span>Schedule</span>
-          </button>
+          {showScheduleButton && (
+            <button className="flex items-center space-x-1 rounded-md bg-gray-900 px-4 py-1.5 text-sm font-medium text-white hover:bg-gray-800 shadow-sm">
+              <Plus className="h-4 w-4" />
+              <span>Schedule</span>
+            </button>
+          )}
         </div>
       </div>
 

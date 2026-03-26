@@ -1,9 +1,13 @@
+import type { CandidateStage } from "./candidate";
+
 export type OfferStatus = "DRAFT" | "PENDING_APPROVAL" | "APPROVED" | "REJECTED" | "SENT" | "ACCEPTED" | "DECLINED";
 export type ApprovalStatus = "APPROVED" | "REJECTED";
 
 export interface Offer {
   id: string;
   applicationId?: string;
+  /** Pipeline stage of the candidate’s active application (driven by offer actions). */
+  applicationStage?: CandidateStage;
   candidateName: string;
   jobTitle: string;
   salary: number;

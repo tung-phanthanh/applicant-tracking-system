@@ -29,7 +29,7 @@ export interface AuthApiResponse {
 export interface AuthContextType {
     user: User | null;
     isLoading: boolean;
-    login: (credentials: LoginCredentials, rememberMe?: boolean) => Promise<void>;
+    login: (credentials: LoginCredentials, rememberMe?: boolean) => Promise<User>;
     logout: () => Promise<void>;
     updateUser: (updates: Partial<User>) => void;
 }

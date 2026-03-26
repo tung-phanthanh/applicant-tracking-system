@@ -13,6 +13,6 @@ public class DashboardStatsDTO {
     private int interviewsToday;
     private int offersSent;
     private Map<String, Long> hiringPipeline;
-    private List<Object> recentApplications;
-    private List<Object> todaysInterviews;
+    private List<DashboardRecentApplicationDTO> recentApplications;
+    private List<DashboardTodaysInterviewDTO> todaysInterviews;
 }

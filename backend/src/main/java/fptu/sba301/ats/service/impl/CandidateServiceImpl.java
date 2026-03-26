@@ -34,6 +34,7 @@ import fptu.sba301.ats.repository.InterviewRepository;
 import fptu.sba301.ats.repository.JobRepository;
 import fptu.sba301.ats.repository.UserRepository;
 import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
+import fptu.sba301.ats.service.ApplicationStageTransitionService;
 import fptu.sba301.ats.service.CandidateService;
 import fptu.sba301.ats.service.CloudinaryService;
 import lombok.RequiredArgsConstructor;
@@ -67,6 +68,7 @@ public class CandidateServiceImpl implements CandidateService {
     private final CandidateRepository candidateRepository;
     private final ApplicationRepository applicationRepository;
     private final CandidateStageHistoryRepository candidateStageHistoryRepository;
+    private final ApplicationStageTransitionService applicationStageTransitionService;
     private final CandidateDocumentRepository candidateDocumentRepository;
     private final JobRepository jobRepository;
     private final UserRepository userRepository;
@@ -99,7 +101,7 @@ public class CandidateServiceImpl implements CandidateService {
                 .findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(candidateId, ApplicationStatus.ACTIVE);
 
         if (latestActiveApplication.isPresent() && latestActiveApplication.get().getStage() == ApplicationStage.APPLIED) {
-            transitionStage(latestActiveApplication.get(), ApplicationStage.SCREENING);
+            applicationStageTransitionService.transition(latestActiveApplication.get(), ApplicationStage.SCREENING);
         }
 
         return buildCandidateDetailResponse(candidateId);
@@ -118,7 +120,7 @@ public class CandidateServiceImpl implements CandidateService {
             throw new BusinessException("Target stage must be INTERVIEW or REJECTED", HttpStatus.BAD_REQUEST);
         }
 
-        transitionStage(application, targetStage);
+        applicationStageTransitionService.transition(application, targetStage);
         return buildCandidateDetailResponse(candidateId);
     }
 
@@ -184,7 +186,7 @@ public class CandidateServiceImpl implements CandidateService {
         }
 
         if (application.getStage() != ApplicationStage.INTERVIEW) {
-            transitionStage(application, ApplicationStage.INTERVIEW);
+            applicationStageTransitionService.transition(application, ApplicationStage.INTERVIEW);
         }
 
         List<UUID> interviewIds = new ArrayList<>();
@@ -487,19 +489,4 @@ public class CandidateServiceImpl implements CandidateService {
                 .orElseThrow(() -> new BusinessException("Active application not found", HttpStatus.NOT_FOUND));
     }
 
-    private void transitionStage(Application application, ApplicationStage toStage) {
-        ApplicationStage fromStage = application.getStage();
-        if (fromStage == toStage) {
-            return;
-        }
-
-        application.setStage(toStage);
-        applicationRepository.save(application);
-
-        candidateStageHistoryRepository.save(CandidateStageHistory.builder()
-                .application(application)
-                .fromStage(fromStage)
-                .toStage(toStage)
-                .build());
-    }
 }

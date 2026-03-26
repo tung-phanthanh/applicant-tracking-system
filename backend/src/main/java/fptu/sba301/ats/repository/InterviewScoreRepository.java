@@ -4,6 +4,7 @@ import fptu.sba301.ats.entity.InterviewScore;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +21,13 @@ public interface InterviewScoreRepository extends JpaRepository<InterviewScore, 
         AND s.interviewer.id = :userId
     """)
     void deleteOld(UUID interviewId, UUID userId);
+
+    @Query("""
+            SELECT i.application.id, AVG(s.score)
+            FROM InterviewScore s
+            JOIN s.interview i
+            WHERE i.application.id IN :applicationIds
+            GROUP BY i.application.id
+            """)
+    List<Object[]> averageScoresByApplicationIds(@Param("applicationIds") List<UUID> applicationIds);
 }

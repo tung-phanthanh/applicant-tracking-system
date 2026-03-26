@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -13,6 +13,27 @@ export default function ProfilePage() {
     const [uploading, setUploading] = useState(false);
     const [error, setError] = useState("");
     const fileInputRef = useRef<HTMLInputElement>(null);
+
+    useEffect(() => {
+        let cancelled = false;
+        void userService
+            .getMe()
+            .then((me) => {
+                if (cancelled) return;
+                updateUser({
+                    fullName: me.fullName,
+                    email: me.email,
+                    department: me.department,
+                    avatarUrl: me.avatarUrl,
+                });
+            })
+            .catch(() => {
+                /* session may be invalid; ignore */
+            });
+        return () => {
+            cancelled = true;
+        };
+    }, [updateUser]);
 
     if (!user) return null;
 

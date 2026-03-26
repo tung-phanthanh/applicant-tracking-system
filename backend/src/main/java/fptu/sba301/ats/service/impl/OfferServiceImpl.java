@@ -11,6 +11,7 @@ import fptu.sba301.ats.entity.Offer;
 import fptu.sba301.ats.entity.OfferApproval;
 import fptu.sba301.ats.entity.User;
 import fptu.sba301.ats.enums.ApprovalStatus;
+import fptu.sba301.ats.enums.ApplicationStage;
 import fptu.sba301.ats.enums.ApplicationStatus;
 import fptu.sba301.ats.enums.OfferStatus;
 import fptu.sba301.ats.exception.BusinessException;
@@ -18,6 +19,7 @@ import fptu.sba301.ats.repository.ApplicationRepository;
 import fptu.sba301.ats.repository.OfferApprovalRepository;
 import fptu.sba301.ats.repository.OfferRepository;
 import fptu.sba301.ats.repository.UserRepository;
+import fptu.sba301.ats.service.ApplicationStageTransitionService;
 import fptu.sba301.ats.service.OfferService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -38,6 +40,7 @@ public class OfferServiceImpl implements OfferService {
     private final OfferApprovalRepository approvalRepository;
     private final ApplicationRepository applicationRepository;
     private final UserRepository userRepository;
+    private final ApplicationStageTransitionService applicationStageTransitionService;
 
     @Override
     @Transactional
@@ -45,6 +48,12 @@ public class OfferServiceImpl implements OfferService {
         Application application = applicationRepository.findTopByCandidate_IdAndStatusOrderByAppliedAtDesc(
                 request.getCandidateId(), ApplicationStatus.ACTIVE)
                 .orElseThrow(() -> new BusinessException("Active application not found for this candidate", HttpStatus.BAD_REQUEST));
+
+        if (application.getStage() != ApplicationStage.INTERVIEW) {
+            throw new BusinessException(
+                    "A new offer can only be created for candidates whose current stage is INTERVIEW.",
+                    HttpStatus.BAD_REQUEST);
+        }
 
         Offer offer = Offer.builder()
                 .application(application)
@@ -68,6 +77,13 @@ public class OfferServiceImpl implements OfferService {
 
         if (offer.getStatus() != OfferStatus.DRAFT) {
             throw new BusinessException("Can only update offers in DRAFT status", HttpStatus.BAD_REQUEST);
+        }
+
+        Application application = offer.getApplication();
+        if (application.getStage() != ApplicationStage.INTERVIEW) {
+            throw new BusinessException(
+                    "The offer can only be edited while the candidate is in INTERVIEW stage",
+                    HttpStatus.BAD_REQUEST);
         }
 
         offer.setSalary(request.getSalary());
@@ -104,8 +120,16 @@ public class OfferServiceImpl implements OfferService {
             throw new BusinessException("Can only submit offers in DRAFT status", HttpStatus.BAD_REQUEST);
         }
 
+        Application application = offer.getApplication();
+        if (application.getStage() != ApplicationStage.INTERVIEW) {
+            throw new BusinessException(
+                    "The offer can only be submitted for approval while the candidate is in INTERVIEW stage",
+                    HttpStatus.BAD_REQUEST);
+        }
+
         offer.setStatus(OfferStatus.PENDING_APPROVAL);
         offer = offerRepository.save(offer);
+        applicationStageTransitionService.transition(application, ApplicationStage.OFFER);
         return toResponse(offer);
     }
 
@@ -122,11 +146,20 @@ public class OfferServiceImpl implements OfferService {
             throw new BusinessException("Can only approve/reject offers in PENDING_APPROVAL status", HttpStatus.BAD_REQUEST);
         }
 
+        Application application = offer.getApplication();
+        if (application.getStage() != ApplicationStage.OFFER) {
+            throw new BusinessException(
+                    "Offer approval can only be processed when the candidate is in OFFER stage",
+                    HttpStatus.BAD_REQUEST);
+        }
+
         // Update offer status
         if (request.getStatus() == ApprovalStatus.APPROVED) {
             offer.setStatus(OfferStatus.APPROVED);
+            applicationStageTransitionService.transition(application, ApplicationStage.HIRED);
         } else {
             offer.setStatus(OfferStatus.REJECTED);
+            applicationStageTransitionService.transition(application, ApplicationStage.REJECTED);
         }
         offerRepository.save(offer);
 
@@ -231,6 +264,7 @@ public class OfferServiceImpl implements OfferService {
         return OfferResponse.builder()
                 .id(offer.getId())
                 .applicationId(offer.getApplication() != null ? offer.getApplication().getId() : null)
+                .applicationStage(offer.getApplication() != null ? offer.getApplication().getStage() : null)
                 .candidateName(offer.getApplication() != null && offer.getApplication().getCandidate() != null
                         ? offer.getApplication().getCandidate().getFullName() : null)
                 .jobTitle(offer.getApplication() != null && offer.getApplication().getJob() != null

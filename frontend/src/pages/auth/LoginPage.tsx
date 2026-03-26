@@ -76,8 +76,10 @@ export default function LoginPage() {
         setIsLoading(true);
 
         try {
-            await login({ email, password }, rememberMe);
-            navigate("/dashboard");
+            const userData = await login({ email, password }, rememberMe);
+            navigate(
+                userData.role === "SYSTEM_ADMIN" ? "/admin/dashboard" : "/dashboard",
+            );
         } catch (err) {
             setApiError(resolveApiError(err));
         } finally {

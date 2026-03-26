@@ -37,7 +37,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -122,7 +121,7 @@ public class DatabaseSeeder implements CommandLineRunner {
                 .passwordHash(encodedPassword)
                 .fullName("Human Resources Staff")
                 .role(Role.HR)
-                .department(hrDept)
+                .department(itDept)
                 .active(true)
                 .build());
 
@@ -445,10 +444,18 @@ public class DatabaseSeeder implements CommandLineRunner {
             log.info("Interview Scores seeded.");
         }
 
-        if (isEntityEmpty(Offer.class) && !applications.isEmpty()) {
+        Application offerStageApplication = null;
+        for (Application a : applications) {
+            if (a.getStage() == ApplicationStage.OFFER) {
+                offerStageApplication = a;
+                break;
+            }
+        }
+
+        if (isEntityEmpty(Offer.class) && offerStageApplication != null) {
             log.info("Seeding Offers...");
             entityManager.persist(Offer.builder()
-                    .application(applications.get(0))
+                    .application(offerStageApplication)
                     .salary(new BigDecimal("2500.00"))
                     .positionTitle("Senior Frontend Developer")
                     .status(OfferStatus.PENDING_APPROVAL)
@@ -460,15 +467,31 @@ public class DatabaseSeeder implements CommandLineRunner {
         List<Offer> offers = findAll(Offer.class);
 
         if (isEntityEmpty(OfferApproval.class) && !offers.isEmpty() && admin != null) {
-            log.info("Seeding Offer Approvals...");
-            entityManager.persist(OfferApproval.builder()
-                    .offer(offers.get(0))
-                    .approvedBy(admin)
-                    .status(ApprovalStatus.APPROVED)
-                    .comment("Compensation approved by System Admin")
-                    .build());
-            entityManager.flush();
-            log.info("Offer Approvals seeded.");
+            Offer pendingOffer = null;
+            for (Offer o : offers) {
+                if (o.getStatus() == OfferStatus.PENDING_APPROVAL) {
+                    pendingOffer = o;
+                    break;
+                }
+            }
+            if (pendingOffer != null) {
+                log.info("Seeding Offer Approvals...");
+                entityManager.persist(OfferApproval.builder()
+                        .offer(pendingOffer)
+                        .approvedBy(admin)
+                        .status(ApprovalStatus.APPROVED)
+                        .comment("Compensation approved by System Admin")
+                        .build());
+                pendingOffer.setStatus(OfferStatus.APPROVED);
+                Application approvedApp = pendingOffer.getApplication();
+                if (approvedApp != null) {
+                    approvedApp.setStage(ApplicationStage.HIRED);
+                    entityManager.merge(approvedApp);
+                }
+                entityManager.merge(pendingOffer);
+                entityManager.flush();
+                log.info("Offer Approvals seeded.");
+            }
         }
 
         if (isEntityEmpty(RefreshToken.class) && hrUser != null) {

@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8080/api/v1";
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8386/api/v1";
 
 const api = axios.create({
     baseURL: BASE_URL,
@@ -91,6 +91,29 @@ api.interceptors.response.use(
 
                 localStorage.setItem("accessToken", newAccessToken);
                 localStorage.setItem("refreshToken", newRefreshToken);
+
+                // Keep stored user in sync with refresh payload (department, avatar, etc.)
+                const mergeStoredUser = (storage: Storage) => {
+                    const raw = storage.getItem("user");
+                    if (!raw) return;
+                    try {
+                        const prev = JSON.parse(raw) as Record<string, unknown>;
+                        const merged = {
+                            ...prev,
+                            id: data.userId ?? prev.id,
+                            fullName: data.fullName ?? prev.fullName,
+                            email: data.email ?? prev.email,
+                            role: data.role ?? prev.role,
+                            ...(data.department !== undefined && { department: data.department }),
+                            ...(data.avatarUrl !== undefined && { avatarUrl: data.avatarUrl }),
+                        };
+                        storage.setItem("user", JSON.stringify(merged));
+                    } catch {
+                        /* ignore */
+                    }
+                };
+                mergeStoredUser(localStorage);
+                mergeStoredUser(sessionStorage);
 
                 api.defaults.headers.common.Authorization = `Bearer ${newAccessToken}`;
                 originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;

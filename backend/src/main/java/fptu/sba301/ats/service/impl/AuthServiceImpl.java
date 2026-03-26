@@ -48,6 +48,8 @@ public class AuthServiceImpl implements AuthService {
                 .fullName(user.getFullName())
                 .email(user.getEmail())
                 .role(user.getRole())
+                .department(user.getDepartment() != null ? user.getDepartment().getName() : null)
+                .avatarUrl(user.getAvatarURL())
                 .build();
     }
 }

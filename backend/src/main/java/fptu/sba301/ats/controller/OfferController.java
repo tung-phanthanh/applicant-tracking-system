@@ -62,7 +62,7 @@ public class OfferController {
     }
 
     @PostMapping("/{id}/approval")
-    @PreAuthorize("hasAnyRole('HR', 'HR_MANAGER')")
+    @PreAuthorize("hasRole('HR_MANAGER')")
     public ResponseEntity<OfferApprovalResponse> approveOrReject(
             @PathVariable UUID id,
             @Valid @RequestBody OfferApprovalRequest request,

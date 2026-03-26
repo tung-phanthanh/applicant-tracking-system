@@ -6,7 +6,12 @@ import { Badge } from "@/components/ui/badge";
 import { offerService } from "@/services/offerService";
 import { onboardingService } from "@/services/onboardingService";
 import type { Offer, OfferApproval, OfferStatus, ApprovalStatus } from "@/types/offer";
+import type { CandidateStage } from "@/types/candidate";
 import { useAuth } from "@/hooks/useAuth";
+
+function stageLabel(stage: CandidateStage): string {
+  return stage.charAt(0) + stage.slice(1).toLowerCase();
+}
 
 const STATUS_STYLES: Record<OfferStatus, string> = {
   DRAFT: "bg-gray-100 text-gray-700 ring-1 ring-gray-300",
@@ -31,6 +36,7 @@ export default function OfferDetailPage() {
   const [hasOnboarding, setHasOnboarding] = useState(false);
 
   const isHrManager = user?.role === "HR_MANAGER";
+  const canSubmitForApproval = user?.role === "HR" || user?.role === "HR_MANAGER";
 
   const loadOffer = async () => {
     if (!id) return;
@@ -127,10 +133,36 @@ export default function OfferDetailPage() {
             Offer for {offer.candidateName}
           </p>
         </div>
-        <Badge variant="outline" className={`text-sm ${STATUS_STYLES[offer.status]}`}>
-          {offer.status.replace(/_/g, " ")}
-        </Badge>
+        <div className="flex flex-wrap items-center gap-2">
+          {offer.applicationStage && (
+            <Badge variant="secondary" className="text-sm">
+              Candidate stage: {stageLabel(offer.applicationStage)}
+            </Badge>
+          )}
+          <Badge variant="outline" className={`text-sm ${STATUS_STYLES[offer.status]}`}>
+            {offer.status.replace(/_/g, " ")}
+          </Badge>
+        </div>
       </div>
+
+      <section className="rounded-lg border border-border bg-muted/30 p-4 text-sm text-muted-foreground">
+        <p className="font-medium text-foreground">Offer workflow and pipeline stages</p>
+        <ul className="mt-2 list-inside list-disc space-y-1">
+          <li>
+            <strong className="text-foreground">Submit for approval</strong> (while the candidate is in{" "}
+            <strong className="text-foreground">Interview</strong>): moves the candidate to{" "}
+            <strong className="text-foreground">Offer</strong> and sends the offer to the HR Manager.
+          </li>
+          <li>
+            <strong className="text-foreground">Approve</strong> (HR Manager): moves the candidate from{" "}
+            <strong className="text-foreground">Offer</strong> to <strong className="text-foreground">Hired</strong>.
+          </li>
+          <li>
+            <strong className="text-foreground">Reject</strong> (HR Manager): moves the candidate from{" "}
+            <strong className="text-foreground">Offer</strong> to <strong className="text-foreground">Rejected</strong>.
+          </li>
+        </ul>
+      </section>
 
       {/* Offer Info Card */}
       <section className="rounded-lg border border-border bg-card p-6 shadow-sm">
@@ -167,10 +199,12 @@ export default function OfferDetailPage() {
             <Button variant="outline" onClick={() => navigate(`/offers/${id}/edit`)}>
               Edit Draft
             </Button>
-            <Button onClick={handleSubmitForApproval} disabled={submitting}>
-              <Send className="h-4 w-4" />
-              {submitting ? "Submitting..." : "Submit for Approval"}
-            </Button>
+            {canSubmitForApproval && (
+              <Button onClick={handleSubmitForApproval} disabled={submitting}>
+                <Send className="h-4 w-4" />
+                {submitting ? "Submitting..." : "Submit for Approval"}
+              </Button>
+            )}
           </>
         )}
         {(offer.status === "APPROVED" || offer.status === "SENT") && (

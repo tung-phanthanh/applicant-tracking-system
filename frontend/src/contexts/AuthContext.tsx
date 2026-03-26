@@ -71,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, []);
 
     const login = useCallback(
-        async (credentials: LoginCredentials, rememberMe = false): Promise<void> => {
+        async (credentials: LoginCredentials, rememberMe = false): Promise<User> => {
             setIsLoading(true);
             try {
                 const response = await authService.login(
@@ -94,6 +94,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
                 storage.setItem("user", JSON.stringify(userData));
 
                 setUser(userData);
+                return userData;
             } finally {
                 setIsLoading(false);
             }

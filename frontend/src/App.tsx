@@ -4,8 +4,11 @@ import { Toaster } from "sonner";
 import ProtectedRoute from "@/routes/ProtectedRoute";
 import AdminRoute from "@/routes/AdminRoute";
 import HrRoute from "@/routes/HrRoute";
+import HrOnlyRoute from "@/routes/HrOnlyRoute";
+import HrManagerRoute from "@/routes/HrManagerRoute";
 import HrOrAdminRoute from "@/routes/HrOrAdminRoute";
 import InterviewRoute from "@/routes/InterviewRoute";
+import HomeRedirect from "@/routes/HomeRedirect";
 import AppLayout from "@/layouts/AppLayout";
 import AuthLayout from "@/layouts/AuthLayout";
 import LoginPage from "@/pages/auth/LoginPage";
@@ -37,6 +40,11 @@ import OfferFormPage from "@/pages/recruiter/OfferFormPage";
 import OfferDetailPage from "@/pages/recruiter/OfferDetailPage";
 import OnboardingPage from "@/pages/recruiter/OnboardingPage";
 import OnboardingListPage from "@/pages/recruiter/OnboardingListPage";
+import JobListPage from "@/pages/recruiter/JobListPage";
+import JobDetailPage from "@/pages/recruiter/JobDetailPage";
+import CreateJobPage from "@/pages/recruiter/CreateJobPage";
+import EditJobPage from "@/pages/recruiter/EditJobPage";
+import JobApprovalPage from "@/pages/recruiter/JobApprovalPage";
 
 function App() {
   return (
@@ -56,13 +64,21 @@ function App() {
           {/* Protected routes — any authenticated user */}
           <Route element={<ProtectedRoute />}>
             <Route element={<AppLayout />}>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<HomeRedirect />} />
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
-              {/* Placeholder routes */}
-              <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
+              {/* Jobs: specific paths before /jobs/:id */}
+              <Route element={<HrOnlyRoute />}>
+                <Route path="/jobs/new" element={<CreateJobPage />} />
+                <Route path="/jobs/:id/edit" element={<EditJobPage />} />
+              </Route>
+              <Route element={<HrManagerRoute />}>
+                <Route path="/jobs/pending-approval" element={<JobApprovalPage />} />
+              </Route>
+              <Route path="/jobs" element={<JobListPage />} />
+              <Route path="/jobs/:id" element={<JobDetailPage />} />
                {/* Interview routes (HR, Admin, Interviewer) */}
               <Route element={<InterviewRoute />}>
                 <Route path="/interviews" element={<InterviewCalendarPage />} />
@@ -111,14 +127,6 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-  );
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="flex h-64 items-center justify-center text-muted-foreground">
-      <p className="text-lg font-medium">{title} — Coming Soon</p>
-    </div>
   );
 }
 

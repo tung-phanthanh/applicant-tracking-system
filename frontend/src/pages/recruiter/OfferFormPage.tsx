@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { offerService } from "@/services/offerService";
@@ -24,6 +25,11 @@ export default function OfferFormPage() {
   const [saving, setSaving] = useState(false);
   const [candidates, setCandidates] = useState<CandidateListItem[]>([]);
   const [editCandidateName, setEditCandidateName] = useState("");
+
+  const interviewCandidates = useMemo(
+    () => candidates.filter((c) => c.stage === "INTERVIEW"),
+    [candidates],
+  );
 
   useEffect(() => {
     const load = async () => {
@@ -70,8 +76,15 @@ export default function OfferFormPage() {
         await offerService.createDraft(form);
       }
       navigate("/offers");
-    } catch {
-      alert("Failed to save offer.");
+    } catch (err: unknown) {
+      const msg =
+        axios.isAxiosError(err) &&
+        err.response?.data &&
+        typeof err.response.data === "object" &&
+        "message" in err.response.data
+          ? String((err.response.data as { message: string }).message)
+          : "Failed to save offer.";
+      alert(msg);
     } finally {
       setSaving(false);
     }
@@ -92,7 +105,9 @@ export default function OfferFormPage() {
           {isEdit ? "Edit Offer" : "Create Offer"}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          {isEdit ? "Update the offer details" : "Draft a new offer for a candidate"}
+          {isEdit
+            ? "Update the offer details"
+            : "A new offer can only be created for candidates whose current stage is INTERVIEW."}
         </p>
       </div>
 
@@ -102,14 +117,18 @@ export default function OfferFormPage() {
             <label className="mb-1 block text-sm font-medium">Candidate *</label>
             {isEdit ? (
               <Input value={editCandidateName} disabled />
+            ) : interviewCandidates.length === 0 ? (
+              <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                No candidates in INTERVIEW stage. Move a candidate to INTERVIEW in the pipeline before creating an offer.
+              </p>
             ) : (
               <select
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                 value={form.candidateId}
                 onChange={(e) => handleChange("candidateId", e.target.value)}
               >
-                <option value="">Select a Candidate</option>
-                {candidates.map((c) => (
+                <option value="">Select a candidate (INTERVIEW only)</option>
+                {interviewCandidates.map((c) => (
                   <option key={c.candidateId} value={c.candidateId}>
                     {c.fullName} ({c.jobTitle})
                   </option>
@@ -173,7 +192,10 @@ export default function OfferFormPage() {
           <Button variant="outline" onClick={() => navigate("/offers")}>
             Cancel
           </Button>
-          <Button onClick={handleSubmit} disabled={saving}>
+          <Button
+            onClick={handleSubmit}
+            disabled={saving || (!isEdit && interviewCandidates.length === 0)}
+          >
             {saving ? "Saving..." : isEdit ? "Update Offer" : "Create Draft"}
           </Button>
         </div>

@@ -204,7 +204,7 @@ public class DemoDataSeederService {
             Application app1 = new Application();
             app1.setCandidate(candidate1);
             app1.setJob(frontendJob);
-            app1.setStage(ApplicationStage.OFFER);
+            app1.setStage(ApplicationStage.INTERVIEW);
             app1.setStatus(ApplicationStatus.ACTIVE);
             app1.setCreatedBy(hr.getId());
             app1 = applicationRepository.save(app1);
@@ -225,7 +225,7 @@ public class DemoDataSeederService {
             Application app2 = new Application();
             app2.setCandidate(candidate2);
             app2.setJob(frontendJob);
-            app2.setStage(ApplicationStage.INTERVIEW);
+            app2.setStage(ApplicationStage.OFFER);
             app2.setStatus(ApplicationStatus.ACTIVE);
             app2.setCreatedBy(hr.getId());
             app2 = applicationRepository.save(app2);
@@ -246,7 +246,7 @@ public class DemoDataSeederService {
             Application app3 = new Application();
             app3.setCandidate(candidate3);
             app3.setJob(frontendJob);
-            app3.setStage(ApplicationStage.INTERVIEW);
+            app3.setStage(ApplicationStage.HIRED);
             app3.setStatus(ApplicationStatus.ACTIVE);
             app3.setCreatedBy(hr.getId());
             app3 = applicationRepository.save(app3);
@@ -343,17 +343,6 @@ public class DemoDataSeederService {
             score2_3.setCreatedBy(hr.getId());
             interviewScoreRepository.save(score2_3);
 
-            // Interview for Candidate 3 (Low scores)
-            Interview interview3 = new Interview();
-            interview3.setApplication(app3);
-            interview3.setScheduledAt(LocalDateTime.now().plus(1, ChronoUnit.DAYS));
-            interview3.setLocation("Office - Room 301");
-            interview3.setDurationMinutes(30);
-            interview3.setType(InterviewType.OFFLINE);
-            interview3.setStatus(InterviewStatus.SCHEDULED);
-            interview3.setCreatedBy(hr.getId());
-            interview3 = interviewRepository.save(interview3);
-
             // ====================== 5. OFFERS (Draft, Pending, Approved) ======================
             // Offer 1: Draft (for testing create/edit)
             Offer offer1 = new Offer();
@@ -381,7 +370,7 @@ public class DemoDataSeederService {
 
             // Offer 3: Approved (for PDF preview)
             Offer offer3 = new Offer();
-            offer3.setApplication(app1);
+            offer3.setApplication(app3);
             offer3.setSalary(new BigDecimal("4000.00"));
             offer3.setPositionTitle("Senior Frontend Developer");
             offer3.setStartDate(LocalDate.now().plusDays(14));

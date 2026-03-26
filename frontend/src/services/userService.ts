@@ -8,6 +8,12 @@ import type {
 import type { PaginatedResponse } from "@/types/admin";
 
 export const userService = {
+    /** Current session user (includes department name). */
+    async getMe(): Promise<UserRecord> {
+        const { data } = await api.get<UserRecord>("/users/me");
+        return data;
+    },
+
     async getUsers(page = 0, size = 10, departmentId?: string): Promise<PaginatedResponse<UserRecord>> {
         const { data } = await api.get<PaginatedResponse<UserRecord>>("/users", {
             params: { page, size, departmentId }

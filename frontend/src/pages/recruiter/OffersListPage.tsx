@@ -6,6 +6,12 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { offerService } from "@/services/offerService";
 import type { Offer, OfferStatus } from "@/types/offer";
+import type { CandidateStage } from "@/types/candidate";
+
+function candidateStageLabel(stage: CandidateStage | undefined): string {
+  if (!stage) return "—";
+  return stage.charAt(0) + stage.slice(1).toLowerCase();
+}
 
 const STATUS_STYLES: Record<OfferStatus, string> = {
   DRAFT: "bg-gray-100 text-gray-700 ring-1 ring-gray-300",
@@ -65,7 +71,10 @@ export default function OffersListPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-semibold tracking-tight">Offers</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Manage job offers and approvals</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Submitting an offer for approval moves the candidate Interview → Offer; HR Manager approval moves Offer →
+          Hired, or rejection moves Offer → Rejected.
+        </p>
       </div>
 
       <section className="rounded-lg border border-border bg-card p-4">
@@ -110,21 +119,22 @@ export default function OffersListPage() {
                 <tr>
                   <th className="px-5 py-3 text-left text-sm font-semibold">Candidate</th>
                   <th className="px-5 py-3 text-left text-sm font-semibold">Position</th>
+                  <th className="px-5 py-3 text-left text-sm font-semibold">Candidate stage</th>
                   <th className="px-5 py-3 text-left text-sm font-semibold">Salary</th>
-                  <th className="px-5 py-3 text-left text-sm font-semibold">Status</th>
+                  <th className="px-5 py-3 text-left text-sm font-semibold">Offer status</th>
                   <th className="px-5 py-3 text-left text-sm font-semibold">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border">
                 {loading ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-10 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="px-5 py-10 text-center text-sm text-muted-foreground">
                       Loading offers...
                     </td>
                   </tr>
                 ) : filtered.length === 0 ? (
                   <tr>
-                    <td colSpan={5} className="px-5 py-10 text-center text-sm text-muted-foreground">
+                    <td colSpan={6} className="px-5 py-10 text-center text-sm text-muted-foreground">
                       <FileText className="mx-auto mb-2 h-10 w-10 opacity-30" />
                       No offers found.
                     </td>
@@ -141,6 +151,9 @@ export default function OffersListPage() {
                         <p className="text-sm text-muted-foreground">{offer.jobTitle}</p>
                       </td>
                       <td className="px-5 py-4 text-sm">{offer.positionTitle}</td>
+                      <td className="px-5 py-4 text-sm text-muted-foreground">
+                        {candidateStageLabel(offer.applicationStage)}
+                      </td>
                       <td className="px-5 py-4 text-sm font-medium">
                         ${offer.salary.toLocaleString()}
                       </td>

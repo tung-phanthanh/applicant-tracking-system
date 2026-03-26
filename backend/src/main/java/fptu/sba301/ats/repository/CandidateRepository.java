@@ -4,6 +4,7 @@ import fptu.sba301.ats.entity.Candidate;
 import fptu.sba301.ats.repository.projection.CandidateDetailProjection;
 import fptu.sba301.ats.repository.projection.CandidateDocumentProjection;
 import fptu.sba301.ats.repository.projection.CandidateListProjection;
+import fptu.sba301.ats.repository.projection.JobApplicantProjection;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -37,6 +38,25 @@ public interface CandidateRepository extends JpaRepository<Candidate, UUID> {
         ORDER BY a.applied_at DESC
         """, nativeQuery = true)
     List<CandidateListProjection> findAllCandidatesWithApplications();
+
+    @Query(value = """
+        SELECT
+            BIN_TO_UUID(c.id) AS candidateId,
+            c.full_name AS fullName,
+            c.email AS email,
+            a.stage AS stage,
+            ROUND(AVG(isc.score), 1) AS rating,
+            a.applied_at AS appliedAt
+        FROM candidates c
+        JOIN applications a ON c.id = a.candidate_id
+        LEFT JOIN interviews i ON a.id = i.application_id
+        LEFT JOIN interview_scores isc ON i.id = isc.interview_id
+        WHERE a.job_id = UUID_TO_BIN(:jobId)
+          AND a.status = 'ACTIVE'
+        GROUP BY a.id, c.id, c.full_name, c.email, a.stage, a.applied_at
+        ORDER BY a.applied_at DESC
+        """, nativeQuery = true)
+    List<JobApplicantProjection> findApplicantsByJobId(@Param("jobId") String jobId);
 
     @Query(value = """
         SELECT

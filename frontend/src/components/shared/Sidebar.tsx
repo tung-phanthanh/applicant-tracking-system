@@ -14,6 +14,7 @@ import {
     ClipboardList,
     FileText,
     ClipboardCheck,
+    ListChecks,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -57,6 +58,18 @@ export default function Sidebar() {
             .catch(() => {});
     }, []);
     const isHr = user?.role === "HR" || user?.role === "HR_MANAGER";
+    const isHrManager = user?.role === "HR_MANAGER";
+
+    const visibleNavItems = navItems.filter((item) => {
+        if (item.to === "/interviews" && user?.role !== "INTERVIEWER") return false;
+        if (
+            user?.role === "SYSTEM_ADMIN" &&
+            (item.to === "/dashboard" || item.to === "/jobs")
+        ) {
+            return false;
+        }
+        return true;
+    });
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -73,10 +86,11 @@ export default function Sidebar() {
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <ul className="space-y-1">
-                    {navItems.map(({ to, icon: Icon, label }) => (
+                    {visibleNavItems.map(({ to, icon: Icon, label }) => (
                         <li key={to}>
                             <NavLink
                                 to={to}
+                                end={to === "/jobs"}
                                 className={({ isActive }) =>
                                     cn(
                                         "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
@@ -91,6 +105,25 @@ export default function Sidebar() {
                             </NavLink>
                         </li>
                     ))}
+
+                    {isHrManager && (
+                        <li>
+                            <NavLink
+                                to="/jobs/pending-approval"
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        isActive
+                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    )
+                                }
+                            >
+                                <ListChecks className="h-4 w-4 shrink-0" />
+                                Pending approvals
+                            </NavLink>
+                        </li>
+                    )}
 
                     {isHr && (
                         <>
