@@ -25,10 +25,25 @@ interface NotificationItem {
 const PAGE_TITLES: Record<string, string> = {
     "/dashboard": "Dashboard",
     "/jobs": "Jobs",
+    "/jobs/create": "Create New Job",
+    "/jobs/pending-approvals": "Pending Approvals",
     "/candidates": "Candidates",
     "/interviews": "Interviews",
     "/profile": "User Profile",
 };
+
+function resolvePageTitle(pathname: string): string {
+    if (PAGE_TITLES[pathname]) {
+        return PAGE_TITLES[pathname];
+    }
+    if (/^\/jobs\/[^/]+\/edit$/.test(pathname)) {
+        return "Edit Job";
+    }
+    if (/^\/jobs\/[^/]+$/.test(pathname)) {
+        return "Job Details";
+    }
+    return "Enterprise ATS";
+}
 
 export default function Header() {
     const { user, logout } = useAuth();
@@ -96,7 +111,7 @@ export default function Header() {
         }
     };
 
-    const pageTitle = PAGE_TITLES[location.pathname] ?? "Enterprise ATS";
+    const pageTitle = resolvePageTitle(location.pathname);
     const displayName =
         user?.fullName?.trim() || user?.email?.split("@")[0] || "User";
     const initials = displayName

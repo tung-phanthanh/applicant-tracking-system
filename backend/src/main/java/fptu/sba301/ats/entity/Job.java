@@ -4,7 +4,9 @@ import fptu.sba301.ats.enums.JobStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.UuidGenerator;
+import org.hibernate.type.SqlTypes;
 
 
 
@@ -19,7 +21,8 @@ public class Job extends BaseEntity {
 
     @Id
     @UuidGenerator
-    @Column(name = "id", updatable = false, nullable = false)
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "id", length = 36, updatable = false, nullable = false)
     private java.util.UUID id;
 
     @Column(name = "title", nullable = false)
@@ -27,6 +30,12 @@ public class Job extends BaseEntity {
 
     @Column(name = "description", columnDefinition = "TEXT")
     private String description;
+
+    @Column(name = "location")
+    private String location;
+
+    @Column(name = "salary")
+    private String salary;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "department_id")

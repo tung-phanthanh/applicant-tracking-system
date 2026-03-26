@@ -4,6 +4,8 @@ import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -24,13 +26,15 @@ public abstract class BaseEntity {
 
     private static final ZoneId APP_ZONE = ZoneId.of("Asia/Ho_Chi_Minh");
 
-    @Column(name = "created_by")
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "created_by", length = 36)
     private UUID createdBy;
 
     @Column(name = "created_at", nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "modified_by")
+    @JdbcTypeCode(SqlTypes.CHAR)
+    @Column(name = "modified_by", length = 36)
     private UUID modifiedBy;
 
     @Column(name = "last_modified_date")

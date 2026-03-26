@@ -10,6 +10,8 @@ import java.util.UUID;
 
 @Repository
 public interface OfferRepository extends JpaRepository<Offer, UUID> {
+
     Optional<Offer> findByApplicationId(UUID applicationId);
+
     List<Offer> findAllByOrderByCreatedAtDesc();
 }

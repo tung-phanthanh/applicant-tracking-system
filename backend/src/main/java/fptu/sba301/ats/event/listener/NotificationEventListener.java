@@ -2,6 +2,7 @@ package fptu.sba301.ats.event.listener;
 
 import fptu.sba301.ats.entity.Notification;
 import fptu.sba301.ats.entity.User;
+import fptu.sba301.ats.enums.NotificationType;
 import fptu.sba301.ats.event.SystemEvent;
 import fptu.sba301.ats.repository.NotificationRepository;
 import fptu.sba301.ats.repository.UserRepository;
@@ -30,14 +31,15 @@ public class NotificationEventListener {
     public void handleSystemEvent(SystemEvent event) {
         log.info("Received SystemEvent: {} - {}", event.getTitle(), event.getContent());
 
-        // Get current authenticated user to exclude them from notification recipients
         UUID currentUserId = getCurrentUserId();
+
+        NotificationType notificationType = resolveType(event.getType());
+        String message = buildMessage(event);
 
         List<User> users = userRepository.findByDeletedFalse();
 
         int sentCount = 0;
         for (User user : users) {
-            // Skip the sender — notifications should go to OTHER users only
             if (currentUserId != null && user.getId().equals(currentUserId)) {
                 continue;
             }
@@ -45,8 +47,8 @@ public class NotificationEventListener {
             Notification notification = Notification.builder()
                     .userId(user.getId())
                     .title(event.getTitle())
-                    .message(event.getContent())
-                    .type(fptu.sba301.ats.enums.NotificationType.SYSTEM_ALERT)
+                    .message(message)
+                    .type(notificationType)
                     .isRead(false)
                     .build();
             notificationRepository.save(notification);
@@ -66,5 +68,24 @@ public class NotificationEventListener {
             log.debug("Could not determine current user for event filtering: {}", e.getMessage());
         }
         return null;
+    }
+
+    private static NotificationType resolveType(String type) {
+        if (type == null || type.isBlank()) {
+            return NotificationType.SYSTEM_ALERT;
+        }
+        try {
+            return NotificationType.valueOf(type.trim());
+        } catch (IllegalArgumentException ex) {
+            return NotificationType.SYSTEM_ALERT;
+        }
+    }
+
+    private static String buildMessage(SystemEvent event) {
+        String content = event.getContent() != null ? event.getContent() : "";
+        if (event.getLink() != null && !event.getLink().isBlank()) {
+            return content + "\n" + event.getLink();
+        }
+        return content;
     }
 }

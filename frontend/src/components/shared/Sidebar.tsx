@@ -4,6 +4,7 @@ import { adminService } from "@/services/adminService";
 import {
     Briefcase,
     Calendar,
+    ClipboardCheck,
     LayoutDashboard,
     Users,
     ShieldCheck,
@@ -13,7 +14,6 @@ import {
     Bell,
     ClipboardList,
     FileText,
-    ClipboardCheck,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/hooks/useAuth";
@@ -56,7 +56,8 @@ export default function Sidebar() {
             })
             .catch(() => {});
     }, []);
-    const isHr = user?.role === "HR" || user?.role === "HR_MANAGER";
+    const isHr = user?.role === "HR";
+    const isHrManager = user?.role === "HR_MANAGER";
 
     return (
         <aside className="flex h-screen w-64 flex-col border-r border-border bg-sidebar">
@@ -73,7 +74,9 @@ export default function Sidebar() {
             {/* Navigation */}
             <nav className="flex-1 overflow-y-auto px-3 py-4">
                 <ul className="space-y-1">
-                    {navItems.map(({ to, icon: Icon, label }) => (
+                    {navItems
+                        .filter((item) => !(isAdmin && item.to === "/jobs"))
+                        .map(({ to, icon: Icon, label }) => (
                         <li key={to}>
                             <NavLink
                                 to={to}
@@ -113,6 +116,25 @@ export default function Sidebar() {
                                 </li>
                             ))}
                         </>
+                    )}
+
+                    {isHrManager && (
+                        <li>
+                            <NavLink
+                                to="/jobs/pending-approvals"
+                                className={({ isActive }) =>
+                                    cn(
+                                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-colors",
+                                        isActive
+                                            ? "bg-sidebar-primary text-sidebar-primary-foreground"
+                                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground",
+                                    )
+                                }
+                            >
+                                <ClipboardCheck className="h-4 w-4 shrink-0" />
+                                Job approvals
+                            </NavLink>
+                        </li>
                     )}
 
                     {/* Admin section */}

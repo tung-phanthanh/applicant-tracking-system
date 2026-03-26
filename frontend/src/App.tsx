@@ -25,6 +25,15 @@ import InterviewCandidateEvaluationPage from "@/pages/interview/CandidateEvaluat
 import AdminUsersPage from "@/pages/admin/AdminUsersPage";
 import AdminCreateUserPage from "@/pages/admin/AdminCreateUserPage";
 import AdminEditUserPage from "@/pages/admin/AdminEditUserPage";
+import JobsPage from "@/pages/jobs/JobsPage";
+import JobDetailPage from "@/pages/jobs/JobDetailPage";
+import CreateJobPage from "@/pages/jobs/CreateJobPage";
+import EditJobPage from "@/pages/jobs/EditJobPage";
+import PendingJobsPage from "@/pages/jobs/PendingJobsPage";
+import ManageJobsRoute from "@/routes/ManageJobsRoute";
+import CreateJobRoute from "@/routes/CreateJobRoute";
+import JobsSectionRoute from "@/routes/JobsSectionRoute";
+import HrManagerRoute from "@/routes/HrManagerRoute";
 import DepartmentsPage from "@/pages/admin/DepartmentsPage";
 import SystemConfigPage from "@/pages/admin/SystemConfigPage";
 import AuditLogsPage from "@/pages/admin/AuditLogsPage";
@@ -61,9 +70,24 @@ function App() {
               <Route path="/profile" element={<ProfilePage />} />
               <Route path="/change-password" element={<ChangePasswordPage />} />
 
-              {/* Placeholder routes */}
-              <Route path="/jobs" element={<ComingSoon title="Jobs" />} />
-               {/* Interview routes (HR, Admin, Interviewer) */}
+              <Route element={<JobsSectionRoute />}>
+                <Route path="/jobs" element={<JobsPage />} />
+                <Route element={<CreateJobRoute />}>
+                  <Route path="/jobs/create" element={<CreateJobPage />} />
+                </Route>
+                <Route element={<ManageJobsRoute />}>
+                  <Route path="/jobs/:jobId/edit" element={<EditJobPage />} />
+                </Route>
+                <Route element={<HrManagerRoute />}>
+                  <Route
+                    path="/jobs/pending-approvals"
+                    element={<PendingJobsPage />}
+                  />
+                </Route>
+                <Route path="/jobs/:jobId" element={<JobDetailPage />} />
+              </Route>
+
+              {/* Interview routes (HR, Admin, Interviewer) */}
               <Route element={<InterviewRoute />}>
                 <Route path="/interviews" element={<InterviewCalendarPage />} />
                 <Route path="/interviews/:id" element={<InterviewFeedbackPage />} />
@@ -81,7 +105,6 @@ function App() {
                 <Route path="/candidates/:candidateId" element={<CandidateProfilePage />} />
                 <Route path="/candidates/:candidateId/schedule-interviews" element={<CandidateScheduleInterviewsPage />} />
                 <Route path="/scorecard-templates" element={<ScorecardTemplatesPage />} />
-                <Route path="/applications/:applicationId/evaluation" element={<CandidateEvaluationPage />} />
                 <Route path="/jobs/:jobId/ranking" element={<CandidateRankingPage />} />
                 <Route path="/offers" element={<OffersListPage />} />
                 <Route path="/offers/new" element={<OfferFormPage />} />
@@ -111,14 +134,6 @@ function App() {
         </Routes>
       </AuthProvider>
     </BrowserRouter>
-  );
-}
-
-function ComingSoon({ title }: { title: string }) {
-  return (
-    <div className="flex h-64 items-center justify-center text-muted-foreground">
-      <p className="text-lg font-medium">{title} — Coming Soon</p>
-    </div>
   );
 }
 

@@ -5,7 +5,10 @@ export interface User {
     fullName: string;
     email: string;
     role: UserRole;
+    /** Department name (display) */
     department?: string;
+    /** Department UUID when assigned */
+    departmentId?: string;
     avatarUrl?: string;
 }
 
@@ -23,6 +26,7 @@ export interface AuthApiResponse {
     email: string;
     role: UserRole;
     department?: string;
+    departmentId?: string;
     avatarUrl?: string;
 }
 
