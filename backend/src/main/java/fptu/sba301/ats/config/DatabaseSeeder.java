@@ -37,7 +37,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -360,7 +362,16 @@ public class DatabaseSeeder implements CommandLineRunner {
             entityManager.persist(Interview.builder()
                     .application(applications.get(0))
                     .template(defaultTemplate)
+<<<<<<< HEAD
                     .scheduledAt(LocalDateTime.now().plusDays(1))
+=======
+                    .scheduledAt(
+                            LocalDateTime.ofInstant(
+                                    Instant.now().plusSeconds(3600 * 24),
+                                    ZoneId.systemDefault()
+                            )
+                    )
+>>>>>>> e8a7e5c (feat: jobs module, role-scoped recruiter dashboard, offers and auth updates)
                     .location("Google Meet")
                     .type(InterviewType.ONLINE)
                     .status(InterviewStatus.SCHEDULED)
@@ -370,7 +381,16 @@ public class DatabaseSeeder implements CommandLineRunner {
                 entityManager.persist(Interview.builder()
                         .application(applications.get(1))
                         .template(defaultTemplate)
+<<<<<<< HEAD
                         .scheduledAt(LocalDateTime.now().minusDays(1))
+=======
+                        .scheduledAt(
+                                LocalDateTime.ofInstant(
+                                        Instant.now().plusSeconds(3600 * 24),
+                                        ZoneId.systemDefault()
+                                )
+                        )
+>>>>>>> e8a7e5c (feat: jobs module, role-scoped recruiter dashboard, offers and auth updates)
                         .location("FPT Tower - Meeting Room 5")
                         .type(InterviewType.OFFLINE)
                         .status(InterviewStatus.COMPLETED)
